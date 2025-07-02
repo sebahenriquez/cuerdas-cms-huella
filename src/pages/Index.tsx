@@ -42,7 +42,7 @@ const Index = () => {
             {pageContent?.title || 'La Huella de las Cuerdas'}
           </h1>
           <div 
-            className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto animate-fade-in"
+            className="text-xl md:text-2xl mb-8 w-full max-w-[90%] mx-auto animate-fade-in"
             dangerouslySetInnerHTML={{ 
               __html: pageContent?.content || '<p>Un viaje musical por la historia de los instrumentos de cuerda en América Latina...</p>'
             }}
