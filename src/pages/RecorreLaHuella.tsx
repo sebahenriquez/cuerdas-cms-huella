@@ -60,7 +60,7 @@ const RecorreLaHuella = () => {
   return (
     <Layout showAudioPlayer={false}>
       {/* Track Menu */}
-      <section className="track-nav bg-card/95 backdrop-blur-xl border-b border-border">
+      <section className="relative z-10 bg-card/95 backdrop-blur-xl border-b border-border">
         <div className="container-wide py-4">
           <div className="flex items-center justify-center space-x-6 flex-wrap">
             <span className="text-muted-foreground text-sm font-medium mr-2">Tracks:</span>
@@ -82,8 +82,8 @@ const RecorreLaHuella = () => {
       </section>
 
       {/* Audio Player Section */}
-      <section className="bg-card/95 backdrop-blur-xl border-b border-border">
-        <div className="container mx-auto px-4 py-3">
+      <section className="relative z-20 bg-background border-b border-border shadow-lg">
+        <div className="container mx-auto px-4 py-4">
           <AudioPlayer />
         </div>
       </section>
