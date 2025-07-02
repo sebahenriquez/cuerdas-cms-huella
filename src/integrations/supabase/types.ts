@@ -60,6 +60,39 @@ export type Database = {
         }
         Relationships: []
       }
+      media_files: {
+        Row: {
+          alt_text: string | null
+          file_path: string | null
+          file_size: number | null
+          filename: string
+          id: number
+          mime_type: string | null
+          original_name: string | null
+          uploaded_at: string | null
+        }
+        Insert: {
+          alt_text?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          filename: string
+          id?: number
+          mime_type?: string | null
+          original_name?: string | null
+          uploaded_at?: string | null
+        }
+        Update: {
+          alt_text?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          filename?: string
+          id?: number
+          mime_type?: string | null
+          original_name?: string | null
+          uploaded_at?: string | null
+        }
+        Relationships: []
+      }
       page_contents: {
         Row: {
           content: string | null
@@ -169,6 +202,186 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      track_contents: {
+        Row: {
+          content_blocks: Json | null
+          created_at: string | null
+          description: string | null
+          hero_image_url: string | null
+          id: number
+          language_id: number | null
+          long_text_content: string | null
+          menu_title: string | null
+          status: string | null
+          title: string | null
+          track_id: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          content_blocks?: Json | null
+          created_at?: string | null
+          description?: string | null
+          hero_image_url?: string | null
+          id?: number
+          language_id?: number | null
+          long_text_content?: string | null
+          menu_title?: string | null
+          status?: string | null
+          title?: string | null
+          track_id?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          content_blocks?: Json | null
+          created_at?: string | null
+          description?: string | null
+          hero_image_url?: string | null
+          id?: number
+          language_id?: number | null
+          long_text_content?: string | null
+          menu_title?: string | null
+          status?: string | null
+          title?: string | null
+          track_id?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_contents_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "track_contents_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      track_featured_images: {
+        Row: {
+          caption_en: string | null
+          caption_es: string | null
+          created_at: string | null
+          id: number
+          media_file_id: number | null
+          order_position: number | null
+          track_id: number | null
+        }
+        Insert: {
+          caption_en?: string | null
+          caption_es?: string | null
+          created_at?: string | null
+          id?: number
+          media_file_id?: number | null
+          order_position?: number | null
+          track_id?: number | null
+        }
+        Update: {
+          caption_en?: string | null
+          caption_es?: string | null
+          created_at?: string | null
+          id?: number
+          media_file_id?: number | null
+          order_position?: number | null
+          track_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_featured_images_media_file_id_fkey"
+            columns: ["media_file_id"]
+            isOneToOne: false
+            referencedRelation: "media_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "track_featured_images_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      track_quotes: {
+        Row: {
+          author_name: string
+          author_role: string | null
+          created_at: string | null
+          id: number
+          language_id: number | null
+          order_position: number | null
+          quote_text: string
+          track_id: number | null
+        }
+        Insert: {
+          author_name: string
+          author_role?: string | null
+          created_at?: string | null
+          id?: number
+          language_id?: number | null
+          order_position?: number | null
+          quote_text: string
+          track_id?: number | null
+        }
+        Update: {
+          author_name?: string
+          author_role?: string | null
+          created_at?: string | null
+          id?: number
+          language_id?: number | null
+          order_position?: number | null
+          quote_text?: string
+          track_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_quotes_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "track_quotes_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracks: {
+        Row: {
+          audio_url: string | null
+          created_at: string | null
+          id: number
+          order_position: number
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          audio_url?: string | null
+          created_at?: string | null
+          id?: number
+          order_position: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          audio_url?: string | null
+          created_at?: string | null
+          id?: number
+          order_position?: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
