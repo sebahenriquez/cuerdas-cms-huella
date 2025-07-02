@@ -147,8 +147,12 @@ const AdminPageEdit: React.FC = () => {
       }
     },
     onSuccess: () => {
+      // Invalidate all possible caches that could contain this page data
       queryClient.invalidateQueries({ queryKey: ['admin-pages'] });
       queryClient.invalidateQueries({ queryKey: ['page', pageId] });
+      queryClient.invalidateQueries({ queryKey: ['page'] }); // Invalidate all page queries
+      queryClient.invalidateQueries({ queryKey: ['pages'] }); // Invalidate pages queries
+      
       toast({
         title: 'Página guardada',
         description: 'Los cambios han sido guardados correctamente.',

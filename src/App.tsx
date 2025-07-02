@@ -11,6 +11,9 @@ import RecorreLaHuella from "./pages/RecorreLaHuella";
 import EscuchaLaHuella from "./pages/EscuchaLaHuella";
 import SobreElProyecto from "./pages/SobreElProyecto";
 import Contacto from "./pages/Contacto";
+import FichaTecnica from "./pages/FichaTecnica";
+import Prensa from "./pages/Prensa";
+import TrackDetail from "./pages/TrackDetail";
 import NotFound from "./pages/NotFound";
 import CMSLogin from "./components/admin/CMSLogin";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
@@ -24,6 +27,8 @@ import AdminTrackEdit from "./pages/admin/AdminTrackEdit";
 import AdminMedia from "./pages/admin/AdminMedia";
 import AdminVideos from "./pages/admin/AdminVideos";
 import AdminLanguages from "./pages/admin/AdminLanguages";
+import AdminLanguageEdit from "./pages/admin/AdminLanguageEdit";
+import AdminVideoEdit from "./pages/admin/AdminVideoEdit";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminUsers from "./pages/admin/AdminUsers";
 
@@ -44,6 +49,10 @@ const App = () => (
                 <Route path="/escucha-la-huella" element={<EscuchaLaHuella />} />
                 <Route path="/sobre-el-proyecto" element={<SobreElProyecto />} />
                 <Route path="/contacto" element={<Contacto />} />
+                <Route path="/ficha-tecnica" element={<FichaTecnica />} />
+                <Route path="/prensa" element={<Prensa />} />
+                <Route path="/track/:trackId" element={<TrackDetail />} />
+                <Route path="/recorre-la-huella/track-:trackId" element={<TrackDetail />} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<CMSLogin />} />
@@ -62,7 +71,11 @@ const App = () => (
                   <Route path="tracks/:id/edit" element={<AdminTrackEdit />} />
                   <Route path="media" element={<AdminMedia />} />
                   <Route path="videos" element={<AdminVideos />} />
+                  <Route path="videos/new" element={<AdminVideoEdit />} />
+                  <Route path="videos/:id/edit" element={<AdminVideoEdit />} />
                   <Route path="languages" element={<AdminLanguages />} />
+                  <Route path="languages/new" element={<AdminLanguageEdit />} />
+                  <Route path="languages/:id/edit" element={<AdminLanguageEdit />} />
                   <Route path="settings" element={<AdminSettings />} />
                   <Route path="users" element={<AdminUsers />} />
                 </Route>

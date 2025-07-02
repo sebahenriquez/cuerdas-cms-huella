@@ -5,7 +5,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { getPageBySlug, getTracks } from '@/lib/supabase-helpers';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Clock, Music } from 'lucide-react';
+import { Play, Clock, Music, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 
 const RecorreLaHuella = () => {
@@ -94,14 +95,21 @@ const RecorreLaHuella = () => {
                               </CardDescription>
                             </div>
                           </div>
-                          <Button
-                            onClick={() => playTrack(track)}
-                            className="flex items-center space-x-2"
-                            variant={isCurrentTrack && isPlaying ? "secondary" : "default"}
-                          >
-                            <Play className="h-4 w-4" />
-                            <span>{isCurrentTrack && isPlaying ? 'Reproduciendo' : 'Reproducir'}</span>
-                          </Button>
+                          <div className="flex space-x-2">
+                            <Button
+                              onClick={() => playTrack(track)}
+                              variant={isCurrentTrack && isPlaying ? "secondary" : "default"}
+                            >
+                              <Play className="h-4 w-4 mr-2" />
+                              <span>{isCurrentTrack && isPlaying ? 'Reproduciendo' : 'Reproducir'}</span>
+                            </Button>
+                            <Button variant="outline" asChild>
+                              <Link to={`/track/${track.id}`}>
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                Ver Detalles
+                              </Link>
+                            </Button>
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent>
