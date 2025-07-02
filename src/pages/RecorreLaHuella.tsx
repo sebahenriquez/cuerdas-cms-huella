@@ -106,15 +106,36 @@ const RecorreLaHuella = () => {
           <h1 className="text-4xl md:text-6xl font-bold mb-4 animate-fade-in">
             {currentTrackContent?.title || 'Recorre la Huella'}
           </h1>
-          <p className="text-lg md:text-xl max-w-2xl mx-auto animate-fade-in opacity-90">
-            Sumérgete en un recorrido interactivo por los diferentes tracks que 
-            componen este álbum musical.
+          <p className="text-lg md:text-xl max-w-2xl mx-auto animate-fade-in opacity-90 mb-8">
+            {currentTrackContent?.description || 'Sumérgete en un recorrido interactivo por los diferentes tracks que componen este álbum musical.'}
           </p>
+          
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-4 justify-center">
+            <a
+              href="#textos"
+              className="bg-primary/20 backdrop-blur-sm text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-primary/30 transition-all duration-300 transform hover:scale-105"
+            >
+              Textos
+            </a>
+            <a
+              href="#videos"
+              className="bg-primary/20 backdrop-blur-sm text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-primary/30 transition-all duration-300 transform hover:scale-105"
+            >
+              Videos
+            </a>
+            <a
+              href="#fotos"
+              className="bg-primary/20 backdrop-blur-sm text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-primary/30 transition-all duration-300 transform hover:scale-105"
+            >
+              Fotos
+            </a>
+          </div>
         </div>
       </section>
 
-      {/* Content Section */}
-      <section className="py-16 bg-background">
+      {/* Textos Section */}
+      <section id="textos" className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="w-full max-w-[60%] mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-foreground">
@@ -122,7 +143,7 @@ const RecorreLaHuella = () => {
             </h2>
             <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-border/30">
               <div 
-                className="prose prose-lg max-w-none text-foreground mb-8"
+                className="prose prose-lg max-w-none text-foreground"
                 dangerouslySetInnerHTML={{ 
                   __html: currentTrackContent?.long_text_content || `
                     <p>Explora la profundidad musical y emocional de este track. Cada pieza ha sido cuidadosamente 
@@ -134,31 +155,111 @@ const RecorreLaHuella = () => {
                   `
                 }}
               />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Videos Section */}
+      <section id="videos" className="py-16 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <div className="w-full max-w-4xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-foreground">Videos</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Demo videos - estas URLs serán configurables desde el backend */}
+              <div className="bg-card rounded-lg overflow-hidden shadow-lg">
+                <div className="aspect-video">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                    title="Video demostrativo 1"
+                    frameBorder="0"
+                    allowFullScreen
+                    className="rounded-t-lg"
+                  ></iframe>
+                </div>
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    Técnicas de interpretación
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    Descubre las técnicas especiales utilizadas en este track.
+                  </p>
+                </div>
+              </div>
               
-              {/* Featured Images Section */}
-              <div className="mt-8 pt-8 border-t border-border/30">
-                <h3 className="text-xl font-semibold mb-6 text-foreground">Imágenes Destacadas</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div 
-                    className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
-                    onClick={() => setLightboxImage('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800')}
-                  >
-                    <img 
-                      src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop" 
-                      alt="Imagen destacada 1"
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <div 
-                    className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
-                    onClick={() => setLightboxImage('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800')}
-                  >
-                    <img 
-                      src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=300&fit=crop" 
-                      alt="Imagen destacada 2"
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
+              <div className="bg-card rounded-lg overflow-hidden shadow-lg">
+                <div className="aspect-video">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                    title="Video demostrativo 2"
+                    frameBorder="0"
+                    allowFullScreen
+                    className="rounded-t-lg"
+                  ></iframe>
+                </div>
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    Historia del instrumento
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    Conoce la historia detrás de los instrumentos utilizados.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Fotos Section */}
+      <section id="fotos" className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="w-full max-w-4xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-foreground">Fotos</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div 
+                className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
+                onClick={() => setLightboxImage('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800')}
+              >
+                <img 
+                  src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop" 
+                  alt="Imagen destacada 1"
+                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="p-4 bg-card">
+                  <h3 className="text-sm font-medium text-foreground">Instrumento histórico</h3>
+                </div>
+              </div>
+              
+              <div 
+                className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
+                onClick={() => setLightboxImage('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800')}
+              >
+                <img 
+                  src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=300&fit=crop" 
+                  alt="Imagen destacada 2"
+                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="p-4 bg-card">
+                  <h3 className="text-sm font-medium text-foreground">Detalles constructivos</h3>
+                </div>
+              </div>
+              
+              <div 
+                className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
+                onClick={() => setLightboxImage('https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800')}
+              >
+                <img 
+                  src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=300&fit=crop" 
+                  alt="Imagen destacada 3"
+                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="p-4 bg-card">
+                  <h3 className="text-sm font-medium text-foreground">Sesión de grabación</h3>
                 </div>
               </div>
             </div>
