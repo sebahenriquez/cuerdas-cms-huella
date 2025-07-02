@@ -84,7 +84,11 @@ const RecorreLaHuella = () => {
       {/* Audio Player Section */}
       <section className="relative z-20 bg-background border-b border-border shadow-lg">
         <div className="container mx-auto px-4 py-4">
-          <AudioPlayer />
+          {selectedTrack ? <AudioPlayer /> : (
+            <div className="text-center text-muted-foreground py-4">
+              Selecciona un track para reproducir
+            </div>
+          )}
         </div>
       </section>
 
