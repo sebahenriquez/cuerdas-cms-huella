@@ -9,7 +9,167 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      cms_users: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          password_hash: string
+          role: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          password_hash: string
+          role?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          password_hash?: string
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      languages: {
+        Row: {
+          code: string
+          created_at: string | null
+          id: number
+          is_default: boolean | null
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          id?: number
+          is_default?: boolean | null
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          id?: number
+          is_default?: boolean | null
+          name?: string
+        }
+        Relationships: []
+      }
+      page_contents: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          hero_image_url: string | null
+          id: number
+          language_id: number | null
+          meta_description: string | null
+          page_id: number | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          hero_image_url?: string | null
+          id?: number
+          language_id?: number | null
+          meta_description?: string | null
+          page_id?: number | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          hero_image_url?: string | null
+          id?: number
+          language_id?: number | null
+          meta_description?: string | null
+          page_id?: number | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_contents_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_contents_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pages: {
+        Row: {
+          created_at: string | null
+          id: number
+          slug: string
+          status: string | null
+          template_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          slug: string
+          status?: string | null
+          template_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          slug?: string
+          status?: string | null
+          template_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          created_at: string | null
+          id: number
+          key: string
+          language_id: number | null
+          value: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          key: string
+          language_id?: number | null
+          value?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          key?: string
+          language_id?: number | null
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_settings_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
