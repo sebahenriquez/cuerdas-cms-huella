@@ -7,6 +7,10 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
 import { CMSAuthProvider } from "@/contexts/CMSAuthContext";
 import Index from "./pages/Index";
+import RecorreLaHuella from "./pages/RecorreLaHuella";
+import EscuchaLaHuella from "./pages/EscuchaLaHuella";
+import SobreElProyecto from "./pages/SobreElProyecto";
+import Contacto from "./pages/Contacto";
 import NotFound from "./pages/NotFound";
 import CMSLogin from "./components/admin/CMSLogin";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
@@ -29,6 +33,10 @@ const App = () => (
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/recorre-la-huella" element={<RecorreLaHuella />} />
+                <Route path="/escucha-la-huella" element={<EscuchaLaHuella />} />
+                <Route path="/sobre-el-proyecto" element={<SobreElProyecto />} />
+                <Route path="/contacto" element={<Contacto />} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<CMSLogin />} />
