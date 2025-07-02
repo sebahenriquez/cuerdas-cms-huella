@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -25,17 +26,19 @@ interface TrackContent {
   language_id: number;
 }
 
+interface VideoContent {
+  id?: number;
+  title: string;
+  description: string;
+  language_id: number;
+}
+
 interface VideoData {
   id?: number;
   vimeo_url: string;
   thumbnail_url?: string;
   order_position: number;
-  video_contents?: Array<{
-    id?: number;
-    title: string;
-    description: string;
-    language_id: number;
-  }>;
+  video_contents?: VideoContent[];
 }
 
 interface PhotoData {
@@ -193,6 +196,7 @@ const AdminTrackEdit: React.FC = () => {
           // Update or insert videos
           for (const video of data.videos) {
             if (video.id) {
+              // Update existing video
               const { error } = await supabase
                 .from('videos')
                 .update({
@@ -202,7 +206,32 @@ const AdminTrackEdit: React.FC = () => {
                 })
                 .eq('id', video.id);
               if (error) throw error;
+
+              // Update video contents
+              for (const content of video.video_contents || []) {
+                if (content.id) {
+                  const { error: contentError } = await supabase
+                    .from('video_contents')
+                    .update({
+                      title: content.title,
+                      description: content.description
+                    })
+                    .eq('id', content.id);
+                  if (contentError) throw contentError;
+                } else {
+                  const { error: contentError } = await supabase
+                    .from('video_contents')
+                    .insert({
+                      video_id: video.id,
+                      language_id: content.language_id,
+                      title: content.title,
+                      description: content.description
+                    });
+                  if (contentError) throw contentError;
+                }
+              }
             } else {
+              // Create new video
               const { data: newVideo, error } = await supabase
                 .from('videos')
                 .insert({
@@ -485,9 +514,9 @@ const AdminTrackEdit: React.FC = () => {
                 </Button>
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {trackData.videos?.map((video, index) => (
-                  <div key={index} className="border rounded p-2 space-y-2">
+                  <div key={index} className="border rounded p-3 space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium">Video {index + 1}</span>
                       <Button
@@ -505,7 +534,7 @@ const AdminTrackEdit: React.FC = () => {
                       </Button>
                     </div>
                     <Input
-                      placeholder="URL de Vimeo"
+                      placeholder="URL del Video (YouTube/Vimeo)"
                       value={video.vimeo_url}
                       onChange={(e) => {
                         setTrackData(prev => ({
@@ -516,6 +545,58 @@ const AdminTrackEdit: React.FC = () => {
                         }))
                       }}
                     />
+                    
+                    {/* Video Content Fields */}
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium">Contenido del Video</Label>
+                      {languages.map((lang) => {
+                        const content = video.video_contents?.find(c => c.language_id === lang.id);
+                        return (
+                          <div key={lang.id} className="border rounded p-2 space-y-2">
+                            <Label className="text-xs text-muted-foreground">{lang.name}</Label>
+                            <Input
+                              placeholder={`Título (${lang.code.toUpperCase()})`}
+                              value={content?.title || ''}
+                              onChange={(e) => {
+                                setTrackData(prev => ({
+                                  ...prev,
+                                  videos: prev.videos?.map((v, i) => 
+                                    i === index ? {
+                                      ...v,
+                                      video_contents: v.video_contents?.map(c => 
+                                        c.language_id === lang.id 
+                                          ? { ...c, title: e.target.value }
+                                          : c
+                                      )
+                                    } : v
+                                  )
+                                }))
+                              }}
+                            />
+                            <Textarea
+                              placeholder={`Descripción (${lang.code.toUpperCase()})`}
+                              value={content?.description || ''}
+                              rows={2}
+                              onChange={(e) => {
+                                setTrackData(prev => ({
+                                  ...prev,
+                                  videos: prev.videos?.map((v, i) => 
+                                    i === index ? {
+                                      ...v,
+                                      video_contents: v.video_contents?.map(c => 
+                                        c.language_id === lang.id 
+                                          ? { ...c, description: e.target.value }
+                                          : c
+                                      )
+                                    } : v
+                                  )
+                                }))
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 ))}
               </div>
