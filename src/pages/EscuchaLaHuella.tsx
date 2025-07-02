@@ -74,7 +74,8 @@ const EscuchaLaHuella = () => {
     <Layout showAudioPlayer={true}>
       {/* Hero Section */}
       <section 
-        className="hero-section"
+        
+        className="hero-section hero-section-short"
         style={{
           backgroundImage: `url(${pageContent?.hero_image_url || 'https://images.unsplash.com/photo-1471478331149-c72f17e33c73'})`
         }}
