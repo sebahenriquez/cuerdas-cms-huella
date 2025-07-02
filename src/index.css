@@ -138,6 +138,10 @@ All colors MUST be HSL and editable from CMS backend.
   .hero-section {
     @apply relative min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat;
   }
+
+  .hero-section-short {
+    @apply min-h-[20vh];
+  }
   
   .hero-overlay {
     @apply absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40;
