@@ -17,8 +17,15 @@ import ProtectedRoute from "./components/admin/ProtectedRoute";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPages from "./pages/admin/AdminPages";
+import AdminPageEdit from "./pages/admin/AdminPageEdit";
+import AdminPageNew from "./pages/admin/AdminPageNew";
 import AdminTracks from "./pages/admin/AdminTracks";
+import AdminTrackEdit from "./pages/admin/AdminTrackEdit";
 import AdminMedia from "./pages/admin/AdminMedia";
+import AdminVideos from "./pages/admin/AdminVideos";
+import AdminLanguages from "./pages/admin/AdminLanguages";
+import AdminSettings from "./pages/admin/AdminSettings";
+import AdminUsers from "./pages/admin/AdminUsers";
 
 const queryClient = new QueryClient();
 
@@ -48,8 +55,16 @@ const App = () => (
                   <Route index element={<AdminDashboard />} />
                   <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="pages" element={<AdminPages />} />
+                  <Route path="pages/new" element={<AdminPageNew />} />
+                  <Route path="pages/:id/edit" element={<AdminPageEdit />} />
                   <Route path="tracks" element={<AdminTracks />} />
+                  <Route path="tracks/new" element={<AdminTrackEdit />} />
+                  <Route path="tracks/:id/edit" element={<AdminTrackEdit />} />
                   <Route path="media" element={<AdminMedia />} />
+                  <Route path="videos" element={<AdminVideos />} />
+                  <Route path="languages" element={<AdminLanguages />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                  <Route path="users" element={<AdminUsers />} />
                 </Route>
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
