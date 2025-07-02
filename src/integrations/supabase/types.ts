@@ -36,6 +36,71 @@ export type Database = {
         }
         Relationships: []
       }
+      gallery_images: {
+        Row: {
+          caption: string | null
+          gallery_id: number | null
+          id: number
+          media_file_id: number | null
+          order_position: number | null
+        }
+        Insert: {
+          caption?: string | null
+          gallery_id?: number | null
+          id?: number
+          media_file_id?: number | null
+          order_position?: number | null
+        }
+        Update: {
+          caption?: string | null
+          gallery_id?: number | null
+          id?: number
+          media_file_id?: number | null
+          order_position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_images_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "image_galleries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_images_media_file_id_fkey"
+            columns: ["media_file_id"]
+            isOneToOne: false
+            referencedRelation: "media_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      image_galleries: {
+        Row: {
+          created_at: string | null
+          id: number
+          track_id: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          track_id?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          track_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "image_galleries_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       languages: {
         Row: {
           code: string
@@ -92,6 +157,77 @@ export type Database = {
           uploaded_at?: string | null
         }
         Relationships: []
+      }
+      navigation_contents: {
+        Row: {
+          id: number
+          language_id: number | null
+          navigation_id: number | null
+          title: string
+        }
+        Insert: {
+          id?: number
+          language_id?: number | null
+          navigation_id?: number | null
+          title: string
+        }
+        Update: {
+          id?: number
+          language_id?: number | null
+          navigation_id?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "navigation_contents_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "navigation_contents_navigation_id_fkey"
+            columns: ["navigation_id"]
+            isOneToOne: false
+            referencedRelation: "navigation_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      navigation_items: {
+        Row: {
+          created_at: string | null
+          icon: string | null
+          id: number
+          order_position: number
+          parent_id: number | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          icon?: string | null
+          id?: number
+          order_position: number
+          parent_id?: number | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          icon?: string | null
+          id?: number
+          order_position?: number
+          parent_id?: number | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "navigation_items_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "navigation_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       page_contents: {
         Row: {
@@ -202,6 +338,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      theme_settings: {
+        Row: {
+          accent_color: string | null
+          background_color: string | null
+          font_family: string | null
+          id: number
+          primary_color: string | null
+          text_color: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          background_color?: string | null
+          font_family?: string | null
+          id?: number
+          primary_color?: string | null
+          text_color?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          background_color?: string | null
+          font_family?: string | null
+          id?: number
+          primary_color?: string | null
+          text_color?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       track_contents: {
         Row: {
@@ -382,6 +548,80 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      video_contents: {
+        Row: {
+          description: string | null
+          id: number
+          language_id: number | null
+          title: string | null
+          video_id: number | null
+        }
+        Insert: {
+          description?: string | null
+          id?: number
+          language_id?: number | null
+          title?: string | null
+          video_id?: number | null
+        }
+        Update: {
+          description?: string | null
+          id?: number
+          language_id?: number | null
+          title?: string | null
+          video_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_contents_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_contents_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      videos: {
+        Row: {
+          created_at: string | null
+          id: number
+          order_position: number | null
+          thumbnail_url: string | null
+          track_id: number | null
+          vimeo_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          order_position?: number | null
+          thumbnail_url?: string | null
+          track_id?: number | null
+          vimeo_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          order_position?: number | null
+          thumbnail_url?: string | null
+          track_id?: number | null
+          vimeo_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videos_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
