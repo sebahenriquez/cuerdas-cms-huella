@@ -11,6 +11,7 @@ const RecorreLaHuella = () => {
   const { currentLanguage } = useLanguage();
   const { playTrack, currentTrack, isPlaying, pauseTrack, setTracks } = useAudioPlayer();
   const [selectedTrack, setSelectedTrack] = useState(null);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   const { data: pageData, isLoading: pageLoading } = useQuery({
     queryKey: ['page', 'recorre-la-huella', currentLanguage?.id],
@@ -122,36 +123,35 @@ const RecorreLaHuella = () => {
 
       {/* Hero Section - Changes based on selected track */}
       <section 
-        className="hero-section"
+        className="relative h-[50vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: currentTrackContent?.hero_image_url 
             ? `url(${currentTrackContent.hero_image_url})`
-            : 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f'
+            : 'url(https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f)'
         }}
       >
-        <div className="hero-overlay" />
-        <div className="hero-content">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="relative z-10 text-center text-white px-4">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 animate-fade-in">
             {currentTrackContent?.title || 'Recorre la Huella'}
           </h1>
-          <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto animate-fade-in opacity-90">
+          <p className="text-lg md:text-xl max-w-2xl mx-auto animate-fade-in opacity-90">
             Sumérgete en un recorrido interactivo por los diferentes tracks que 
-            componen este álbum musical. Cada pieza cuenta una historia única sobre 
-            la experiencia musical que nos conecta.
+            componen este álbum musical.
           </p>
         </div>
       </section>
 
       {/* Content Section */}
-      <section className="section-padding bg-background">
-        <div className="container-wide">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-foreground">
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="w-full max-w-[60%] mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-foreground">
               {currentTrackContent?.menu_title || 'Sobre este Track'}
             </h2>
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border">
+            <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-border/30">
               <div 
-                className="prose prose-lg max-w-none text-foreground"
+                className="prose prose-lg max-w-none text-foreground mb-8"
                 dangerouslySetInnerHTML={{ 
                   __html: currentTrackContent?.long_text_content || `
                     <p>Explora la profundidad musical y emocional de este track. Cada pieza ha sido cuidadosamente 
@@ -163,10 +163,61 @@ const RecorreLaHuella = () => {
                   `
                 }}
               />
+              
+              {/* Featured Images Section */}
+              <div className="mt-8 pt-8 border-t border-border/30">
+                <h3 className="text-xl font-semibold mb-6 text-foreground">Imágenes Destacadas</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div 
+                    className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
+                    onClick={() => setLightboxImage('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800')}
+                  >
+                    <img 
+                      src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop" 
+                      alt="Imagen destacada 1"
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div 
+                    className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
+                    onClick={() => setLightboxImage('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800')}
+                  >
+                    <img 
+                      src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=300&fit=crop" 
+                      alt="Imagen destacada 2"
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Lightbox Modal */}
+      {lightboxImage && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-full">
+            <img 
+              src={lightboxImage} 
+              alt="Imagen ampliada"
+              className="max-w-full max-h-full object-contain"
+            />
+            <button
+              onClick={() => setLightboxImage(null)}
+              className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };
