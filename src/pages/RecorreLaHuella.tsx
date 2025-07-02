@@ -68,20 +68,20 @@ const RecorreLaHuella = () => {
   const isCurrentTrackPlaying = currentTrack?.id === currentTrackForPlayer?.id && isPlaying;
 
   return (
-    <Layout>
+    <Layout showAudioPlayer={true}>
       {/* Track Menu */}
-      <section className="bg-red-500 py-3">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center space-x-4 flex-wrap">
-            <span className="text-white text-sm font-medium mr-4">MENÚ por número de track en (números en círculos)</span>
+      <section className="track-nav bg-card/95 backdrop-blur-xl border-b border-border">
+        <div className="container-wide py-4">
+          <div className="flex items-center justify-center space-x-6 flex-wrap">
+            <span className="text-muted-foreground text-sm font-medium mr-2">Tracks:</span>
             {tracks.map((track) => (
               <button
                 key={track.id}
                 onClick={() => handleTrackSelect(track)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200 ${
                   selectedTrack?.id === track.id 
-                    ? 'bg-white text-red-500' 
-                    : 'bg-red-600 text-white border border-white hover:bg-red-400'
+                    ? 'bg-primary text-primary-foreground shadow-lg scale-110' 
+                    : 'bg-muted text-muted-foreground border border-border hover:bg-muted/80 hover:text-foreground hover:scale-105'
                 }`}
               >
                 {track.order_position}
@@ -92,19 +92,18 @@ const RecorreLaHuella = () => {
       </section>
 
       {/* Audio Player Bar */}
-      <section className="bg-red-400 py-3">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center space-x-4 text-white">
-            <span className="text-sm">reproductor de audio-</span>
-            <span className="font-medium">
+      <section className="audio-player-mini bg-card/95 backdrop-blur-xl border-b border-border">
+        <div className="container-wide py-3">
+          <div className="flex items-center justify-center space-x-4 text-foreground">
+            <span className="text-muted-foreground text-sm">♪</span>
+            <span className="font-medium text-foreground">
               {currentTrackContent?.title || `Track ${currentTrackForPlayer?.order_position}`}
             </span>
-            <span className="text-sm">-</span>
             <Button
               onClick={handlePlayPause}
               variant="ghost"
               size="sm"
-              className="text-white hover:text-red-200 hover:bg-red-500 p-1"
+              className="text-primary hover:text-primary/80 hover:bg-primary/10 p-2 rounded-full"
             >
               {isCurrentTrackPlaying ? (
                 <Pause className="h-4 w-4" />
@@ -112,9 +111,8 @@ const RecorreLaHuella = () => {
                 <Play className="h-4 w-4" />
               )}
             </Button>
-            <span className="text-sm">- tags del track (editables desde backend)</span>
             {currentTrackContent?.description && (
-              <span className="text-sm italic">
+              <span className="text-muted-foreground text-sm italic hidden md:inline">
                 {currentTrackContent.description}
               </span>
             )}
@@ -124,48 +122,48 @@ const RecorreLaHuella = () => {
 
       {/* Hero Section - Changes based on selected track */}
       <section 
-        className="relative min-h-[60vh] flex items-center justify-center bg-gradient-to-br from-pink-400 to-pink-600"
+        className="hero-section"
         style={{
           backgroundImage: currentTrackContent?.hero_image_url 
-            ? `linear-gradient(rgba(236, 72, 153, 0.7), rgba(236, 72, 153, 0.7)), url(${currentTrackContent.hero_image_url})`
-            : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
+            ? `url(${currentTrackContent.hero_image_url})`
+            : 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f'
         }}
       >
-        <div className="text-center text-white px-4">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            TÍTULO CON FONDO DE IMAGEN TIPO HERO
+        <div className="hero-overlay" />
+        <div className="hero-content">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
+            {currentTrackContent?.title || 'Recorre la Huella'}
           </h1>
-          <p className="text-lg md:text-xl max-w-2xl mx-auto">
-            {currentTrackContent?.title || `Track ${currentTrackForPlayer?.order_position}`}
-          </p>
-          <p className="text-base md:text-lg max-w-3xl mx-auto mt-4 opacity-90">
+          <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto animate-fade-in opacity-90">
             Sumérgete en un recorrido interactivo por los diferentes tracks que 
-            componen este álbum musical. Cada pieza cuenta una historia única sobre...
+            componen este álbum musical. Cada pieza cuenta una historia única sobre 
+            la experiencia musical que nos conecta.
           </p>
         </div>
       </section>
 
       {/* Content Section */}
-      <section className="py-16 px-4 bg-gradient-to-b from-pink-400 to-pink-600">
-        <div className="max-w-4xl mx-auto text-white">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8 text-black">
-            Título Secundario
-          </h2>
-          <div className="bg-black/10 p-8 rounded-lg">
-            <div 
-              className="text-base md:text-lg leading-relaxed"
-              dangerouslySetInnerHTML={{ 
-                __html: currentTrackContent?.long_text_content || `
-                  <p>Box text, long text. Este espacio está destinado para contenido extenso sobre el track seleccionado. 
-                  El contenido cambiará dinámicamente según el track que esté seleccionado en el menú superior.</p>
-                  
-                  <p>Todo este contenido es editable desde el backend de manera WYSIWYG, permitiendo a los administradores 
-                  modificar fácilmente el texto, formato y estructura de cada track individual.</p>
-                `
-              }}
-            />
+      <section className="section-padding bg-background">
+        <div className="container-wide">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-foreground">
+              {currentTrackContent?.menu_title || 'Sobre este Track'}
+            </h2>
+            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border">
+              <div 
+                className="prose prose-lg max-w-none text-foreground"
+                dangerouslySetInnerHTML={{ 
+                  __html: currentTrackContent?.long_text_content || `
+                    <p>Explora la profundidad musical y emocional de este track. Cada pieza ha sido cuidadosamente 
+                    crafted para transportarte a través de una experiencia única que refleja la esencia de 
+                    "La Huella de las Cuerdas".</p>
+                    
+                    <p>El contenido de esta sección cambia dinámicamente según el track seleccionado, 
+                    proporcionando información contextual y detallada sobre cada composición musical.</p>
+                  `
+                }}
+              />
+            </div>
           </div>
         </div>
       </section>
