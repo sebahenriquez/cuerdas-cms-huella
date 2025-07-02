@@ -72,7 +72,9 @@ export const getTracks = async (languageId: number) => {
     .from('tracks')
     .select(`
       *,
-      track_contents!inner(*)
+      track_contents!inner(*),
+      videos(*, video_contents(*)),
+      track_featured_images(*)
     `)
     .eq('track_contents.language_id', languageId)
     .eq('status', 'published')

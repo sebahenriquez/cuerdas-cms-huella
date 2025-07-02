@@ -166,50 +166,96 @@ const RecorreLaHuella = () => {
           <div className="w-full max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-foreground">Videos</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Demo videos - estas URLs serán configurables desde el backend */}
-              <div className="bg-card rounded-lg overflow-hidden shadow-lg">
-                <div className="aspect-video">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                    title="Video demostrativo 1"
-                    frameBorder="0"
-                    allowFullScreen
-                    className="rounded-t-lg"
-                  ></iframe>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    Técnicas de interpretación
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Descubre las técnicas especiales utilizadas en este track.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="bg-card rounded-lg overflow-hidden shadow-lg">
-                <div className="aspect-video">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                    title="Video demostrativo 2"
-                    frameBorder="0"
-                    allowFullScreen
-                    className="rounded-t-lg"
-                  ></iframe>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    Historia del instrumento
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Conoce la historia detrás de los instrumentos utilizados.
-                  </p>
-                </div>
-              </div>
+              {selectedTrack?.videos?.slice(0, 2).map((video, index) => {
+                // Extract YouTube video ID from various URL formats
+                const getYouTubeId = (url) => {
+                  const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
+                  const match = url.match(regex);
+                  return match ? match[1] : null;
+                };
+
+                const videoId = getYouTubeId(video.vimeo_url); // Note: field name is vimeo_url but it stores YouTube URLs
+                const videoContent = video.video_contents?.find(content => content.language_id === currentLanguage?.id);
+
+                return (
+                  <div key={video.id} className="bg-card rounded-lg overflow-hidden shadow-lg">
+                    <div className="aspect-video">
+                      {videoId ? (
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          src={`https://www.youtube.com/embed/${videoId}`}
+                          title={videoContent?.title || `Video ${index + 1}`}
+                          frameBorder="0"
+                          allowFullScreen
+                          className="rounded-t-lg"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-muted flex items-center justify-center rounded-t-lg">
+                          <p className="text-muted-foreground">Video no disponible</p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
+                        {videoContent?.title || `Video ${index + 1}`}
+                      </h3>
+                      <p className="text-muted-foreground text-sm">
+                        {videoContent?.description || 'Descripción del video'}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Show demo videos if no videos are configured */}
+              {(!selectedTrack?.videos || selectedTrack.videos.length === 0) && (
+                <>
+                  <div className="bg-card rounded-lg overflow-hidden shadow-lg">
+                    <div className="aspect-video">
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                        title="Video demostrativo 1"
+                        frameBorder="0"
+                        allowFullScreen
+                        className="rounded-t-lg"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
+                        Técnicas de interpretación
+                      </h3>
+                      <p className="text-muted-foreground text-sm">
+                        Descubre las técnicas especiales utilizadas en este track.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-card rounded-lg overflow-hidden shadow-lg">
+                    <div className="aspect-video">
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                        title="Video demostrativo 2"
+                        frameBorder="0"
+                        allowFullScreen
+                        className="rounded-t-lg"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
+                        Historia del instrumento
+                      </h3>
+                      <p className="text-muted-foreground text-sm">
+                        Conoce la historia detrás de los instrumentos utilizados.
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -221,47 +267,72 @@ const RecorreLaHuella = () => {
           <div className="w-full max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-foreground">Fotos</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div 
-                className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
-                onClick={() => setLightboxImage('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800')}
-              >
-                <img 
-                  src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop" 
-                  alt="Imagen destacada 1"
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="p-4 bg-card">
-                  <h3 className="text-sm font-medium text-foreground">Instrumento histórico</h3>
-                </div>
-              </div>
-              
-              <div 
-                className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
-                onClick={() => setLightboxImage('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800')}
-              >
-                <img 
-                  src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=300&fit=crop" 
-                  alt="Imagen destacada 2"
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="p-4 bg-card">
-                  <h3 className="text-sm font-medium text-foreground">Detalles constructivos</h3>
-                </div>
-              </div>
-              
-              <div 
-                className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
-                onClick={() => setLightboxImage('https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800')}
-              >
-                <img 
-                  src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=300&fit=crop" 
-                  alt="Imagen destacada 3"
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="p-4 bg-card">
-                  <h3 className="text-sm font-medium text-foreground">Sesión de grabación</h3>
-                </div>
-              </div>
+              {selectedTrack?.track_featured_images?.slice(0, 8).map((photo, index) => {
+                const caption = currentLanguage?.code === 'es' ? photo.caption_es : photo.caption_en;
+                return (
+                  <div 
+                    key={photo.id}
+                    className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
+                    onClick={() => setLightboxImage(photo.image_url)}
+                  >
+                    <img 
+                      src={photo.image_url || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop'} 
+                      alt={caption || `Imagen ${index + 1}`}
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="p-4 bg-card">
+                      <h3 className="text-sm font-medium text-foreground">{caption || `Imagen ${index + 1}`}</h3>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Show demo photos if no photos are configured */}
+              {(!selectedTrack?.track_featured_images || selectedTrack.track_featured_images.length === 0) && (
+                <>
+                  <div 
+                    className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
+                    onClick={() => setLightboxImage('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800')}
+                  >
+                    <img 
+                      src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop" 
+                      alt="Imagen destacada 1"
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="p-4 bg-card">
+                      <h3 className="text-sm font-medium text-foreground">Instrumento histórico</h3>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
+                    onClick={() => setLightboxImage('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800')}
+                  >
+                    <img 
+                      src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=300&fit=crop" 
+                      alt="Imagen destacada 2"
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="p-4 bg-card">
+                      <h3 className="text-sm font-medium text-foreground">Detalles constructivos</h3>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    className="group cursor-pointer overflow-hidden rounded-lg border border-border/30 hover:border-primary/50 transition-all duration-300"
+                    onClick={() => setLightboxImage('https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800')}
+                  >
+                    <img 
+                      src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=300&fit=crop" 
+                      alt="Imagen destacada 3"
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="p-4 bg-card">
+                      <h3 className="text-sm font-medium text-foreground">Sesión de grabación</h3>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
