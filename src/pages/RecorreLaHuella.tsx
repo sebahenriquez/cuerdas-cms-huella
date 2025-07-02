@@ -59,8 +59,19 @@ const RecorreLaHuella = () => {
 
   return (
     <Layout showAudioPlayer={false}>
+      {/* Audio Player Section */}
+      <section className="relative z-20 bg-background border-b border-border shadow-lg">
+        <div className="container mx-auto px-4 py-4">
+          {selectedTrack ? <AudioPlayer /> : (
+            <div className="text-center text-muted-foreground py-4">
+              Selecciona un track para reproducir
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Track Menu */}
-      <section className="relative z-10 bg-card/95 backdrop-blur-xl border-b border-border">
+      <section className="relative z-10 bg-card/95 backdrop-blur-xl">
         <div className="container-wide py-4">
           <div className="flex items-center justify-center space-x-6 flex-wrap">
             <span className="text-muted-foreground text-sm font-medium mr-2">Tracks:</span>
@@ -78,17 +89,6 @@ const RecorreLaHuella = () => {
               </button>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Audio Player Section */}
-      <section className="relative z-20 bg-background border-b border-border shadow-lg">
-        <div className="container mx-auto px-4 py-4">
-          {selectedTrack ? <AudioPlayer /> : (
-            <div className="text-center text-muted-foreground py-4">
-              Selecciona un track para reproducir
-            </div>
-          )}
         </div>
       </section>
 
