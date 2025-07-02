@@ -46,6 +46,8 @@ const RecorreLaHuella = () => {
 
   const handleTrackSelect = (track) => {
     setSelectedTrack(track);
+    // Also set it as the current track in the audio player
+    playTrack(track);
   };
 
   const getCurrentTrackContent = () => {
