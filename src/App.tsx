@@ -29,6 +29,7 @@ import AdminVideos from "./pages/admin/AdminVideos";
 import AdminLanguages from "./pages/admin/AdminLanguages";
 import AdminLanguageEdit from "./pages/admin/AdminLanguageEdit";
 import AdminVideoEdit from "./pages/admin/AdminVideoEdit";
+import AdminTemplates from "./pages/admin/AdminTemplates";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminUsers from "./pages/admin/AdminUsers";
 
@@ -73,6 +74,7 @@ const App = () => (
                   <Route path="videos" element={<AdminVideos />} />
                   <Route path="videos/new" element={<AdminVideoEdit />} />
                   <Route path="videos/:id/edit" element={<AdminVideoEdit />} />
+                  <Route path="templates" element={<AdminTemplates />} />
                   <Route path="languages" element={<AdminLanguages />} />
                   <Route path="languages/new" element={<AdminLanguageEdit />} />
                   <Route path="languages/:id/edit" element={<AdminLanguageEdit />} />

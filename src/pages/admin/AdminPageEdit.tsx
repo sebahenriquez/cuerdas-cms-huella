@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import RichTextEditor from '@/components/admin/RichTextEditor';
 import { ArrowLeft, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { getLanguages } from '@/lib/supabase-helpers';
@@ -301,12 +302,10 @@ const AdminPageEdit: React.FC = () => {
 
                     <div>
                       <Label htmlFor={`content-${language.id}`}>Contenido</Label>
-                      <Textarea
-                        id={`content-${language.id}`}
-                        value={content?.content || ''}
-                        onChange={(e) => updatePageContent(language.id, 'content', e.target.value)}
-                        placeholder="Contenido de la página (HTML permitido)"
-                        rows={10}
+                      <RichTextEditor
+                        content={content?.content || ''}
+                        onChange={(value) => updatePageContent(language.id, 'content', value)}
+                        placeholder="Contenido de la página"
                       />
                     </div>
 

@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import RichTextEditor from '@/components/admin/RichTextEditor';
 import { ArrowLeft, Save, Play, Pause } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { getLanguages } from '@/lib/supabase-helpers';
@@ -356,12 +357,10 @@ const AdminTrackEdit: React.FC = () => {
 
                     <div>
                       <Label htmlFor={`long_text_content-${language.id}`}>Contenido Largo</Label>
-                      <Textarea
-                        id={`long_text_content-${language.id}`}
-                        value={content?.long_text_content || ''}
-                        onChange={(e) => updateTrackContent(language.id, 'long_text_content', e.target.value)}
-                        placeholder="Contenido detallado del track (HTML permitido)"
-                        rows={8}
+                      <RichTextEditor
+                        content={content?.long_text_content || ''}
+                        onChange={(value) => updateTrackContent(language.id, 'long_text_content', value)}
+                        placeholder="Contenido detallado del track"
                       />
                     </div>
 
