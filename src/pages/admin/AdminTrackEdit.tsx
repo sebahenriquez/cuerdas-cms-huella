@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import RichTextEditor from '@/components/admin/RichTextEditor';
-import { ArrowLeft, Save, Play, Pause } from 'lucide-react';
+import { ArrowLeft, Save, Play, Pause, Plus, X, Video, Image } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { getLanguages } from '@/lib/supabase-helpers';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
@@ -25,12 +25,37 @@ interface TrackContent {
   language_id: number;
 }
 
+interface VideoData {
+  id?: number;
+  vimeo_url: string;
+  thumbnail_url?: string;
+  order_position: number;
+  video_contents?: Array<{
+    id?: number;
+    title: string;
+    description: string;
+    language_id: number;
+  }>;
+}
+
+interface PhotoData {
+  id?: number;
+  media_file_id?: number;
+  caption_es: string;
+  caption_en: string;
+  order_position: number;
+  image_url?: string;
+}
+
 interface TrackData {
   id: number;
   order_position: number;
   audio_url: string;
   status: string;
   track_contents: TrackContent[];
+  videos?: VideoData[];
+  photos?: PhotoData[];
+  track_featured_images?: any[];
 }
 
 const AdminTrackEdit: React.FC = () => {
@@ -45,7 +70,9 @@ const AdminTrackEdit: React.FC = () => {
     order_position: 1,
     audio_url: '',
     status: 'published',
-    track_contents: []
+    track_contents: [],
+    videos: [],
+    photos: []
   });
 
   const { data: languages = [] } = useQuery({
@@ -62,7 +89,9 @@ const AdminTrackEdit: React.FC = () => {
         .from('tracks')
         .select(`
           *,
-          track_contents(*)
+          track_contents(*),
+          videos(*, video_contents(*)),
+          track_featured_images(*)
         `)
         .eq('id', trackId)
         .single();
@@ -75,7 +104,23 @@ const AdminTrackEdit: React.FC = () => {
 
   useEffect(() => {
     if (existingTrack) {
-      setTrackData(existingTrack);
+      // Transform the data to match our interface
+      const transformedTrack = {
+        ...existingTrack,
+        videos: existingTrack.videos?.map(video => ({
+          ...video,
+          video_contents: video.video_contents || languages.map(lang => ({
+            title: '',
+            description: '',
+            language_id: lang.id
+          }))
+        })) || [],
+        photos: existingTrack.track_featured_images?.map(photo => ({
+          ...photo,
+          image_url: '' // You might want to construct this from media_file_id
+        })) || []
+      };
+      setTrackData(transformedTrack);
     } else if (languages.length > 0 && trackData.track_contents.length === 0) {
       // Initialize empty content for all languages
       setTrackData(prev => ({
@@ -123,6 +168,111 @@ const AdminTrackEdit: React.FC = () => {
                 track_id: trackId
               });
             if (error) throw error;
+          }
+        }
+
+        // Handle videos
+        if (data.videos) {
+          // Delete existing videos not in the new list
+          const currentVideoIds = data.videos.filter(v => v.id).map(v => v.id);
+          if (currentVideoIds.length > 0) {
+            const { error } = await supabase
+              .from('videos')
+              .delete()
+              .eq('track_id', trackId)
+              .not('id', 'in', `(${currentVideoIds.join(',')})`);
+            if (error) throw error;
+          } else {
+            const { error } = await supabase
+              .from('videos')
+              .delete()
+              .eq('track_id', trackId);
+            if (error) throw error;
+          }
+
+          // Update or insert videos
+          for (const video of data.videos) {
+            if (video.id) {
+              const { error } = await supabase
+                .from('videos')
+                .update({
+                  vimeo_url: video.vimeo_url,
+                  thumbnail_url: video.thumbnail_url,
+                  order_position: video.order_position
+                })
+                .eq('id', video.id);
+              if (error) throw error;
+            } else {
+              const { data: newVideo, error } = await supabase
+                .from('videos')
+                .insert({
+                  track_id: trackId,
+                  vimeo_url: video.vimeo_url,
+                  thumbnail_url: video.thumbnail_url,
+                  order_position: video.order_position
+                })
+                .select()
+                .single();
+              if (error) throw error;
+
+              // Insert video contents
+              for (const content of video.video_contents || []) {
+                const { error: contentError } = await supabase
+                  .from('video_contents')
+                  .insert({
+                    video_id: newVideo.id,
+                    language_id: content.language_id,
+                    title: content.title,
+                    description: content.description
+                  });
+                if (contentError) throw contentError;
+              }
+            }
+          }
+        }
+
+        // Handle photos
+        if (data.photos) {
+          // Delete existing photos not in the new list
+          const currentPhotoIds = data.photos.filter(p => p.id).map(p => p.id);
+          if (currentPhotoIds.length > 0) {
+            const { error } = await supabase
+              .from('track_featured_images')
+              .delete()
+              .eq('track_id', trackId)
+              .not('id', 'in', `(${currentPhotoIds.join(',')})`);
+            if (error) throw error;
+          } else {
+            const { error } = await supabase
+              .from('track_featured_images')
+              .delete()
+              .eq('track_id', trackId);
+            if (error) throw error;
+          }
+
+          // Update or insert photos
+          for (const photo of data.photos) {
+            if (photo.id) {
+              const { error } = await supabase
+                .from('track_featured_images')
+                .update({
+                  caption_es: photo.caption_es,
+                  caption_en: photo.caption_en,
+                  order_position: photo.order_position
+                })
+                .eq('id', photo.id);
+              if (error) throw error;
+            } else {
+              const { error } = await supabase
+                .from('track_featured_images')
+                .insert({
+                  track_id: trackId,
+                  caption_es: photo.caption_es,
+                  caption_en: photo.caption_en,
+                  order_position: photo.order_position
+                });
+              if (error) throw error;
+            }
           }
         }
       } else {
@@ -297,6 +447,173 @@ const AdminTrackEdit: React.FC = () => {
                   <SelectItem value="draft">Borrador</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Videos Section */}
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <Label className="flex items-center gap-2">
+                  <Video className="h-4 w-4" />
+                  Videos (máx. 2)
+                </Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if ((trackData.videos?.length || 0) < 2) {
+                      setTrackData(prev => ({
+                        ...prev,
+                        videos: [
+                          ...(prev.videos || []),
+                          {
+                            vimeo_url: '',
+                            order_position: (prev.videos?.length || 0) + 1,
+                            video_contents: languages.map(lang => ({
+                              title: '',
+                              description: '',
+                              language_id: lang.id
+                            }))
+                          }
+                        ]
+                      }))
+                    }
+                  }}
+                  disabled={(trackData.videos?.length || 0) >= 2}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="space-y-2">
+                {trackData.videos?.map((video, index) => (
+                  <div key={index} className="border rounded p-2 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Video {index + 1}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setTrackData(prev => ({
+                            ...prev,
+                            videos: prev.videos?.filter((_, i) => i !== index)
+                          }))
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Input
+                      placeholder="URL de Vimeo"
+                      value={video.vimeo_url}
+                      onChange={(e) => {
+                        setTrackData(prev => ({
+                          ...prev,
+                          videos: prev.videos?.map((v, i) => 
+                            i === index ? { ...v, vimeo_url: e.target.value } : v
+                          )
+                        }))
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Photos Section */}
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <Label className="flex items-center gap-2">
+                  <Image className="h-4 w-4" />
+                  Fotos (máx. 8)
+                </Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if ((trackData.photos?.length || 0) < 8) {
+                      setTrackData(prev => ({
+                        ...prev,
+                        photos: [
+                          ...(prev.photos || []),
+                          {
+                            caption_es: '',
+                            caption_en: '',
+                            order_position: (prev.photos?.length || 0) + 1,
+                            image_url: ''
+                          }
+                        ]
+                      }))
+                    }
+                  }}
+                  disabled={(trackData.photos?.length || 0) >= 8}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="space-y-2">
+                {trackData.photos?.map((photo, index) => (
+                  <div key={index} className="border rounded p-2 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Foto {index + 1}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setTrackData(prev => ({
+                            ...prev,
+                            photos: prev.photos?.filter((_, i) => i !== index)
+                          }))
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Input
+                      placeholder="URL de la imagen"
+                      value={photo.image_url || ''}
+                      onChange={(e) => {
+                        setTrackData(prev => ({
+                          ...prev,
+                          photos: prev.photos?.map((p, i) => 
+                            i === index ? { ...p, image_url: e.target.value } : p
+                          )
+                        }))
+                      }}
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        placeholder="Descripción (ES)"
+                        value={photo.caption_es}
+                        onChange={(e) => {
+                          setTrackData(prev => ({
+                            ...prev,
+                            photos: prev.photos?.map((p, i) => 
+                              i === index ? { ...p, caption_es: e.target.value } : p
+                            )
+                          }))
+                        }}
+                      />
+                      <Input
+                        placeholder="Descripción (EN)"
+                        value={photo.caption_en}
+                        onChange={(e) => {
+                          setTrackData(prev => ({
+                            ...prev,
+                            photos: prev.photos?.map((p, i) => 
+                              i === index ? { ...p, caption_en: e.target.value } : p
+                            )
+                          }))
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
