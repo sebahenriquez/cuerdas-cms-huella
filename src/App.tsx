@@ -49,7 +49,7 @@ function App() {
             <AudioPlayerProvider>
               <Routes>
                 {/* Public routes */}
-                <Route path="/" element={<Layout />}>
+                <Route path="/" element={<Layout><div /></Layout>}>
                   <Route index element={<Index />} />
                   <Route path="sobre-el-proyecto" element={<SobreElProyecto />} />
                   <Route path="ficha-tecnica" element={<FichaTecnica />} />

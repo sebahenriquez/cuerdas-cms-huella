@@ -1,10 +1,12 @@
+
 import React from 'react';
+import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import AudioPlayer from '@/components/audio/AudioPlayer';
 
 interface LayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   showAudioPlayer?: boolean;
 }
 
@@ -13,7 +15,7 @@ const Layout: React.FC<LayoutProps> = ({ children, showAudioPlayer = false }) =>
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 pt-16">
-        {children}
+        {children || <Outlet />}
       </main>
       <Footer />
       {showAudioPlayer && <AudioPlayer />}
