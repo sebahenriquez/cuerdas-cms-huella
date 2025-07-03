@@ -361,6 +361,22 @@ const AdminTrackEdit: React.FC = () => {
     }));
   };
 
+  const updateVideoContent = (videoIndex: number, languageId: number, field: keyof VideoContent, value: string) => {
+    setTrackData(prev => ({
+      ...prev,
+      videos: prev.videos?.map((video, index) => 
+        index === videoIndex ? {
+          ...video,
+          video_contents: video.video_contents?.map(content => 
+            content.language_id === languageId 
+              ? { ...content, [field]: value }
+              : content
+          )
+        } : video
+      )
+    }));
+  };
+
   const handleSave = () => {
     saveTrack.mutate(trackData);
   };
@@ -546,53 +562,27 @@ const AdminTrackEdit: React.FC = () => {
                       }}
                     />
                     
-                    {/* Video Content Fields */}
-                    <div className="space-y-2">
-                      <Label className="text-xs font-medium">Contenido del Video</Label>
+                    {/* Video Content Fields - Now properly organized by language */}
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">Contenido del Video</Label>
                       {languages.map((lang) => {
                         const content = video.video_contents?.find(c => c.language_id === lang.id);
                         return (
-                          <div key={lang.id} className="border rounded p-2 space-y-2">
-                            <Label className="text-xs text-muted-foreground">{lang.name}</Label>
-                            <Input
-                              placeholder={`Título (${lang.code.toUpperCase()})`}
-                              value={content?.title || ''}
-                              onChange={(e) => {
-                                setTrackData(prev => ({
-                                  ...prev,
-                                  videos: prev.videos?.map((v, i) => 
-                                    i === index ? {
-                                      ...v,
-                                      video_contents: v.video_contents?.map(c => 
-                                        c.language_id === lang.id 
-                                          ? { ...c, title: e.target.value }
-                                          : c
-                                      )
-                                    } : v
-                                  )
-                                }))
-                              }}
-                            />
-                            <Textarea
-                              placeholder={`Descripción (${lang.code.toUpperCase()})`}
-                              value={content?.description || ''}
-                              rows={2}
-                              onChange={(e) => {
-                                setTrackData(prev => ({
-                                  ...prev,
-                                  videos: prev.videos?.map((v, i) => 
-                                    i === index ? {
-                                      ...v,
-                                      video_contents: v.video_contents?.map(c => 
-                                        c.language_id === lang.id 
-                                          ? { ...c, description: e.target.value }
-                                          : c
-                                      )
-                                    } : v
-                                  )
-                                }))
-                              }}
-                            />
+                          <div key={lang.id} className="border rounded p-3 space-y-2">
+                            <Label className="text-xs text-muted-foreground font-medium">{lang.name}</Label>
+                            <div className="space-y-2">
+                              <Input
+                                placeholder={`Título del video (${lang.code.toUpperCase()})`}
+                                value={content?.title || ''}
+                                onChange={(e) => updateVideoContent(index, lang.id, 'title', e.target.value)}
+                              />
+                              <Textarea
+                                placeholder={`Descripción del video (${lang.code.toUpperCase()})`}
+                                value={content?.description || ''}
+                                rows={2}
+                                onChange={(e) => updateVideoContent(index, lang.id, 'description', e.target.value)}
+                              />
+                            </div>
                           </div>
                         );
                       })}
