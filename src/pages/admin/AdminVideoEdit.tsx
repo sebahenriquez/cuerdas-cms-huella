@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -119,15 +120,20 @@ const AdminVideoEdit: React.FC = () => {
           if (content.id) {
             const { error } = await supabase
               .from('video_contents')
-              .update(content)
+              .update({
+                title: content.title,
+                description: content.description
+              })
               .eq('id', content.id);
             if (error) throw error;
           } else {
             const { error } = await supabase
               .from('video_contents')
               .insert({
-                ...content,
-                video_id: videoId
+                video_id: videoId,
+                language_id: content.language_id,
+                title: content.title,
+                description: content.description
               });
             if (error) throw error;
           }
@@ -152,8 +158,10 @@ const AdminVideoEdit: React.FC = () => {
           const { error } = await supabase
             .from('video_contents')
             .insert({
-              ...content,
-              video_id: newVideo.id
+              video_id: newVideo.id,
+              language_id: content.language_id,
+              title: content.title,
+              description: content.description
             });
           if (error) throw error;
         }
@@ -229,12 +237,12 @@ const AdminVideoEdit: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="vimeo_url">URL de Vimeo</Label>
+              <Label htmlFor="vimeo_url">URL del Video (YouTube/Vimeo)</Label>
               <Input
                 id="vimeo_url"
                 value={videoData.vimeo_url || ''}
                 onChange={(e) => setVideoData(prev => ({ ...prev, vimeo_url: e.target.value }))}
-                placeholder="https://player.vimeo.com/video/..."
+                placeholder="https://youtu.be/... o https://player.vimeo.com/video/..."
               />
             </div>
             
