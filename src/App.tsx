@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { QueryClient } from '@tanstack/react-query';
-import { CMSAuthProvider } from './contexts/CMSContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { CMSAuthProvider } from './contexts/CMSAuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AudioPlayerProvider } from './contexts/AudioPlayerContext';
 import { Toaster } from '@/components/ui/toaster';
@@ -16,10 +17,10 @@ import Prensa from './pages/Prensa';
 import Contacto from './pages/Contacto';
 import TrackDetail from './pages/TrackDetail';
 import NotFound from './pages/NotFound';
-import Layout from './components/Layout';
+import Layout from './components/layout/Layout';
 
 // Admin Pages
-import CMSLogin from './pages/admin/CMSLogin';
+import CMSLogin from './components/admin/CMSLogin';
 import AdminLayout from './components/admin/AdminLayout';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -37,10 +38,12 @@ import AdminLanguageEdit from './pages/admin/AdminLanguageEdit';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminTemplates from './pages/admin/AdminTemplates';
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
     <Router>
-      <QueryClient>
+      <QueryClientProvider client={queryClient}>
         <CMSAuthProvider>
           <LanguageProvider>
             <AudioPlayerProvider>
@@ -86,7 +89,7 @@ function App() {
             </AudioPlayerProvider>
           </LanguageProvider>
         </CMSAuthProvider>
-      </QueryClient>
+      </QueryClientProvider>
     </Router>
   );
 }
