@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Save, Mouse } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +18,12 @@ interface CTAButton {
     language_id: number;
     text: string;
   }[];
+}
+
+interface Language {
+  id: number;
+  name: string;
+  code: string;
 }
 
 const AdminCTAButtons: React.FC = () => {
@@ -40,7 +45,7 @@ const AdminCTAButtons: React.FC = () => {
   React.useEffect(() => {
     if (ctaButtons) {
       const textsObj: Record<string, Record<number, string>> = {};
-      ctaButtons.forEach((button: CTAButton) => {
+      (ctaButtons as CTAButton[]).forEach((button: CTAButton) => {
         textsObj[button.key] = {};
         button.cta_button_contents.forEach(content => {
           textsObj[button.key][content.language_id] = content.text;
@@ -53,7 +58,7 @@ const AdminCTAButtons: React.FC = () => {
   const saveCTAButtons = useMutation({
     mutationFn: async (data: Record<string, Record<number, string>>) => {
       for (const [buttonKey, languageTexts] of Object.entries(data)) {
-        const button = ctaButtons?.find((b: CTAButton) => b.key === buttonKey);
+        const button = (ctaButtons as CTAButton[])?.find((b: CTAButton) => b.key === buttonKey);
         if (!button) continue;
 
         for (const [languageId, text] of Object.entries(languageTexts)) {
@@ -63,13 +68,13 @@ const AdminCTAButtons: React.FC = () => {
 
           if (existingContent) {
             const { error } = await supabase
-              .from('cta_button_contents')
+              .from('cta_button_contents' as any)
               .update({ text })
               .eq('id', existingContent.id);
             if (error) throw error;
           } else {
             const { error } = await supabase
-              .from('cta_button_contents')
+              .from('cta_button_contents' as any)
               .insert({
                 cta_button_id: button.id,
                 language_id: parseInt(languageId),
@@ -143,12 +148,12 @@ const AdminCTAButtons: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {ctaButtons?.map((button: CTAButton) => (
+          {(ctaButtons as CTAButton[])?.map((button: CTAButton) => (
             <div key={button.key} className="border rounded-lg p-4 space-y-4">
               <h3 className="text-lg font-semibold">{getButtonDisplayName(button.key)}</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {languages?.map((lang) => (
+                {(languages as Language[])?.map((lang) => (
                   <div key={lang.id}>
                     <Label htmlFor={`${button.key}-${lang.id}`}>
                       Texto en {lang.name}

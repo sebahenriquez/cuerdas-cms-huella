@@ -181,7 +181,7 @@ export const getTrackQuotes = async (trackId: number, languageId: number) => {
 // CTA Button helpers
 export const getCTAButtons = async (languageId: number) => {
   const { data, error } = await supabase
-    .from('cta_buttons')
+    .from('cta_buttons' as any)
     .select(`
       *,
       cta_button_contents!inner(*)
@@ -194,7 +194,7 @@ export const getCTAButtons = async (languageId: number) => {
 
 export const getAllCTAButtons = async () => {
   const { data, error } = await supabase
-    .from('cta_buttons')
+    .from('cta_buttons' as any)
     .select(`
       *,
       cta_button_contents(*)

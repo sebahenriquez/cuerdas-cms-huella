@@ -35,8 +35,11 @@ const Index = () => {
   const pageContent = homeData?.page_contents?.[0];
   
   // Get CTA button texts
-  const exploreButtonText = ctaButtons?.find(b => b.key === 'explore_trail')?.cta_button_contents?.[0]?.text || 'Recorré la Huella';
-  const listenButtonText = ctaButtons?.find(b => b.key === 'listen_album')?.cta_button_contents?.[0]?.text || 'Escuchar el Álbum';
+  const exploreButton = ctaButtons?.find((b: any) => b.key === 'explore_trail');
+  const listenButton = ctaButtons?.find((b: any) => b.key === 'listen_album');
+  
+  const exploreButtonText = exploreButton?.cta_button_contents?.[0]?.text || 'Recorré la Huella';
+  const listenButtonText = listenButton?.cta_button_contents?.[0]?.text || 'Escuchar el Álbum';
 
   return (
     <Layout showAudioPlayer={true}>
