@@ -184,12 +184,18 @@ export const getCTAButtons = async (languageId: number) => {
     .from('cta_buttons' as any)
     .select(`
       *,
-      cta_button_contents!inner(*)
-    `)
-    .eq('cta_button_contents.language_id', languageId);
+      cta_button_contents(*)
+    `);
   
   if (error) throw error;
-  return data;
+  
+  // Filter contents by language_id on the client side for now
+  const filteredData = data?.map((button: any) => ({
+    ...button,
+    cta_button_contents: button.cta_button_contents?.filter((content: any) => content.language_id === languageId) || []
+  }));
+  
+  return filteredData;
 };
 
 export const getAllCTAButtons = async () => {

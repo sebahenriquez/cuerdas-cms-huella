@@ -34,12 +34,21 @@ const Index = () => {
 
   const pageContent = homeData?.page_contents?.[0];
   
-  // Get CTA button texts
-  const exploreButton = ctaButtons?.find((b: any) => b.key === 'explore_trail');
-  const listenButton = ctaButtons?.find((b: any) => b.key === 'listen_album');
+  // Get CTA button texts - simplified approach
+  let exploreButtonText = 'Recorré la Huella';
+  let listenButtonText = 'Escuchar el Álbum';
   
-  const exploreButtonText = exploreButton?.cta_button_contents?.[0]?.text || 'Recorré la Huella';
-  const listenButtonText = listenButton?.cta_button_contents?.[0]?.text || 'Escuchar el Álbum';
+  if (ctaButtons && Array.isArray(ctaButtons)) {
+    const exploreButton = ctaButtons.find((b: any) => b?.key === 'explore_trail');
+    const listenButton = ctaButtons.find((b: any) => b?.key === 'listen_album');
+    
+    if (exploreButton?.cta_button_contents?.[0]?.text) {
+      exploreButtonText = exploreButton.cta_button_contents[0].text;
+    }
+    if (listenButton?.cta_button_contents?.[0]?.text) {
+      listenButtonText = listenButton.cta_button_contents[0].text;
+    }
+  }
 
   return (
     <Layout showAudioPlayer={true}>

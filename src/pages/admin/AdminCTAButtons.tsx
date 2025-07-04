@@ -10,22 +10,6 @@ import { Save, Mouse } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { getAllCTAButtons, getLanguages } from '@/lib/supabase-helpers';
 
-interface CTAButton {
-  id: number;
-  key: string;
-  cta_button_contents: {
-    id: number;
-    language_id: number;
-    text: string;
-  }[];
-}
-
-interface Language {
-  id: number;
-  name: string;
-  code: string;
-}
-
 const AdminCTAButtons: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -43,13 +27,17 @@ const AdminCTAButtons: React.FC = () => {
   });
 
   React.useEffect(() => {
-    if (ctaButtons) {
+    if (ctaButtons && Array.isArray(ctaButtons)) {
       const textsObj: Record<string, Record<number, string>> = {};
-      (ctaButtons as CTAButton[]).forEach((button: CTAButton) => {
-        textsObj[button.key] = {};
-        button.cta_button_contents.forEach(content => {
-          textsObj[button.key][content.language_id] = content.text;
-        });
+      ctaButtons.forEach((button: any) => {
+        if (button?.key && button?.cta_button_contents) {
+          textsObj[button.key] = {};
+          button.cta_button_contents.forEach((content: any) => {
+            if (content?.language_id && content?.text) {
+              textsObj[button.key][content.language_id] = content.text;
+            }
+          });
+        }
       });
       setButtonTexts(textsObj);
     }
@@ -58,12 +46,12 @@ const AdminCTAButtons: React.FC = () => {
   const saveCTAButtons = useMutation({
     mutationFn: async (data: Record<string, Record<number, string>>) => {
       for (const [buttonKey, languageTexts] of Object.entries(data)) {
-        const button = (ctaButtons as CTAButton[])?.find((b: CTAButton) => b.key === buttonKey);
+        const button = ctaButtons?.find((b: any) => b?.key === buttonKey);
         if (!button) continue;
 
         for (const [languageId, text] of Object.entries(languageTexts)) {
-          const existingContent = button.cta_button_contents.find(
-            c => c.language_id === parseInt(languageId)
+          const existingContent = button.cta_button_contents?.find(
+            (c: any) => c?.language_id === parseInt(languageId)
           );
 
           if (existingContent) {
@@ -148,26 +136,30 @@ const AdminCTAButtons: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {(ctaButtons as CTAButton[])?.map((button: CTAButton) => (
-            <div key={button.key} className="border rounded-lg p-4 space-y-4">
-              <h3 className="text-lg font-semibold">{getButtonDisplayName(button.key)}</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(languages as Language[])?.map((lang) => (
-                  <div key={lang.id}>
-                    <Label htmlFor={`${button.key}-${lang.id}`}>
-                      Texto en {lang.name}
-                    </Label>
-                    <Input
-                      id={`${button.key}-${lang.id}`}
-                      value={buttonTexts[button.key]?.[lang.id] || ''}
-                      onChange={(e) => handleTextChange(button.key, lang.id, e.target.value)}
-                      placeholder={`Texto del botón en ${lang.name.toLowerCase()}`}
-                    />
-                  </div>
-                ))}
+          {ctaButtons && Array.isArray(ctaButtons) && ctaButtons.map((button: any) => (
+            button?.key ? (
+              <div key={button.key} className="border rounded-lg p-4 space-y-4">
+                <h3 className="text-lg font-semibold">{getButtonDisplayName(button.key)}</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {languages && Array.isArray(languages) && languages.map((lang: any) => (
+                    lang?.id && lang?.name ? (
+                      <div key={lang.id}>
+                        <Label htmlFor={`${button.key}-${lang.id}`}>
+                          Texto en {lang.name}
+                        </Label>
+                        <Input
+                          id={`${button.key}-${lang.id}`}
+                          value={buttonTexts[button.key]?.[lang.id] || ''}
+                          onChange={(e) => handleTextChange(button.key, lang.id, e.target.value)}
+                          placeholder={`Texto del botón en ${lang.name.toLowerCase()}`}
+                        />
+                      </div>
+                    ) : null
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : null
           ))}
 
           <Button onClick={handleSave} disabled={saveCTAButtons.isPending} className="w-full">
