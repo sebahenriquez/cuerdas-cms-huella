@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,6 +33,7 @@ import AdminVideoEdit from "./pages/admin/AdminVideoEdit";
 import AdminTemplates from "./pages/admin/AdminTemplates";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminCTAButtons from "./pages/admin/AdminCTAButtons";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +76,7 @@ const App = () => (
                   <Route path="videos" element={<AdminVideos />} />
                   <Route path="videos/new" element={<AdminVideoEdit />} />
                   <Route path="videos/:id/edit" element={<AdminVideoEdit />} />
+                  <Route path="cta-buttons" element={<AdminCTAButtons />} />
                   <Route path="templates" element={<AdminTemplates />} />
                   <Route path="languages" element={<AdminLanguages />} />
                   <Route path="languages/new" element={<AdminLanguageEdit />} />

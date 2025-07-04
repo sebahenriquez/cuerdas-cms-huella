@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { 
@@ -10,7 +11,8 @@ import {
   Users, 
   LogOut,
   Globe,
-  Code
+  Code,
+  Mouse
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCMSAuth } from '@/contexts/CMSAuthContext';
@@ -25,6 +27,7 @@ const AdminLayout: React.FC = () => {
     { name: 'Tracks', href: '/admin/tracks', icon: Music },
     { name: 'Videos', href: '/admin/videos', icon: Video },
     { name: 'Media', href: '/admin/media', icon: Image },
+    { name: 'Botones CTA', href: '/admin/cta-buttons', icon: Mouse },
     { name: 'Plantillas', href: '/admin/templates', icon: Code },
     { name: 'Idiomas', href: '/admin/languages', icon: Globe },
     { name: 'Configuración', href: '/admin/settings', icon: Settings },

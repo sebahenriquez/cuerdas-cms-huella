@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { getPageBySlug } from '@/lib/supabase-helpers';
+import { getPageBySlug, getCTAButtons } from '@/lib/supabase-helpers';
 
 const Index = () => {
   const { currentLanguage } = useLanguage();
@@ -12,6 +13,12 @@ const Index = () => {
   const { data: homeData, isLoading } = useQuery({
     queryKey: ['page', 'home', currentLanguage?.id],
     queryFn: () => currentLanguage ? getPageBySlug('home', currentLanguage.id) : null,
+    enabled: !!currentLanguage,
+  });
+
+  const { data: ctaButtons } = useQuery({
+    queryKey: ['cta-buttons', currentLanguage?.id],
+    queryFn: () => currentLanguage ? getCTAButtons(currentLanguage.id) : null,
     enabled: !!currentLanguage,
   });
 
@@ -26,6 +33,10 @@ const Index = () => {
   }
 
   const pageContent = homeData?.page_contents?.[0];
+  
+  // Get CTA button texts
+  const exploreButtonText = ctaButtons?.find(b => b.key === 'explore_trail')?.cta_button_contents?.[0]?.text || 'Recorré la Huella';
+  const listenButtonText = ctaButtons?.find(b => b.key === 'listen_album')?.cta_button_contents?.[0]?.text || 'Escuchar el Álbum';
 
   return (
     <Layout showAudioPlayer={true}>
@@ -51,12 +62,12 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
             <Link to="/recorre-la-huella">
               <Button className="btn-hero">
-                Recorré la Huella
+                {exploreButtonText}
               </Button>
             </Link>
             <Link to="/escucha-la-huella">
               <Button className="btn-secondary-hero">
-                Escuchar el Álbum
+                {listenButtonText}
               </Button>
             </Link>
           </div>

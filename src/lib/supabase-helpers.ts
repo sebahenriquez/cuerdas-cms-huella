@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 // Language helpers
@@ -172,6 +173,33 @@ export const getTrackQuotes = async (trackId: number, languageId: number) => {
     .eq('track_id', trackId)
     .eq('language_id', languageId)
     .order('order_position');
+  
+  if (error) throw error;
+  return data;
+};
+
+// CTA Button helpers
+export const getCTAButtons = async (languageId: number) => {
+  const { data, error } = await supabase
+    .from('cta_buttons')
+    .select(`
+      *,
+      cta_button_contents!inner(*)
+    `)
+    .eq('cta_button_contents.language_id', languageId);
+  
+  if (error) throw error;
+  return data;
+};
+
+export const getAllCTAButtons = async () => {
+  const { data, error } = await supabase
+    .from('cta_buttons')
+    .select(`
+      *,
+      cta_button_contents(*)
+    `)
+    .order('key');
   
   if (error) throw error;
   return data;
