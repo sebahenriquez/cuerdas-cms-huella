@@ -60,7 +60,7 @@ const TrackDetail = () => {
 
   // Get CTA labels based on language
   const getCtaLabel = (type: 'texts' | 'videos' | 'photos') => {
-    if (!ctaSettings) return '';
+    if (!ctaSettings || typeof ctaSettings === 'string') return '';
     const langCode = currentLanguage?.code?.toLowerCase();
     
     switch (type) {
@@ -118,7 +118,7 @@ const TrackDetail = () => {
           )}
 
           {/* CTA Buttons Section */}
-          {ctaSettings && (
+          {ctaSettings && typeof ctaSettings !== 'string' && (
             <div className="flex flex-wrap justify-center gap-4 mt-8 animate-fade-in">
               {ctaSettings.show_texts && trackContent?.long_text_content && (
                 <Button variant="outline" className="btn-secondary-hero">
@@ -219,9 +219,9 @@ const TrackDetail = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {trackData.track_featured_images.map((image, index) => (
                 <div key={index} className="bg-card rounded-lg overflow-hidden shadow-lg">
-                  {image.image_url && (
+                  {(image.image_url || image.media_files?.file_path) && (
                     <img
-                      src={image.image_url}
+                      src={image.image_url || image.media_files?.file_path}
                       alt={currentLanguage?.code === 'en' ? image.caption_en : image.caption_es}
                       className="w-full h-64 object-cover"
                     />

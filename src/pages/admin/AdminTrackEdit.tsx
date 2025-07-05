@@ -2,20 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import RichTextEditor from '@/components/admin/RichTextEditor';
-import { ArrowLeft, Save, Play, Pause, Plus, X, Video, Image } from 'lucide-react';
+import { ArrowLeft, Save, Play, Pause } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { getLanguages } from '@/lib/supabase-helpers';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
+import TrackSettingsForm from '@/components/admin/track-edit/TrackSettingsForm';
+import CTASettingsForm from '@/components/admin/track-edit/CTASettingsForm';
+import VideosSection from '@/components/admin/track-edit/VideosSection';
+import PhotosSection from '@/components/admin/track-edit/PhotosSection';
+import TrackContentTabs from '@/components/admin/track-edit/TrackContentTabs';
 
 interface TrackContent {
   id?: number;
@@ -133,7 +131,6 @@ const AdminTrackEdit: React.FC = () => {
 
   useEffect(() => {
     if (existingTrack) {
-      // Transform the data to match our interface
       const transformedTrack = {
         ...existingTrack,
         videos: existingTrack.videos?.map(video => ({
@@ -163,7 +160,6 @@ const AdminTrackEdit: React.FC = () => {
       };
       setTrackData(transformedTrack);
     } else if (languages.length > 0 && trackData.track_contents.length === 0) {
-      // Initialize empty content for all languages
       setTrackData(prev => ({
         ...prev,
         track_contents: languages.map(lang => ({
@@ -214,7 +210,6 @@ const AdminTrackEdit: React.FC = () => {
 
         // Handle videos
         if (data.videos) {
-          // Delete existing videos not in the new list
           const currentVideoIds = data.videos.filter(v => v.id).map(v => v.id);
           if (currentVideoIds.length > 0) {
             const { error } = await supabase
@@ -231,10 +226,8 @@ const AdminTrackEdit: React.FC = () => {
             if (error) throw error;
           }
 
-          // Update or insert videos
           for (const video of data.videos) {
             if (video.id) {
-              // Update existing video
               const { error } = await supabase
                 .from('videos')
                 .update({
@@ -245,7 +238,6 @@ const AdminTrackEdit: React.FC = () => {
                 .eq('id', video.id);
               if (error) throw error;
 
-              // Update video contents
               for (const content of video.video_contents || []) {
                 if (content.id) {
                   const { error: contentError } = await supabase
@@ -269,7 +261,6 @@ const AdminTrackEdit: React.FC = () => {
                 }
               }
             } else {
-              // Create new video
               const { data: newVideo, error } = await supabase
                 .from('videos')
                 .insert({
@@ -282,7 +273,6 @@ const AdminTrackEdit: React.FC = () => {
                 .single();
               if (error) throw error;
 
-              // Insert video contents
               for (const content of video.video_contents || []) {
                 const { error: contentError } = await supabase
                   .from('video_contents')
@@ -300,7 +290,6 @@ const AdminTrackEdit: React.FC = () => {
 
         // Handle photos
         if (data.photos) {
-          // Delete existing photos not in the new list
           const currentPhotoIds = data.photos.filter(p => p.id).map(p => p.id);
           if (currentPhotoIds.length > 0) {
             const { error } = await supabase
@@ -317,7 +306,6 @@ const AdminTrackEdit: React.FC = () => {
             if (error) throw error;
           }
 
-          // Update or insert photos
           for (const photo of data.photos) {
             if (photo.id) {
               const { error } = await supabase
@@ -364,7 +352,6 @@ const AdminTrackEdit: React.FC = () => {
           if (error) throw error;
         }
       } else {
-        // Create new track
         const { data: newTrack, error: trackError } = await supabase
           .from('tracks')
           .insert({
@@ -377,7 +364,6 @@ const AdminTrackEdit: React.FC = () => {
 
         if (trackError) throw trackError;
 
-        // Insert track contents
         for (const content of data.track_contents || []) {
           const { error } = await supabase
             .from('track_contents')
@@ -509,474 +495,59 @@ const AdminTrackEdit: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Track Settings */}
         <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Configuración</CardTitle>
-            <CardDescription>Configuración del track</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="order_position">Posición</Label>
-              <Input
-                id="order_position"
-                type="number"
-                value={trackData.order_position || ''}
-                onChange={(e) => setTrackData(prev => ({ ...prev, order_position: parseInt(e.target.value) || 1 }))}
-                placeholder="1"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="audio_url">URL del Audio</Label>
-              <Input
-                id="audio_url"
-                value={trackData.audio_url || ''}
-                onChange={(e) => setTrackData(prev => ({ ...prev, audio_url: e.target.value }))}
-                placeholder="https://ejemplo.com/audio.mp3"
-              />
-            </div>
+          <CardContent className="p-6">
+            <TrackSettingsForm
+              orderPosition={trackData.order_position || 1}
+              audioUrl={trackData.audio_url || ''}
+              status={trackData.status || 'published'}
+              onOrderPositionChange={(value) => setTrackData(prev => ({ ...prev, order_position: value }))}
+              onAudioUrlChange={(value) => setTrackData(prev => ({ ...prev, audio_url: value }))}
+              onStatusChange={(value) => setTrackData(prev => ({ ...prev, status: value }))}
+            />
 
-            <div>
-              <Label htmlFor="status">Estado</Label>
-              <Select
-                value={trackData.status || ''}
-                onValueChange={(value) => setTrackData(prev => ({ ...prev, status: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="published">Publicado</SelectItem>
-                  <SelectItem value="draft">Borrador</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <CTASettingsForm
+              ctaSettings={trackData.cta_settings || {
+                show_texts: true,
+                show_videos: true,
+                show_photos: true,
+                texts_label_es: 'Textos',
+                texts_label_en: 'Texts',
+                videos_label_es: 'Videos',
+                videos_label_en: 'Videos',
+                photos_label_es: 'Fotos',
+                photos_label_en: 'Photos'
+              }}
+              onCTASettingsChange={(settings) => {
+                setTrackData(prev => ({
+                  ...prev,
+                  cta_settings: {
+                    ...prev.cta_settings,
+                    ...settings
+                  }
+                }));
+              }}
+            />
 
-            {/* CTA Settings Section */}
-            <div className="border-t pt-4">
-              <Label className="text-sm font-medium mb-3 block">Configuración de Botones CTA</Label>
-              
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="show_texts"
-                    checked={trackData.cta_settings?.show_texts || false}
-                    onCheckedChange={(checked) => {
-                      setTrackData(prev => ({
-                        ...prev,
-                        cta_settings: {
-                          ...prev.cta_settings,
-                          show_texts: checked as boolean
-                        }
-                      }));
-                    }}
-                  />
-                  <Label htmlFor="show_texts" className="text-sm">Mostrar Textos</Label>
-                </div>
+            <VideosSection
+              videos={trackData.videos || []}
+              languages={languages}
+              onVideosChange={(videos) => setTrackData(prev => ({ ...prev, videos }))}
+              onVideoContentChange={updateVideoContent}
+            />
 
-                {trackData.cta_settings?.show_texts && (
-                  <div className="grid grid-cols-2 gap-2 ml-6">
-                    <Input
-                      placeholder="Texto ES"
-                      value={trackData.cta_settings?.texts_label_es || ''}
-                      onChange={(e) => {
-                        setTrackData(prev => ({
-                          ...prev,
-                          cta_settings: {
-                            ...prev.cta_settings,
-                            texts_label_es: e.target.value
-                          }
-                        }));
-                      }}
-                    />
-                    <Input
-                      placeholder="Texto EN"
-                      value={trackData.cta_settings?.texts_label_en || ''}
-                      onChange={(e) => {
-                        setTrackData(prev => ({
-                          ...prev,
-                          cta_settings: {
-                            ...prev.cta_settings,
-                            texts_label_en: e.target.value
-                          }
-                        }));
-                      }}
-                    />
-                  </div>
-                )}
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="show_videos"
-                    checked={trackData.cta_settings?.show_videos || false}
-                    onCheckedChange={(checked) => {
-                      setTrackData(prev => ({
-                        ...prev,
-                        cta_settings: {
-                          ...prev.cta_settings,
-                          show_videos: checked as boolean
-                        }
-                      }));
-                    }}
-                  />
-                  <Label htmlFor="show_videos" className="text-sm">Mostrar Videos</Label>
-                </div>
-
-                {trackData.cta_settings?.show_videos && (
-                  <div className="grid grid-cols-2 gap-2 ml-6">
-                    <Input
-                      placeholder="Videos ES"
-                      value={trackData.cta_settings?.videos_label_es || ''}
-                      onChange={(e) => {
-                        setTrackData(prev => ({
-                          ...prev,
-                          cta_settings: {
-                            ...prev.cta_settings,
-                            videos_label_es: e.target.value
-                          }
-                        }));
-                      }}
-                    />
-                    <Input
-                      placeholder="Videos EN"
-                      value={trackData.cta_settings?.videos_label_en || ''}
-                      onChange={(e) => {
-                        setTrackData(prev => ({
-                          ...prev,
-                          cta_settings: {
-                            ...prev.cta_settings,
-                            videos_label_en: e.target.value
-                          }
-                        }));
-                      }}
-                    />
-                  </div>
-                )}
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="show_photos"
-                    checked={trackData.cta_settings?.show_photos || false}
-                    onCheckedChange={(checked) => {
-                      setTrackData(prev => ({
-                        ...prev,
-                        cta_settings: {
-                          ...prev.cta_settings,
-                          show_photos: checked as boolean
-                        }
-                      }));
-                    }}
-                  />
-                  <Label htmlFor="show_photos" className="text-sm">Mostrar Fotos</Label>
-                </div>
-
-                {trackData.cta_settings?.show_photos && (
-                  <div className="grid grid-cols-2 gap-2 ml-6">
-                    <Input
-                      placeholder="Fotos ES"
-                      value={trackData.cta_settings?.photos_label_es || ''}
-                      onChange={(e) => {
-                        setTrackData(prev => ({
-                          ...prev,
-                          cta_settings: {
-                            ...prev.cta_settings,
-                            photos_label_es: e.target.value
-                          }
-                        }));
-                      }}
-                    />
-                    <Input
-                      placeholder="Fotos EN"
-                      value={trackData.cta_settings?.photos_label_en || ''}
-                      onChange={(e) => {
-                        setTrackData(prev => ({
-                          ...prev,
-                          cta_settings: {
-                            ...prev.cta_settings,
-                            photos_label_en: e.target.value
-                          }
-                        }));
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Videos Section */}
-            <div className="border-t pt-4">
-              <div className="flex items-center justify-between mb-3">
-                <Label className="flex items-center gap-2">
-                  <Video className="h-4 w-4" />
-                  Videos (máx. 2)
-                </Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if ((trackData.videos?.length || 0) < 2) {
-                      setTrackData(prev => ({
-                        ...prev,
-                        videos: [
-                          ...(prev.videos || []),
-                          {
-                            vimeo_url: '',
-                            order_position: (prev.videos?.length || 0) + 1,
-                            video_contents: languages.map(lang => ({
-                              title: '',
-                              description: '',
-                              language_id: lang.id
-                            }))
-                          }
-                        ]
-                      }))
-                    }
-                  }}
-                  disabled={(trackData.videos?.length || 0) >= 2}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              <div className="space-y-4">
-                {trackData.videos?.map((video, index) => (
-                  <div key={index} className="border rounded p-3 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Video {index + 1}</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setTrackData(prev => ({
-                            ...prev,
-                            videos: prev.videos?.filter((_, i) => i !== index)
-                          }))
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Input
-                      placeholder="URL del Video (YouTube/Vimeo)"
-                      value={video.vimeo_url}
-                      onChange={(e) => {
-                        setTrackData(prev => ({
-                          ...prev,
-                          videos: prev.videos?.map((v, i) => 
-                            i === index ? { ...v, vimeo_url: e.target.value } : v
-                          )
-                        }))
-                      }}
-                    />
-                    
-                    {/* Video Content Fields - Now properly organized by language */}
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium">Contenido del Video</Label>
-                      {languages.map((lang) => {
-                        const content = video.video_contents?.find(c => c.language_id === lang.id);
-                        return (
-                          <div key={lang.id} className="border rounded p-3 space-y-2">
-                            <Label className="text-xs text-muted-foreground font-medium">{lang.name}</Label>
-                            <div className="space-y-2">
-                              <Input
-                                placeholder={`Título del video (${lang.code.toUpperCase()})`}
-                                value={content?.title || ''}
-                                onChange={(e) => updateVideoContent(index, lang.id, 'title', e.target.value)}
-                              />
-                              <Textarea
-                                placeholder={`Descripción del video (${lang.code.toUpperCase()})`}
-                                value={content?.description || ''}
-                                rows={2}
-                                onChange={(e) => updateVideoContent(index, lang.id, 'description', e.target.value)}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Photos Section */}
-            <div className="border-t pt-4">
-              <div className="flex items-center justify-between mb-3">
-                <Label className="flex items-center gap-2">
-                  <Image className="h-4 w-4" />
-                  Fotos (máx. 8)
-                </Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if ((trackData.photos?.length || 0) < 8) {
-                      setTrackData(prev => ({
-                        ...prev,
-                        photos: [
-                          ...(prev.photos || []),
-                          {
-                            caption_es: '',
-                            caption_en: '',
-                            order_position: (prev.photos?.length || 0) + 1,
-                            image_url: ''
-                          }
-                        ]
-                      }))
-                    }
-                  }}
-                  disabled={(trackData.photos?.length || 0) >= 8}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              <div className="space-y-2">
-                {trackData.photos?.map((photo, index) => (
-                  <div key={index} className="border rounded p-2 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Foto {index + 1}</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setTrackData(prev => ({
-                            ...prev,
-                            photos: prev.photos?.filter((_, i) => i !== index)
-                          }))
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Input
-                      placeholder="URL de la imagen"
-                      value={photo.image_url || ''}
-                      onChange={(e) => {
-                        setTrackData(prev => ({
-                          ...prev,
-                          photos: prev.photos?.map((p, i) => 
-                            i === index ? { ...p, image_url: e.target.value } : p
-                          )
-                        }))
-                      }}
-                    />
-                    <div className="grid grid-cols-2 gap-2">
-                      <Input
-                        placeholder="Descripción (ES)"
-                        value={photo.caption_es}
-                        onChange={(e) => {
-                          setTrackData(prev => ({
-                            ...prev,
-                            photos: prev.photos?.map((p, i) => 
-                              i === index ? { ...p, caption_es: e.target.value } : p
-                            )
-                          }))
-                        }}
-                      />
-                      <Input
-                        placeholder="Descripción (EN)"
-                        value={photo.caption_en}
-                        onChange={(e) => {
-                          setTrackData(prev => ({
-                            ...prev,
-                            photos: prev.photos?.map((p, i) => 
-                              i === index ? { ...p, caption_en: e.target.value } : p
-                            )
-                          }))
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <PhotosSection
+              photos={trackData.photos || []}
+              onPhotosChange={(photos) => setTrackData(prev => ({ ...prev, photos }))}
+            />
           </CardContent>
         </Card>
 
-        {/* Content Tabs */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Contenido</CardTitle>
-            <CardDescription>Edita el contenido en diferentes idiomas</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue={languages[0]?.code} className="w-full">
-              <TabsList className="grid grid-cols-2 w-full">
-                {languages.map((language) => (
-                  <TabsTrigger key={language.id} value={language.code}>
-                    {language.name}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              
-              {languages.map((language) => {
-                const content = trackData.track_contents?.find(c => c.language_id === language.id);
-                
-                return (
-                  <TabsContent key={language.id} value={language.code} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor={`title-${language.id}`}>Título</Label>
-                        <Input
-                          id={`title-${language.id}`}
-                          value={content?.title || ''}
-                          onChange={(e) => updateTrackContent(language.id, 'title', e.target.value)}
-                          placeholder="Título del track"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor={`menu_title-${language.id}`}>Título del Menú</Label>
-                        <Input
-                          id={`menu_title-${language.id}`}
-                          value={content?.menu_title || ''}
-                          onChange={(e) => updateTrackContent(language.id, 'menu_title', e.target.value)}
-                          placeholder="Título corto para menús"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor={`description-${language.id}`}>Descripción</Label>
-                      <Textarea
-                        id={`description-${language.id}`}
-                        value={content?.description || ''}
-                        onChange={(e) => updateTrackContent(language.id, 'description', e.target.value)}
-                        placeholder="Descripción breve del track"
-                        rows={3}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor={`long_text_content-${language.id}`}>Contenido Largo</Label>
-                      <RichTextEditor
-                        content={content?.long_text_content || ''}
-                        onChange={(value) => updateTrackContent(language.id, 'long_text_content', value)}
-                        placeholder="Contenido detallado del track"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor={`hero_image-${language.id}`}>Imagen Hero (URL)</Label>
-                      <Input
-                        id={`hero_image-${language.id}`}
-                        value={content?.hero_image_url || ''}
-                        onChange={(e) => updateTrackContent(language.id, 'hero_image_url', e.target.value)}
-                        placeholder="https://ejemplo.com/imagen.jpg"
-                      />
-                    </div>
-                  </TabsContent>
-                );
-              })}
-            </Tabs>
-          </CardContent>
-        </Card>
+        <TrackContentTabs
+          languages={languages}
+          trackContents={trackData.track_contents || []}
+          onContentChange={updateTrackContent}
+        />
       </div>
     </div>
   );
