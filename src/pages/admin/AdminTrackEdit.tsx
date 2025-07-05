@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -336,7 +335,7 @@ const AdminTrackEdit: React.FC = () => {
         // Handle CTA settings
         if (data.cta_settings) {
           const { error } = await supabase
-            .from('track_cta_settings' as any)
+            .from('track_cta_settings')
             .upsert({
               track_id: trackId,
               show_texts: data.cta_settings.show_texts,

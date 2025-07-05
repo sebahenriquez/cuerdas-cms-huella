@@ -183,15 +183,16 @@ export const getTrackQuotes = async (trackId: number, languageId: number) => {
 // CTA Button helpers
 export const getCTAButtons = async (languageId: number) => {
   const { data, error } = await supabase
-    .from('cta_buttons' as any)
+    .from('cta_buttons')
     .select(`
       *,
       cta_button_contents(*)
-    `);
+    `)
+    .order('order_position');
   
   if (error) throw error;
   
-  // Filter contents by language_id on the client side for now
+  // Filter contents by language_id on the client side
   const filteredData = data?.map((button: any) => ({
     ...button,
     cta_button_contents: button.cta_button_contents?.filter((content: any) => content.language_id === languageId) || []
@@ -202,7 +203,7 @@ export const getCTAButtons = async (languageId: number) => {
 
 export const getAllCTAButtons = async () => {
   const { data, error } = await supabase
-    .from('cta_buttons' as any)
+    .from('cta_buttons')
     .select(`
       *,
       cta_button_contents(*)
@@ -216,7 +217,7 @@ export const getAllCTAButtons = async () => {
 // Track CTA Settings helpers
 export const getTrackCTASettings = async (trackId: number) => {
   const { data, error } = await supabase
-    .from('track_cta_settings' as any)
+    .from('track_cta_settings')
     .select('*')
     .eq('track_id', trackId)
     .single();

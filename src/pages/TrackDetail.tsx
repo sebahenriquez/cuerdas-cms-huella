@@ -60,7 +60,7 @@ const TrackDetail = () => {
 
   // Get CTA labels based on language
   const getCtaLabel = (type: 'texts' | 'videos' | 'photos') => {
-    if (!ctaSettings || typeof ctaSettings === 'string') return '';
+    if (!ctaSettings) return '';
     const langCode = currentLanguage?.code?.toLowerCase();
     
     switch (type) {
@@ -118,7 +118,7 @@ const TrackDetail = () => {
           )}
 
           {/* CTA Buttons Section */}
-          {ctaSettings && typeof ctaSettings !== 'string' && (
+          {ctaSettings && (
             <div className="flex flex-wrap justify-center gap-4 mt-8 animate-fade-in">
               {ctaSettings.show_texts && trackContent?.long_text_content && (
                 <Button variant="outline" className="btn-secondary-hero">

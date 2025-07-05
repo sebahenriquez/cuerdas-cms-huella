@@ -36,6 +36,81 @@ export type Database = {
         }
         Relationships: []
       }
+      cta_button_contents: {
+        Row: {
+          created_at: string | null
+          cta_button_id: number | null
+          description: string | null
+          id: number
+          label: string
+          language_id: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cta_button_id?: number | null
+          description?: string | null
+          id?: number
+          label: string
+          language_id?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cta_button_id?: number | null
+          description?: string | null
+          id?: number
+          label?: string
+          language_id?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cta_button_contents_cta_button_id_fkey"
+            columns: ["cta_button_id"]
+            isOneToOne: false
+            referencedRelation: "cta_buttons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cta_button_contents_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cta_buttons: {
+        Row: {
+          created_at: string | null
+          id: number
+          is_active: boolean | null
+          key: string
+          order_position: number | null
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          is_active?: boolean | null
+          key: string
+          order_position?: number | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          is_active?: boolean | null
+          key?: string
+          order_position?: number | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: []
+      }
       gallery_images: {
         Row: {
           caption: string | null
@@ -429,12 +504,69 @@ export type Database = {
           },
         ]
       }
+      track_cta_settings: {
+        Row: {
+          created_at: string | null
+          id: number
+          photos_label_en: string | null
+          photos_label_es: string | null
+          show_photos: boolean | null
+          show_texts: boolean | null
+          show_videos: boolean | null
+          texts_label_en: string | null
+          texts_label_es: string | null
+          track_id: number | null
+          updated_at: string | null
+          videos_label_en: string | null
+          videos_label_es: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          photos_label_en?: string | null
+          photos_label_es?: string | null
+          show_photos?: boolean | null
+          show_texts?: boolean | null
+          show_videos?: boolean | null
+          texts_label_en?: string | null
+          texts_label_es?: string | null
+          track_id?: number | null
+          updated_at?: string | null
+          videos_label_en?: string | null
+          videos_label_es?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          photos_label_en?: string | null
+          photos_label_es?: string | null
+          show_photos?: boolean | null
+          show_texts?: boolean | null
+          show_videos?: boolean | null
+          texts_label_en?: string | null
+          texts_label_es?: string | null
+          track_id?: number | null
+          updated_at?: string | null
+          videos_label_en?: string | null
+          videos_label_es?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_cta_settings_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: true
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       track_featured_images: {
         Row: {
           caption_en: string | null
           caption_es: string | null
           created_at: string | null
           id: number
+          image_url: string | null
           media_file_id: number | null
           order_position: number | null
           track_id: number | null
@@ -444,6 +576,7 @@ export type Database = {
           caption_es?: string | null
           created_at?: string | null
           id?: number
+          image_url?: string | null
           media_file_id?: number | null
           order_position?: number | null
           track_id?: number | null
@@ -453,6 +586,7 @@ export type Database = {
           caption_es?: string | null
           created_at?: string | null
           id?: number
+          image_url?: string | null
           media_file_id?: number | null
           order_position?: number | null
           track_id?: number | null
