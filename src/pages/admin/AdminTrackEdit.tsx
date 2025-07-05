@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -70,7 +71,6 @@ interface TrackData {
   photos?: PhotoData[];
   track_featured_images?: any[];
   cta_settings?: TrackCTASettings;
-  track_cta_settings?: TrackCTASettings[];
 }
 
 const AdminTrackEdit: React.FC = () => {
@@ -124,7 +124,7 @@ const AdminTrackEdit: React.FC = () => {
         .single();
       
       if (error) throw error;
-      return data as TrackData;
+      return data;
     },
     enabled: trackId > 0
   });
@@ -162,7 +162,6 @@ const AdminTrackEdit: React.FC = () => {
       console.log('Transformed track data:', transformedTrack);
       setTrackData(transformedTrack);
     } else if (languages.length > 0 && trackData.track_contents.length === 0) {
-      // Initialize empty track contents for all languages
       setTrackData(prev => ({
         ...prev,
         track_contents: languages.map(lang => ({
@@ -298,7 +297,6 @@ const AdminTrackEdit: React.FC = () => {
           try {
             const currentPhotoIds = data.photos.filter(p => p.id).map(p => p.id);
             
-            // Delete photos that are no longer in the list
             if (currentPhotoIds.length > 0) {
               const { error } = await supabase
                 .from('track_featured_images')
@@ -320,7 +318,6 @@ const AdminTrackEdit: React.FC = () => {
               }
             }
 
-            // Update or insert photos
             for (const photo of data.photos) {
               if (photo.id) {
                 const { error } = await supabase
@@ -358,7 +355,7 @@ const AdminTrackEdit: React.FC = () => {
           }
         }
 
-        // Handle CTA settings
+        // Handle CTA settings with proper UPSERT
         if (data.cta_settings) {
           try {
             const { error } = await supabase
@@ -374,6 +371,8 @@ const AdminTrackEdit: React.FC = () => {
                 videos_label_en: data.cta_settings.videos_label_en,
                 photos_label_es: data.cta_settings.photos_label_es,
                 photos_label_en: data.cta_settings.photos_label_en
+              }, {
+                onConflict: 'track_id'
               });
             if (error) {
               console.error('Error saving CTA settings:', error);
