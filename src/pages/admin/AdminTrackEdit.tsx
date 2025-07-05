@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -9,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import { ArrowLeft, Save, Play, Pause, Plus, X, Video, Image } from 'lucide-react';
@@ -50,6 +50,18 @@ interface PhotoData {
   image_url?: string;
 }
 
+interface TrackCTASettings {
+  show_texts: boolean;
+  show_videos: boolean;
+  show_photos: boolean;
+  texts_label_es?: string;
+  texts_label_en?: string;
+  videos_label_es?: string;
+  videos_label_en?: string;
+  photos_label_es?: string;
+  photos_label_en?: string;
+}
+
 interface TrackData {
   id: number;
   order_position: number;
@@ -59,6 +71,7 @@ interface TrackData {
   videos?: VideoData[];
   photos?: PhotoData[];
   track_featured_images?: any[];
+  cta_settings?: TrackCTASettings;
 }
 
 const AdminTrackEdit: React.FC = () => {
@@ -75,7 +88,18 @@ const AdminTrackEdit: React.FC = () => {
     status: 'published',
     track_contents: [],
     videos: [],
-    photos: []
+    photos: [],
+    cta_settings: {
+      show_texts: true,
+      show_videos: true,
+      show_photos: true,
+      texts_label_es: 'Textos',
+      texts_label_en: 'Texts',
+      videos_label_es: 'Videos',
+      videos_label_en: 'Videos',
+      photos_label_es: 'Fotos',
+      photos_label_en: 'Photos'
+    }
   });
 
   const { data: languages = [] } = useQuery({
@@ -94,7 +118,8 @@ const AdminTrackEdit: React.FC = () => {
           *,
           track_contents(*),
           videos(*, video_contents(*)),
-          track_featured_images(*)
+          track_featured_images(*),
+          track_cta_settings(*)
         `)
         .eq('id', trackId)
         .single();
@@ -118,10 +143,22 @@ const AdminTrackEdit: React.FC = () => {
             language_id: lang.id
           }))
         })) || [],
-        photos: existingTrack.track_featured_images?.map(photo => ({
+        photos: existingTrack.track_featured_images?.map((photo, index) => ({
           ...photo,
-          image_url: '' // You might want to construct this from media_file_id
-        })) || []
+          image_url: photo.image_url || '',
+          order_position: photo.order_position || index + 1
+        })) || [],
+        cta_settings: existingTrack.track_cta_settings?.[0] || {
+          show_texts: true,
+          show_videos: true,
+          show_photos: true,
+          texts_label_es: 'Textos',
+          texts_label_en: 'Texts',
+          videos_label_es: 'Videos',
+          videos_label_en: 'Videos',
+          photos_label_es: 'Fotos',
+          photos_label_en: 'Photos'
+        }
       };
       setTrackData(transformedTrack);
     } else if (languages.length > 0 && trackData.track_contents.length === 0) {
@@ -287,7 +324,8 @@ const AdminTrackEdit: React.FC = () => {
                 .update({
                   caption_es: photo.caption_es,
                   caption_en: photo.caption_en,
-                  order_position: photo.order_position
+                  order_position: photo.order_position,
+                  image_url: photo.image_url
                 })
                 .eq('id', photo.id);
               if (error) throw error;
@@ -298,11 +336,31 @@ const AdminTrackEdit: React.FC = () => {
                   track_id: trackId,
                   caption_es: photo.caption_es,
                   caption_en: photo.caption_en,
-                  order_position: photo.order_position
+                  order_position: photo.order_position,
+                  image_url: photo.image_url
                 });
               if (error) throw error;
             }
           }
+        }
+
+        // Handle CTA settings
+        if (data.cta_settings) {
+          const { error } = await supabase
+            .from('track_cta_settings' as any)
+            .upsert({
+              track_id: trackId,
+              show_texts: data.cta_settings.show_texts,
+              show_videos: data.cta_settings.show_videos,
+              show_photos: data.cta_settings.show_photos,
+              texts_label_es: data.cta_settings.texts_label_es,
+              texts_label_en: data.cta_settings.texts_label_en,
+              videos_label_es: data.cta_settings.videos_label_es,
+              videos_label_en: data.cta_settings.videos_label_en,
+              photos_label_es: data.cta_settings.photos_label_es,
+              photos_label_en: data.cta_settings.photos_label_en
+            });
+          if (error) throw error;
         }
       } else {
         // Create new track
@@ -494,6 +552,157 @@ const AdminTrackEdit: React.FC = () => {
               </Select>
             </div>
 
+            {/* CTA Settings Section */}
+            <div className="border-t pt-4">
+              <Label className="text-sm font-medium mb-3 block">Configuración de Botones CTA</Label>
+              
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="show_texts"
+                    checked={trackData.cta_settings?.show_texts || false}
+                    onCheckedChange={(checked) => {
+                      setTrackData(prev => ({
+                        ...prev,
+                        cta_settings: {
+                          ...prev.cta_settings,
+                          show_texts: checked as boolean
+                        }
+                      }));
+                    }}
+                  />
+                  <Label htmlFor="show_texts" className="text-sm">Mostrar Textos</Label>
+                </div>
+
+                {trackData.cta_settings?.show_texts && (
+                  <div className="grid grid-cols-2 gap-2 ml-6">
+                    <Input
+                      placeholder="Texto ES"
+                      value={trackData.cta_settings?.texts_label_es || ''}
+                      onChange={(e) => {
+                        setTrackData(prev => ({
+                          ...prev,
+                          cta_settings: {
+                            ...prev.cta_settings,
+                            texts_label_es: e.target.value
+                          }
+                        }));
+                      }}
+                    />
+                    <Input
+                      placeholder="Texto EN"
+                      value={trackData.cta_settings?.texts_label_en || ''}
+                      onChange={(e) => {
+                        setTrackData(prev => ({
+                          ...prev,
+                          cta_settings: {
+                            ...prev.cta_settings,
+                            texts_label_en: e.target.value
+                          }
+                        }));
+                      }}
+                    />
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="show_videos"
+                    checked={trackData.cta_settings?.show_videos || false}
+                    onCheckedChange={(checked) => {
+                      setTrackData(prev => ({
+                        ...prev,
+                        cta_settings: {
+                          ...prev.cta_settings,
+                          show_videos: checked as boolean
+                        }
+                      }));
+                    }}
+                  />
+                  <Label htmlFor="show_videos" className="text-sm">Mostrar Videos</Label>
+                </div>
+
+                {trackData.cta_settings?.show_videos && (
+                  <div className="grid grid-cols-2 gap-2 ml-6">
+                    <Input
+                      placeholder="Videos ES"
+                      value={trackData.cta_settings?.videos_label_es || ''}
+                      onChange={(e) => {
+                        setTrackData(prev => ({
+                          ...prev,
+                          cta_settings: {
+                            ...prev.cta_settings,
+                            videos_label_es: e.target.value
+                          }
+                        }));
+                      }}
+                    />
+                    <Input
+                      placeholder="Videos EN"
+                      value={trackData.cta_settings?.videos_label_en || ''}
+                      onChange={(e) => {
+                        setTrackData(prev => ({
+                          ...prev,
+                          cta_settings: {
+                            ...prev.cta_settings,
+                            videos_label_en: e.target.value
+                          }
+                        }));
+                      }}
+                    />
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="show_photos"
+                    checked={trackData.cta_settings?.show_photos || false}
+                    onCheckedChange={(checked) => {
+                      setTrackData(prev => ({
+                        ...prev,
+                        cta_settings: {
+                          ...prev.cta_settings,
+                          show_photos: checked as boolean
+                        }
+                      }));
+                    }}
+                  />
+                  <Label htmlFor="show_photos" className="text-sm">Mostrar Fotos</Label>
+                </div>
+
+                {trackData.cta_settings?.show_photos && (
+                  <div className="grid grid-cols-2 gap-2 ml-6">
+                    <Input
+                      placeholder="Fotos ES"
+                      value={trackData.cta_settings?.photos_label_es || ''}
+                      onChange={(e) => {
+                        setTrackData(prev => ({
+                          ...prev,
+                          cta_settings: {
+                            ...prev.cta_settings,
+                            photos_label_es: e.target.value
+                          }
+                        }));
+                      }}
+                    />
+                    <Input
+                      placeholder="Fotos EN"
+                      value={trackData.cta_settings?.photos_label_en || ''}
+                      onChange={(e) => {
+                        setTrackData(prev => ({
+                          ...prev,
+                          cta_settings: {
+                            ...prev.cta_settings,
+                            photos_label_en: e.target.value
+                          }
+                        }));
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Videos Section */}
             <div className="border-t pt-4">
               <div className="flex items-center justify-between mb-3">
@@ -678,8 +887,8 @@ const AdminTrackEdit: React.FC = () => {
                             photos: prev.photos?.map((p, i) => 
                               i === index ? { ...p, caption_en: e.target.value } : p
                             )
-                          }))
-                        }}
+                          })}
+                        />
                       />
                     </div>
                   </div>

@@ -75,7 +75,8 @@ export const getTracks = async (languageId: number) => {
       *,
       track_contents!inner(*),
       videos(*, video_contents(*)),
-      track_featured_images(*)
+      track_featured_images(*),
+      track_cta_settings(*)
     `)
     .eq('track_contents.language_id', languageId)
     .eq('status', 'published')
@@ -93,6 +94,7 @@ export const getTrackWithContent = async (trackId: number, languageId: number) =
       track_contents!inner(*),
       track_quotes(*, language_id),
       track_featured_images(*, media_files(*)),
+      track_cta_settings(*),
       videos(*, video_contents(*))
     `)
     .eq('id', trackId)
@@ -208,5 +210,17 @@ export const getAllCTAButtons = async () => {
     .order('key');
   
   if (error) throw error;
+  return data;
+};
+
+// Track CTA Settings helpers
+export const getTrackCTASettings = async (trackId: number) => {
+  const { data, error } = await supabase
+    .from('track_cta_settings' as any)
+    .select('*')
+    .eq('track_id', trackId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows returned"
   return data;
 };

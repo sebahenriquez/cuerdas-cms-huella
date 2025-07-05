@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -46,6 +47,7 @@ const TrackDetail = () => {
   }
 
   const trackContent = trackData.track_contents?.[0];
+  const ctaSettings = trackData.track_cta_settings?.[0];
   const isCurrentTrack = currentTrack?.id === trackData.id;
 
   const handlePlayPause = () => {
@@ -53,6 +55,23 @@ const TrackDetail = () => {
       pauseTrack();
     } else {
       playTrack(trackData);
+    }
+  };
+
+  // Get CTA labels based on language
+  const getCtaLabel = (type: 'texts' | 'videos' | 'photos') => {
+    if (!ctaSettings) return '';
+    const langCode = currentLanguage?.code?.toLowerCase();
+    
+    switch (type) {
+      case 'texts':
+        return langCode === 'en' ? ctaSettings.texts_label_en : ctaSettings.texts_label_es;
+      case 'videos':
+        return langCode === 'en' ? ctaSettings.videos_label_en : ctaSettings.videos_label_es;
+      case 'photos':
+        return langCode === 'en' ? ctaSettings.photos_label_en : ctaSettings.photos_label_es;
+      default:
+        return '';
     }
   };
 
@@ -95,6 +114,27 @@ const TrackDetail = () => {
                 )}
                 <span>{isCurrentTrack && isPlaying ? 'Pausar' : 'Reproducir Track'}</span>
               </Button>
+            </div>
+          )}
+
+          {/* CTA Buttons Section */}
+          {ctaSettings && (
+            <div className="flex flex-wrap justify-center gap-4 mt-8 animate-fade-in">
+              {ctaSettings.show_texts && trackContent?.long_text_content && (
+                <Button variant="outline" className="btn-secondary-hero">
+                  {getCtaLabel('texts') || 'Textos'}
+                </Button>
+              )}
+              {ctaSettings.show_videos && trackData.videos && trackData.videos.length > 0 && (
+                <Button variant="outline" className="btn-secondary-hero">
+                  {getCtaLabel('videos') || 'Videos'}
+                </Button>
+              )}
+              {ctaSettings.show_photos && trackData.track_featured_images && trackData.track_featured_images.length > 0 && (
+                <Button variant="outline" className="btn-secondary-hero">
+                  {getCtaLabel('photos') || 'Fotos'}
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -164,6 +204,35 @@ const TrackDetail = () => {
                       {video.video_contents?.[0]?.description}
                     </p>
                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Photos Section */}
+      {trackData.track_featured_images && trackData.track_featured_images.length > 0 && (
+        <section className="py-16 px-4 bg-muted/50">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-12">Galería</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {trackData.track_featured_images.map((image, index) => (
+                <div key={index} className="bg-card rounded-lg overflow-hidden shadow-lg">
+                  {image.image_url && (
+                    <img
+                      src={image.image_url}
+                      alt={currentLanguage?.code === 'en' ? image.caption_en : image.caption_es}
+                      className="w-full h-64 object-cover"
+                    />
+                  )}
+                  {(image.caption_es || image.caption_en) && (
+                    <div className="p-4">
+                      <p className="text-sm text-muted-foreground">
+                        {currentLanguage?.code === 'en' ? image.caption_en : image.caption_es}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
