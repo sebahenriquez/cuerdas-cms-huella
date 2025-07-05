@@ -219,9 +219,9 @@ const TrackDetail = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {trackData.track_featured_images.map((image, index) => (
                 <div key={index} className="bg-card rounded-lg overflow-hidden shadow-lg">
-                  {(image.image_url || image.media_files?.file_path) && (
+                  {image.image_url && (
                     <img
-                      src={image.image_url || image.media_files?.file_path}
+                      src={image.image_url}
                       alt={currentLanguage?.code === 'en' ? image.caption_en : image.caption_es}
                       className="w-full h-64 object-cover"
                     />
