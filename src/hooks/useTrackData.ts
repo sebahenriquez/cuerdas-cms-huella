@@ -99,6 +99,8 @@ export const useTrackData = (trackId: number) => {
     queryFn: async () => {
       if (trackId === 0) return null;
       
+      console.log('Fetching track data for ID:', trackId);
+      
       const { data, error } = await supabase
         .from('tracks')
         .select(`
@@ -111,7 +113,12 @@ export const useTrackData = (trackId: number) => {
         .eq('id', trackId)
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching track:', error);
+        throw error;
+      }
+      
+      console.log('Fetched track data:', data);
       return data;
     },
     enabled: trackId > 0
@@ -119,7 +126,9 @@ export const useTrackData = (trackId: number) => {
 
   useEffect(() => {
     if (existingTrack) {
-      console.log('Existing track data:', existingTrack);
+      console.log('Processing existing track data:', existingTrack);
+      console.log('CTA settings from DB:', existingTrack.track_cta_settings);
+      
       const transformedTrack = {
         ...existingTrack,
         videos: existingTrack.videos?.map(video => ({
@@ -135,7 +144,17 @@ export const useTrackData = (trackId: number) => {
           image_url: photo.image_url || '',
           order_position: photo.order_position || index + 1
         })) || [],
-        cta_settings: existingTrack.track_cta_settings?.[0] || {
+        cta_settings: existingTrack.track_cta_settings?.[0] ? {
+          show_texts: existingTrack.track_cta_settings[0].show_texts ?? true,
+          show_videos: existingTrack.track_cta_settings[0].show_videos ?? true,
+          show_photos: existingTrack.track_cta_settings[0].show_photos ?? true,
+          texts_label_es: existingTrack.track_cta_settings[0].texts_label_es || 'Textos',
+          texts_label_en: existingTrack.track_cta_settings[0].texts_label_en || 'Texts',
+          videos_label_es: existingTrack.track_cta_settings[0].videos_label_es || 'Videos',
+          videos_label_en: existingTrack.track_cta_settings[0].videos_label_en || 'Videos',
+          photos_label_es: existingTrack.track_cta_settings[0].photos_label_es || 'Fotos',
+          photos_label_en: existingTrack.track_cta_settings[0].photos_label_en || 'Photos'
+        } : {
           show_texts: true,
           show_videos: true,
           show_photos: true,
@@ -147,9 +166,13 @@ export const useTrackData = (trackId: number) => {
           photos_label_en: 'Photos'
         }
       };
+      
       console.log('Transformed track data:', transformedTrack);
+      console.log('Final CTA settings:', transformedTrack.cta_settings);
+      
       setTrackData(transformedTrack);
     } else if (languages.length > 0 && trackData.track_contents.length === 0) {
+      // Initialize new track with default content for all languages
       setTrackData(prev => ({
         ...prev,
         track_contents: languages.map(lang => ({

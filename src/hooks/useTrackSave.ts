@@ -23,25 +23,106 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
           })
           .eq('id', trackId);
 
-        if (trackError) throw trackError;
+        if (trackError) {
+          console.error('Error updating track:', trackError);
+          throw new Error(`Error al actualizar track: ${trackError.message}`);
+        }
 
         // Update or insert track contents
-        for (const content of data.track_contents || []) {
-          if (content.id) {
-            const { error } = await supabase
-              .from('track_contents')
-              .update(content)
-              .eq('id', content.id);
-            if (error) throw error;
-          } else {
-            const { error } = await supabase
-              .from('track_contents')
-              .insert({
-                ...content,
-                track_id: trackId
-              });
-            if (error) throw error;
+        if (data.track_contents) {
+          for (const content of data.track_contents) {
+            if (content.id) {
+              const { error } = await supabase
+                .from('track_contents')
+                .update({
+                  title: content.title,
+                  menu_title: content.menu_title,
+                  description: content.description,
+                  long_text_content: content.long_text_content,
+                  hero_image_url: content.hero_image_url
+                })
+                .eq('id', content.id);
+              if (error) {
+                console.error('Error updating track content:', error);
+                throw new Error(`Error al actualizar contenido: ${error.message}`);
+              }
+            } else {
+              const { error } = await supabase
+                .from('track_contents')
+                .insert({
+                  ...content,
+                  track_id: trackId
+                });
+              if (error) {
+                console.error('Error inserting track content:', error);
+                throw new Error(`Error al insertar contenido: ${error.message}`);
+              }
+            }
           }
+        }
+
+        // Handle CTA settings with proper UPSERT - THIS IS THE KEY FIX
+        if (data.cta_settings) {
+          console.log('Saving CTA settings:', data.cta_settings);
+          
+          // First, check if CTA settings already exist for this track
+          const { data: existingCTA, error: fetchError } = await supabase
+            .from('track_cta_settings')
+            .select('id')
+            .eq('track_id', trackId)
+            .maybeSingle();
+
+          if (fetchError) {
+            console.error('Error fetching existing CTA settings:', fetchError);
+            throw new Error(`Error al verificar configuración CTA: ${fetchError.message}`);
+          }
+
+          if (existingCTA) {
+            // Update existing CTA settings
+            const { error: updateError } = await supabase
+              .from('track_cta_settings')
+              .update({
+                show_texts: data.cta_settings.show_texts,
+                show_videos: data.cta_settings.show_videos,
+                show_photos: data.cta_settings.show_photos,
+                texts_label_es: data.cta_settings.texts_label_es,
+                texts_label_en: data.cta_settings.texts_label_en,
+                videos_label_es: data.cta_settings.videos_label_es,
+                videos_label_en: data.cta_settings.videos_label_en,
+                photos_label_es: data.cta_settings.photos_label_es,
+                photos_label_en: data.cta_settings.photos_label_en,
+                updated_at: new Date().toISOString()
+              })
+              .eq('track_id', trackId);
+
+            if (updateError) {
+              console.error('Error updating CTA settings:', updateError);
+              throw new Error(`Error al actualizar configuración CTA: ${updateError.message}`);
+            }
+          } else {
+            // Insert new CTA settings
+            const { error: insertError } = await supabase
+              .from('track_cta_settings')
+              .insert({
+                track_id: trackId,
+                show_texts: data.cta_settings.show_texts,
+                show_videos: data.cta_settings.show_videos,
+                show_photos: data.cta_settings.show_photos,
+                texts_label_es: data.cta_settings.texts_label_es,
+                texts_label_en: data.cta_settings.texts_label_en,
+                videos_label_es: data.cta_settings.videos_label_es,
+                videos_label_en: data.cta_settings.videos_label_en,
+                photos_label_es: data.cta_settings.photos_label_es,
+                photos_label_en: data.cta_settings.photos_label_en
+              });
+
+            if (insertError) {
+              console.error('Error inserting CTA settings:', insertError);
+              throw new Error(`Error al crear configuración CTA: ${insertError.message}`);
+            }
+          }
+
+          console.log('CTA settings saved successfully');
         }
 
         // Handle videos
@@ -53,13 +134,19 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
               .delete()
               .eq('track_id', trackId)
               .not('id', 'in', `(${currentVideoIds.join(',')})`);
-            if (error) throw error;
+            if (error) {
+              console.error('Error deleting old videos:', error);
+              throw new Error(`Error al eliminar videos: ${error.message}`);
+            }
           } else {
             const { error } = await supabase
               .from('videos')
               .delete()
               .eq('track_id', trackId);
-            if (error) throw error;
+            if (error) {
+              console.error('Error deleting all videos:', error);
+              throw new Error(`Error al eliminar todos los videos: ${error.message}`);
+            }
           }
 
           for (const video of data.videos) {
@@ -72,7 +159,10 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
                   order_position: video.order_position
                 })
                 .eq('id', video.id);
-              if (error) throw error;
+              if (error) {
+                console.error('Error updating video:', error);
+                throw new Error(`Error al actualizar video: ${error.message}`);
+              }
 
               for (const content of video.video_contents || []) {
                 if (content.id) {
@@ -83,7 +173,10 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
                       description: content.description
                     })
                     .eq('id', content.id);
-                  if (contentError) throw contentError;
+                  if (contentError) {
+                    console.error('Error updating video content:', contentError);
+                    throw new Error(`Error al actualizar contenido de video: ${contentError.message}`);
+                  }
                 } else {
                   const { error: contentError } = await supabase
                     .from('video_contents')
@@ -93,7 +186,10 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
                       title: content.title,
                       description: content.description
                     });
-                  if (contentError) throw contentError;
+                  if (contentError) {
+                    console.error('Error inserting video content:', contentError);
+                    throw new Error(`Error al insertar contenido de video: ${contentError.message}`);
+                  }
                 }
               }
             } else {
@@ -107,7 +203,10 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
                 })
                 .select()
                 .single();
-              if (error) throw error;
+              if (error) {
+                console.error('Error inserting video:', error);
+                throw new Error(`Error al insertar video: ${error.message}`);
+              }
 
               for (const content of video.video_contents || []) {
                 const { error: contentError } = await supabase
@@ -118,7 +217,10 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
                     title: content.title,
                     description: content.description
                   });
-                if (contentError) throw contentError;
+                if (contentError) {
+                  console.error('Error inserting video content:', contentError);
+                  throw new Error(`Error al insertar contenido de video: ${contentError.message}`);
+                }
               }
             }
           }
@@ -186,36 +288,8 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
             throw photoError;
           }
         }
-
-        // Handle CTA settings with proper UPSERT
-        if (data.cta_settings) {
-          try {
-            const { error } = await supabase
-              .from('track_cta_settings')
-              .upsert({
-                track_id: trackId,
-                show_texts: data.cta_settings.show_texts,
-                show_videos: data.cta_settings.show_videos,
-                show_photos: data.cta_settings.show_photos,
-                texts_label_es: data.cta_settings.texts_label_es,
-                texts_label_en: data.cta_settings.texts_label_en,
-                videos_label_es: data.cta_settings.videos_label_es,
-                videos_label_en: data.cta_settings.videos_label_en,
-                photos_label_es: data.cta_settings.photos_label_es,
-                photos_label_en: data.cta_settings.photos_label_en
-              }, {
-                onConflict: 'track_id'
-              });
-            if (error) {
-              console.error('Error saving CTA settings:', error);
-              throw new Error(`Error al guardar configuración CTA: ${error.message}`);
-            }
-          } catch (ctaError) {
-            console.error('CTA settings error:', ctaError);
-            throw ctaError;
-          }
-        }
       } else {
+        // Create new track
         const { data: newTrack, error: trackError } = await supabase
           .from('tracks')
           .insert({
@@ -226,8 +300,12 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
           .select()
           .single();
 
-        if (trackError) throw trackError;
+        if (trackError) {
+          console.error('Error creating track:', trackError);
+          throw new Error(`Error al crear track: ${trackError.message}`);
+        }
 
+        // Insert track contents for new track
         for (const content of data.track_contents || []) {
           const { error } = await supabase
             .from('track_contents')
@@ -235,14 +313,41 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
               ...content,
               track_id: newTrack.id
             });
-          if (error) throw error;
+          if (error) {
+            console.error('Error inserting track content:', error);
+            throw new Error(`Error al insertar contenido: ${error.message}`);
+          }
+        }
+
+        // Insert CTA settings for new track
+        if (data.cta_settings) {
+          const { error } = await supabase
+            .from('track_cta_settings')
+            .insert({
+              track_id: newTrack.id,
+              show_texts: data.cta_settings.show_texts,
+              show_videos: data.cta_settings.show_videos,
+              show_photos: data.cta_settings.show_photos,
+              texts_label_es: data.cta_settings.texts_label_es,
+              texts_label_en: data.cta_settings.texts_label_en,
+              videos_label_es: data.cta_settings.videos_label_es,
+              videos_label_en: data.cta_settings.videos_label_en,
+              photos_label_es: data.cta_settings.photos_label_es,
+              photos_label_en: data.cta_settings.photos_label_en
+            });
+          if (error) {
+            console.error('Error inserting CTA settings:', error);
+            throw new Error(`Error al crear configuración CTA: ${error.message}`);
+          }
         }
       }
     },
     onSuccess: () => {
+      // Invalidate all relevant queries to force refresh
       queryClient.invalidateQueries({ queryKey: ['admin-tracks-es'] });
       queryClient.invalidateQueries({ queryKey: ['admin-tracks-en'] });
       queryClient.invalidateQueries({ queryKey: ['track', trackId] });
+      
       toast({
         title: 'Track guardado',
         description: 'Los cambios han sido guardados correctamente.',

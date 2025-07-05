@@ -25,6 +25,13 @@ const CTASettingsForm: React.FC<CTASettingsFormProps> = ({
   ctaSettings,
   onCTASettingsChange
 }) => {
+  console.log('CTASettingsForm - Current settings:', ctaSettings);
+
+  const handleChange = (field: keyof TrackCTASettings, value: any) => {
+    console.log(`CTASettingsForm - Changing ${field} to:`, value);
+    onCTASettingsChange({ [field]: value });
+  };
+
   return (
     <div className="border-t pt-4">
       <Label className="text-sm font-medium mb-3 block">Configuración de Botones CTA</Label>
@@ -35,9 +42,8 @@ const CTASettingsForm: React.FC<CTASettingsFormProps> = ({
             id="show_texts"
             checked={ctaSettings?.show_texts || false}
             onCheckedChange={(checked) => {
-              onCTASettingsChange({
-                show_texts: checked as boolean
-              });
+              console.log('Texts checkbox changed to:', checked);
+              handleChange('show_texts', checked as boolean);
             }}
           />
           <Label htmlFor="show_texts" className="text-sm">Mostrar Textos</Label>
@@ -48,20 +54,12 @@ const CTASettingsForm: React.FC<CTASettingsFormProps> = ({
             <Input
               placeholder="Texto ES"
               value={ctaSettings?.texts_label_es || ''}
-              onChange={(e) => {
-                onCTASettingsChange({
-                  texts_label_es: e.target.value
-                });
-              }}
+              onChange={(e) => handleChange('texts_label_es', e.target.value)}
             />
             <Input
               placeholder="Texto EN"
               value={ctaSettings?.texts_label_en || ''}
-              onChange={(e) => {
-                onCTASettingsChange({
-                  texts_label_en: e.target.value
-                });
-              }}
+              onChange={(e) => handleChange('texts_label_en', e.target.value)}
             />
           </div>
         )}
@@ -71,9 +69,8 @@ const CTASettingsForm: React.FC<CTASettingsFormProps> = ({
             id="show_videos"
             checked={ctaSettings?.show_videos || false}
             onCheckedChange={(checked) => {
-              onCTASettingsChange({
-                show_videos: checked as boolean
-              });
+              console.log('Videos checkbox changed to:', checked);
+              handleChange('show_videos', checked as boolean);
             }}
           />
           <Label htmlFor="show_videos" className="text-sm">Mostrar Videos</Label>
@@ -84,20 +81,12 @@ const CTASettingsForm: React.FC<CTASettingsFormProps> = ({
             <Input
               placeholder="Videos ES"
               value={ctaSettings?.videos_label_es || ''}
-              onChange={(e) => {
-                onCTASettingsChange({
-                  videos_label_es: e.target.value
-                });
-              }}
+              onChange={(e) => handleChange('videos_label_es', e.target.value)}
             />
             <Input
               placeholder="Videos EN"
               value={ctaSettings?.videos_label_en || ''}
-              onChange={(e) => {
-                onCTASettingsChange({
-                  videos_label_en: e.target.value
-                });
-              }}
+              onChange={(e) => handleChange('videos_label_en', e.target.value)}
             />
           </div>
         )}
@@ -107,9 +96,8 @@ const CTASettingsForm: React.FC<CTASettingsFormProps> = ({
             id="show_photos"
             checked={ctaSettings?.show_photos || false}
             onCheckedChange={(checked) => {
-              onCTASettingsChange({
-                show_photos: checked as boolean
-              });
+              console.log('Photos checkbox changed to:', checked);
+              handleChange('show_photos', checked as boolean);
             }}
           />
           <Label htmlFor="show_photos" className="text-sm">Mostrar Fotos</Label>
@@ -120,20 +108,12 @@ const CTASettingsForm: React.FC<CTASettingsFormProps> = ({
             <Input
               placeholder="Fotos ES"
               value={ctaSettings?.photos_label_es || ''}
-              onChange={(e) => {
-                onCTASettingsChange({
-                  photos_label_es: e.target.value
-                });
-              }}
+              onChange={(e) => handleChange('photos_label_es', e.target.value)}
             />
             <Input
               placeholder="Fotos EN"
               value={ctaSettings?.photos_label_en || ''}
-              onChange={(e) => {
-                onCTASettingsChange({
-                  photos_label_en: e.target.value
-                });
-              }}
+              onChange={(e) => handleChange('photos_label_en', e.target.value)}
             />
           </div>
         )}
