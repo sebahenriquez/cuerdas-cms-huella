@@ -34,19 +34,25 @@ const PhotosSection: React.FC<PhotosSectionProps> = ({
           image_url: ''
         }
       ];
+      console.log('Adding new photo, photos now:', newPhotos);
       onPhotosChange(newPhotos);
     }
   };
 
   const removePhoto = (index: number) => {
-    const newPhotos = photos.filter((_, i) => i !== index);
+    const newPhotos = photos.filter((_, i) => i !== index).map((photo, idx) => ({
+      ...photo,
+      order_position: idx + 1
+    }));
+    console.log('Removing photo at index', index, 'photos now:', newPhotos);
     onPhotosChange(newPhotos);
   };
 
-  const updatePhoto = (index: number, field: keyof PhotoData, value: string) => {
+  const updatePhoto = (index: number, field: keyof PhotoData, value: string | number) => {
     const newPhotos = photos.map((p, i) => 
       i === index ? { ...p, [field]: value } : p
     );
+    console.log(`Updating photo ${index}, field ${field}:`, value, 'photos now:', newPhotos);
     onPhotosChange(newPhotos);
   };
 
@@ -90,15 +96,28 @@ const PhotosSection: React.FC<PhotosSectionProps> = ({
             <div className="grid grid-cols-2 gap-2">
               <Input
                 placeholder="Descripción (ES)"
-                value={photo.caption_es}
+                value={photo.caption_es || ''}
                 onChange={(e) => updatePhoto(index, 'caption_es', e.target.value)}
               />
               <Input
                 placeholder="Descripción (EN)"
-                value={photo.caption_en}
+                value={photo.caption_en || ''}
                 onChange={(e) => updatePhoto(index, 'caption_en', e.target.value)}
               />
             </div>
+            {photo.image_url && (
+              <div className="mt-2">
+                <img 
+                  src={photo.image_url} 
+                  alt="Preview" 
+                  className="w-full h-20 object-cover rounded"
+                  onError={(e) => {
+                    console.error('Error loading image:', photo.image_url);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
           </div>
         ))}
       </div>

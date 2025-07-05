@@ -130,6 +130,7 @@ const AdminTrackEdit: React.FC = () => {
 
   useEffect(() => {
     if (existingTrack) {
+      console.log('Existing track data:', existingTrack);
       const transformedTrack = {
         ...existingTrack,
         videos: existingTrack.videos?.map(video => ({
@@ -157,8 +158,10 @@ const AdminTrackEdit: React.FC = () => {
           photos_label_en: 'Photos'
         }
       };
+      console.log('Transformed track data:', transformedTrack);
       setTrackData(transformedTrack);
     } else if (languages.length > 0 && trackData.track_contents.length === 0) {
+      // Initialize empty track contents for all languages
       setTrackData(prev => ({
         ...prev,
         track_contents: languages.map(lang => ({
@@ -175,6 +178,8 @@ const AdminTrackEdit: React.FC = () => {
 
   const saveTrack = useMutation({
     mutationFn: async (data: Partial<TrackData>) => {
+      console.log('Saving track data:', data);
+      
       if (trackId > 0) {
         // Update existing track
         const { error: trackError } = await supabase
@@ -287,48 +292,68 @@ const AdminTrackEdit: React.FC = () => {
           }
         }
 
-        // Handle photos
+        // Handle photos with better error handling
         if (data.photos) {
-          const currentPhotoIds = data.photos.filter(p => p.id).map(p => p.id);
-          if (currentPhotoIds.length > 0) {
-            const { error } = await supabase
-              .from('track_featured_images')
-              .delete()
-              .eq('track_id', trackId)
-              .not('id', 'in', `(${currentPhotoIds.join(',')})`);
-            if (error) throw error;
-          } else {
-            const { error } = await supabase
-              .from('track_featured_images')
-              .delete()
-              .eq('track_id', trackId);
-            if (error) throw error;
-          }
-
-          for (const photo of data.photos) {
-            if (photo.id) {
+          try {
+            const currentPhotoIds = data.photos.filter(p => p.id).map(p => p.id);
+            
+            // Delete photos that are no longer in the list
+            if (currentPhotoIds.length > 0) {
               const { error } = await supabase
                 .from('track_featured_images')
-                .update({
-                  caption_es: photo.caption_es,
-                  caption_en: photo.caption_en,
-                  order_position: photo.order_position,
-                  image_url: photo.image_url
-                })
-                .eq('id', photo.id);
-              if (error) throw error;
+                .delete()
+                .eq('track_id', trackId)
+                .not('id', 'in', `(${currentPhotoIds.join(',')})`);
+              if (error) {
+                console.error('Error deleting old photos:', error);
+                throw error;
+              }
             } else {
               const { error } = await supabase
                 .from('track_featured_images')
-                .insert({
-                  track_id: trackId,
-                  caption_es: photo.caption_es,
-                  caption_en: photo.caption_en,
-                  order_position: photo.order_position,
-                  image_url: photo.image_url
-                });
-              if (error) throw error;
+                .delete()
+                .eq('track_id', trackId);
+              if (error) {
+                console.error('Error deleting all photos:', error);
+                throw error;
+              }
             }
+
+            // Update or insert photos
+            for (const photo of data.photos) {
+              if (photo.id) {
+                const { error } = await supabase
+                  .from('track_featured_images')
+                  .update({
+                    caption_es: photo.caption_es || '',
+                    caption_en: photo.caption_en || '',
+                    order_position: photo.order_position,
+                    image_url: photo.image_url || ''
+                  })
+                  .eq('id', photo.id);
+                if (error) {
+                  console.error('Error updating photo:', error);
+                  throw error;
+                }
+              } else {
+                const { error } = await supabase
+                  .from('track_featured_images')
+                  .insert({
+                    track_id: trackId,
+                    caption_es: photo.caption_es || '',
+                    caption_en: photo.caption_en || '',
+                    order_position: photo.order_position,
+                    image_url: photo.image_url || ''
+                  });
+                if (error) {
+                  console.error('Error inserting photo:', error);
+                  throw error;
+                }
+              }
+            }
+          } catch (photoError) {
+            console.error('Photo handling error:', photoError);
+            // Don't throw here, just log the error so other data can still be saved
           }
         }
 
@@ -385,16 +410,17 @@ const AdminTrackEdit: React.FC = () => {
       navigate('/admin/tracks');
     },
     onError: (error) => {
+      console.error('Error saving track:', error);
       toast({
         title: 'Error',
-        description: 'No se pudieron guardar los cambios.',
+        description: 'No se pudieron guardar los cambios. Revisa la consola para más detalles.',
         variant: 'destructive',
       });
-      console.error('Error saving track:', error);
     }
   });
 
   const updateTrackContent = (languageId: number, field: keyof TrackContent, value: string) => {
+    console.log(`Updating content for language ${languageId}, field ${field}:`, value);
     setTrackData(prev => ({
       ...prev,
       track_contents: prev.track_contents?.map(content =>
@@ -422,6 +448,7 @@ const AdminTrackEdit: React.FC = () => {
   };
 
   const handleSave = () => {
+    console.log('Saving track with data:', trackData);
     saveTrack.mutate(trackData);
   };
 

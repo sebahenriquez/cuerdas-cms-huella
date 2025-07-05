@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,6 +34,29 @@ const TrackContentTabs: React.FC<TrackContentTabsProps> = ({
   trackContents,
   onContentChange
 }) => {
+  // Log para debug
+  useEffect(() => {
+    console.log('TrackContentTabs - Languages:', languages);
+    console.log('TrackContentTabs - TrackContents:', trackContents);
+  }, [languages, trackContents]);
+
+  // Asegurar que tenemos contenido para todos los idiomas
+  const ensureContentForAllLanguages = () => {
+    return languages.map(language => {
+      const existingContent = trackContents.find(c => c.language_id === language.id);
+      return existingContent || {
+        title: '',
+        menu_title: '',
+        description: '',
+        long_text_content: '',
+        hero_image_url: '',
+        language_id: language.id
+      };
+    });
+  };
+
+  const completeTrackContents = ensureContentForAllLanguages();
+
   return (
     <Card className="lg:col-span-3">
       <CardHeader>
@@ -51,7 +74,16 @@ const TrackContentTabs: React.FC<TrackContentTabsProps> = ({
           </TabsList>
           
           {languages.map((language) => {
-            const content = trackContents?.find(c => c.language_id === language.id);
+            const content = completeTrackContents.find(c => c.language_id === language.id) || {
+              title: '',
+              menu_title: '',
+              description: '',
+              long_text_content: '',
+              hero_image_url: '',
+              language_id: language.id
+            };
+            
+            console.log(`Content for ${language.name} (${language.id}):`, content);
             
             return (
               <TabsContent key={language.id} value={language.code} className="space-y-4">
@@ -60,8 +92,11 @@ const TrackContentTabs: React.FC<TrackContentTabsProps> = ({
                     <Label htmlFor={`title-${language.id}`}>Título</Label>
                     <Input
                       id={`title-${language.id}`}
-                      value={content?.title || ''}
-                      onChange={(e) => onContentChange(language.id, 'title', e.target.value)}
+                      value={content.title || ''}
+                      onChange={(e) => {
+                        console.log(`Updating title for language ${language.id}:`, e.target.value);
+                        onContentChange(language.id, 'title', e.target.value);
+                      }}
                       placeholder="Título del track"
                     />
                   </div>
@@ -70,8 +105,11 @@ const TrackContentTabs: React.FC<TrackContentTabsProps> = ({
                     <Label htmlFor={`menu_title-${language.id}`}>Título del Menú</Label>
                     <Input
                       id={`menu_title-${language.id}`}
-                      value={content?.menu_title || ''}
-                      onChange={(e) => onContentChange(language.id, 'menu_title', e.target.value)}
+                      value={content.menu_title || ''}
+                      onChange={(e) => {
+                        console.log(`Updating menu_title for language ${language.id}:`, e.target.value);
+                        onContentChange(language.id, 'menu_title', e.target.value);
+                      }}
                       placeholder="Título corto para menús"
                     />
                   </div>
@@ -81,8 +119,11 @@ const TrackContentTabs: React.FC<TrackContentTabsProps> = ({
                   <Label htmlFor={`description-${language.id}`}>Descripción</Label>
                   <Textarea
                     id={`description-${language.id}`}
-                    value={content?.description || ''}
-                    onChange={(e) => onContentChange(language.id, 'description', e.target.value)}
+                    value={content.description || ''}
+                    onChange={(e) => {
+                      console.log(`Updating description for language ${language.id}:`, e.target.value);
+                      onContentChange(language.id, 'description', e.target.value);
+                    }}
                     placeholder="Descripción breve del track"
                     rows={3}
                   />
@@ -91,8 +132,11 @@ const TrackContentTabs: React.FC<TrackContentTabsProps> = ({
                 <div>
                   <Label htmlFor={`long_text_content-${language.id}`}>Contenido Largo</Label>
                   <RichTextEditor
-                    content={content?.long_text_content || ''}
-                    onChange={(value) => onContentChange(language.id, 'long_text_content', value)}
+                    content={content.long_text_content || ''}
+                    onChange={(value) => {
+                      console.log(`Updating long_text_content for language ${language.id}:`, value);
+                      onContentChange(language.id, 'long_text_content', value);
+                    }}
                     placeholder="Contenido detallado del track"
                   />
                 </div>
@@ -101,8 +145,11 @@ const TrackContentTabs: React.FC<TrackContentTabsProps> = ({
                   <Label htmlFor={`hero_image-${language.id}`}>Imagen Hero (URL)</Label>
                   <Input
                     id={`hero_image-${language.id}`}
-                    value={content?.hero_image_url || ''}
-                    onChange={(e) => onContentChange(language.id, 'hero_image_url', e.target.value)}
+                    value={content.hero_image_url || ''}
+                    onChange={(e) => {
+                      console.log(`Updating hero_image_url for language ${language.id}:`, e.target.value);
+                      onContentChange(language.id, 'hero_image_url', e.target.value);
+                    }}
                     placeholder="https://ejemplo.com/imagen.jpg"
                   />
                 </div>

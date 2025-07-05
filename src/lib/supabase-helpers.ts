@@ -87,23 +87,40 @@ export const getTracks = async (languageId: number) => {
 };
 
 export const getTrackWithContent = async (trackId: number, languageId: number) => {
+  console.log(`Getting track ${trackId} for language ${languageId}`);
+  
   const { data, error } = await supabase
     .from('tracks')
     .select(`
       *,
-      track_contents!inner(*),
-      track_quotes(*, language_id),
-      track_featured_images(*, media_files(*)),
+      track_contents(*),
+      track_quotes(*),
+      track_featured_images(*),
       track_cta_settings(*),
       videos(*, video_contents(*))
     `)
     .eq('id', trackId)
-    .eq('track_contents.language_id', languageId)
     .eq('status', 'published')
     .single();
   
-  if (error) throw error;
-  return data;
+  if (error) {
+    console.error('Error fetching track:', error);
+    throw error;
+  }
+
+  // Filter content by language
+  const filteredData = {
+    ...data,
+    track_contents: data.track_contents?.filter(content => content.language_id === languageId) || [],
+    track_quotes: data.track_quotes?.filter(quote => quote.language_id === languageId) || [],
+    videos: data.videos?.map(video => ({
+      ...video,
+      video_contents: video.video_contents?.filter(content => content.language_id === languageId) || []
+    })) || []
+  };
+  
+  console.log('Filtered track data:', filteredData);
+  return filteredData;
 };
 
 // Media helpers
