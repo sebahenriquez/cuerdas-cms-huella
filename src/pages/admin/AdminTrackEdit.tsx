@@ -70,6 +70,7 @@ interface TrackData {
   photos?: PhotoData[];
   track_featured_images?: any[];
   cta_settings?: TrackCTASettings;
+  track_cta_settings?: TrackCTASettings[];
 }
 
 const AdminTrackEdit: React.FC = () => {
@@ -146,7 +147,7 @@ const AdminTrackEdit: React.FC = () => {
           image_url: photo.image_url || '',
           order_position: photo.order_position || index + 1
         })) || [],
-        cta_settings: existingTrack.cta_settings?.[0] || {
+        cta_settings: existingTrack.track_cta_settings?.[0] || {
           show_texts: true,
           show_videos: true,
           show_photos: true,
@@ -306,7 +307,7 @@ const AdminTrackEdit: React.FC = () => {
                 .not('id', 'in', `(${currentPhotoIds.join(',')})`);
               if (error) {
                 console.error('Error deleting old photos:', error);
-                throw error;
+                throw new Error(`Error al eliminar fotos: ${error.message}`);
               }
             } else {
               const { error } = await supabase
@@ -315,7 +316,7 @@ const AdminTrackEdit: React.FC = () => {
                 .eq('track_id', trackId);
               if (error) {
                 console.error('Error deleting all photos:', error);
-                throw error;
+                throw new Error(`Error al eliminar todas las fotos: ${error.message}`);
               }
             }
 
@@ -333,7 +334,7 @@ const AdminTrackEdit: React.FC = () => {
                   .eq('id', photo.id);
                 if (error) {
                   console.error('Error updating photo:', error);
-                  throw error;
+                  throw new Error(`Error al actualizar foto: ${error.message}`);
                 }
               } else {
                 const { error } = await supabase
@@ -347,33 +348,41 @@ const AdminTrackEdit: React.FC = () => {
                   });
                 if (error) {
                   console.error('Error inserting photo:', error);
-                  throw error;
+                  throw new Error(`Error al insertar foto: ${error.message}`);
                 }
               }
             }
           } catch (photoError) {
             console.error('Photo handling error:', photoError);
-            // Don't throw here, just log the error so other data can still be saved
+            throw photoError;
           }
         }
 
         // Handle CTA settings
         if (data.cta_settings) {
-          const { error } = await supabase
-            .from('track_cta_settings')
-            .upsert({
-              track_id: trackId,
-              show_texts: data.cta_settings.show_texts,
-              show_videos: data.cta_settings.show_videos,
-              show_photos: data.cta_settings.show_photos,
-              texts_label_es: data.cta_settings.texts_label_es,
-              texts_label_en: data.cta_settings.texts_label_en,
-              videos_label_es: data.cta_settings.videos_label_es,
-              videos_label_en: data.cta_settings.videos_label_en,
-              photos_label_es: data.cta_settings.photos_label_es,
-              photos_label_en: data.cta_settings.photos_label_en
-            });
-          if (error) throw error;
+          try {
+            const { error } = await supabase
+              .from('track_cta_settings')
+              .upsert({
+                track_id: trackId,
+                show_texts: data.cta_settings.show_texts,
+                show_videos: data.cta_settings.show_videos,
+                show_photos: data.cta_settings.show_photos,
+                texts_label_es: data.cta_settings.texts_label_es,
+                texts_label_en: data.cta_settings.texts_label_en,
+                videos_label_es: data.cta_settings.videos_label_es,
+                videos_label_en: data.cta_settings.videos_label_en,
+                photos_label_es: data.cta_settings.photos_label_es,
+                photos_label_en: data.cta_settings.photos_label_en
+              });
+            if (error) {
+              console.error('Error saving CTA settings:', error);
+              throw new Error(`Error al guardar configuración CTA: ${error.message}`);
+            }
+          } catch (ctaError) {
+            console.error('CTA settings error:', ctaError);
+            throw ctaError;
+          }
         }
       } else {
         const { data: newTrack, error: trackError } = await supabase
@@ -409,11 +418,11 @@ const AdminTrackEdit: React.FC = () => {
       });
       navigate('/admin/tracks');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error saving track:', error);
       toast({
-        title: 'Error',
-        description: 'No se pudieron guardar los cambios. Revisa la consola para más detalles.',
+        title: 'Error al guardar',
+        description: error.message || 'No se pudieron guardar los cambios.',
         variant: 'destructive',
       });
     }
@@ -555,17 +564,21 @@ const AdminTrackEdit: React.FC = () => {
               }}
             />
 
-            <VideosSection
-              videos={trackData.videos || []}
-              languages={languages}
-              onVideosChange={(videos) => setTrackData(prev => ({ ...prev, videos }))}
-              onVideoContentChange={updateVideoContent}
-            />
+            {trackData.cta_settings?.show_videos && (
+              <VideosSection
+                videos={trackData.videos || []}
+                languages={languages}
+                onVideosChange={(videos) => setTrackData(prev => ({ ...prev, videos }))}
+                onVideoContentChange={updateVideoContent}
+              />
+            )}
 
-            <PhotosSection
-              photos={trackData.photos || []}
-              onPhotosChange={(photos) => setTrackData(prev => ({ ...prev, photos }))}
-            />
+            {trackData.cta_settings?.show_photos && (
+              <PhotosSection
+                photos={trackData.photos || []}
+                onPhotosChange={(photos) => setTrackData(prev => ({ ...prev, photos }))}
+              />
+            )}
           </CardContent>
         </Card>
 

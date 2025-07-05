@@ -141,7 +141,7 @@ const TrackDetail = () => {
       </section>
 
       {/* Content Section */}
-      {trackContent?.long_text_content && (
+      {ctaSettings?.show_texts && trackContent?.long_text_content && (
         <section className="py-16 px-4">
           <div className="max-w-4xl mx-auto">
             <div className="prose prose-lg max-w-none text-foreground">
@@ -178,7 +178,7 @@ const TrackDetail = () => {
       )}
 
       {/* Videos Section */}
-      {trackData.videos && trackData.videos.length > 0 && (
+      {ctaSettings?.show_videos && trackData.videos && trackData.videos.length > 0 && (
         <section className="py-16 px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-12">Videos</h2>
@@ -212,7 +212,7 @@ const TrackDetail = () => {
       )}
 
       {/* Photos Section */}
-      {trackData.track_featured_images && trackData.track_featured_images.length > 0 && (
+      {ctaSettings?.show_photos && trackData.track_featured_images && trackData.track_featured_images.length > 0 && (
         <section className="py-16 px-4 bg-muted/50">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-12">Galería</h2>
