@@ -146,7 +146,7 @@ const AdminTrackEdit: React.FC = () => {
           image_url: photo.image_url || '',
           order_position: photo.order_position || index + 1
         })) || [],
-        cta_settings: existingTrack.track_cta_settings?.[0] || {
+        cta_settings: existingTrack.cta_settings?.[0] || {
           show_texts: true,
           show_videos: true,
           show_photos: true,
