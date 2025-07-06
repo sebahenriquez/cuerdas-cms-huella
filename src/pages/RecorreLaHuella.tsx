@@ -83,7 +83,8 @@ const RecorreLaHuella = () => {
   // Get CTA settings for the current track with proper language handling
   const getCurrentTrackCTASettings = () => {
     const track = selectedTrack || tracks[0];
-    return track?.track_cta_settings?.[0];
+    // Fix: Access track_cta_settings correctly - it should be an array, get the first element
+    return track?.track_cta_settings?.[0] || track?.track_cta_settings;
   };
 
   const currentCTASettings = getCurrentTrackCTASettings();
@@ -100,6 +101,7 @@ const RecorreLaHuella = () => {
     return 'Comenzar el Recorrido'; // Fallback
   };
 
+  console.log('Current Track:', selectedTrack || tracks[0]);
   console.log('Current CTA Settings:', currentCTASettings);
   console.log('Current Language:', currentLanguage);
   console.log('CTA Labels:', ctaLabels);

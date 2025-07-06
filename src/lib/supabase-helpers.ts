@@ -68,6 +68,8 @@ export const getPageBySlug = async (slug: string, languageId: number) => {
 
 // Track helpers
 export const getTracks = async (languageId: number) => {
+  console.log(`Getting tracks for language ${languageId}`);
+  
   const { data, error } = await supabase
     .from('tracks')
     .select(`
@@ -81,7 +83,12 @@ export const getTracks = async (languageId: number) => {
     .eq('status', 'published')
     .order('order_position');
   
-  if (error) throw error;
+  if (error) {
+    console.error('Error fetching tracks:', error);
+    throw error;
+  }
+  
+  console.log('Fetched tracks data:', data);
   return data;
 };
 
@@ -244,19 +251,26 @@ export const getTrackCTASettings = async (trackId: number) => {
 
 // Helper function to get track CTA labels in the correct language
 export const getTrackCTALabels = (ctaSettings: any, currentLanguage: any) => {
+  console.log('getTrackCTALabels called with:', { ctaSettings, currentLanguage });
+  
+  // Provide default values if ctaSettings or currentLanguage are missing
   if (!ctaSettings || !currentLanguage) {
+    console.log('Missing ctaSettings or currentLanguage, using defaults');
     return {
-      textsLabel: 'Textos',
+      textsLabel: currentLanguage?.code === 'en' ? 'Texts' : 'Textos',
       videosLabel: 'Videos', 
-      photosLabel: 'Fotos'
+      photosLabel: currentLanguage?.code === 'en' ? 'Photos' : 'Fotos'
     };
   }
 
   const isEnglish = currentLanguage.code === 'en';
   
-  return {
+  const labels = {
     textsLabel: isEnglish ? (ctaSettings.texts_label_en || 'Texts') : (ctaSettings.texts_label_es || 'Textos'),
     videosLabel: isEnglish ? (ctaSettings.videos_label_en || 'Videos') : (ctaSettings.videos_label_es || 'Videos'),
     photosLabel: isEnglish ? (ctaSettings.photos_label_en || 'Photos') : (ctaSettings.photos_label_es || 'Fotos')
   };
+  
+  console.log('Returning labels:', labels);
+  return labels;
 };
