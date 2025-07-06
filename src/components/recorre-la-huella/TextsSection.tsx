@@ -8,9 +8,14 @@ interface TrackContent {
 interface TextsSectionProps {
   currentTrackContent: TrackContent | null;
   sectionTitle?: string;
+  showTitle?: boolean;
 }
 
-const TextsSection: React.FC<TextsSectionProps> = ({ currentTrackContent, sectionTitle }) => {
+const TextsSection: React.FC<TextsSectionProps> = ({ 
+  currentTrackContent, 
+  sectionTitle,
+  showTitle = true 
+}) => {
   // Función mejorada para procesar el contenido HTML y crear párrafos
   const processTextContent = (content: string) => {
     if (!content) return '';
@@ -78,9 +83,11 @@ const TextsSection: React.FC<TextsSectionProps> = ({ currentTrackContent, sectio
     <section id="textos" className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <div className="w-full max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground">
-            {sectionTitle || currentTrackContent?.menu_title || 'Sobre este Track'}
-          </h2>
+          {showTitle && (
+            <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground">
+              {sectionTitle || currentTrackContent?.menu_title || 'Sobre este Track'}
+            </h2>
+          )}
           <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-lg border border-border/30">
             <div 
               className="text-content-formatted text-foreground"

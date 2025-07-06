@@ -9,9 +9,14 @@ interface TrackContent {
 
 interface HeroSectionProps {
   currentTrackContent: TrackContent | null;
+  ctaLabels?: {
+    textsLabel: string;
+    videosLabel: string;
+    photosLabel: string;
+  };
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ currentTrackContent }) => {
+const HeroSection: React.FC<HeroSectionProps> = ({ currentTrackContent, ctaLabels }) => {
   return (
     <section 
       className="hero-section hero-bg-image"
@@ -36,19 +41,19 @@ const HeroSection: React.FC<HeroSectionProps> = ({ currentTrackContent }) => {
             href="#textos"
             className="bg-primary/20 backdrop-blur-sm text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-primary/30 transition-all duration-300 transform hover:scale-105"
           >
-            Textos
+            {ctaLabels?.textsLabel || 'Textos'}
           </a>
           <a
             href="#videos"
             className="bg-primary/20 backdrop-blur-sm text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-primary/30 transition-all duration-300 transform hover:scale-105"
           >
-            Videos
+            {ctaLabels?.videosLabel || 'Videos'}
           </a>
           <a
             href="#fotos"
             className="bg-primary/20 backdrop-blur-sm text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-primary/30 transition-all duration-300 transform hover:scale-105"
           >
-            Fotos
+            {ctaLabels?.photosLabel || 'Fotos'}
           </a>
         </div>
       </div>

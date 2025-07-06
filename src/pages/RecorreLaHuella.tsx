@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
@@ -154,14 +153,17 @@ const RecorreLaHuella = () => {
         onIntroClick={() => setShowIntro(true)}
       />
 
-      {/* Hero Section */}
-      <HeroSection currentTrackContent={currentTrackContent} />
+      {/* Hero Section - ahora con las etiquetas CTA traducidas */}
+      <HeroSection 
+        currentTrackContent={currentTrackContent} 
+        ctaLabels={ctaLabels}
+      />
 
-      {/* Textos Section - usando las etiquetas correctas según el idioma */}
+      {/* Textos Section - removemos el título pero mantenemos la sección */}
       {currentCTASettings?.show_texts && (
         <TextsSection 
           currentTrackContent={currentTrackContent}
-          sectionTitle={ctaLabels.textsLabel}
+          showTitle={false}
         />
       )}
 
