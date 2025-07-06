@@ -14,6 +14,24 @@ interface IntroSectionProps {
 }
 
 const IntroSection: React.FC<IntroSectionProps> = ({ introContent, onStartJourney }) => {
+  // Función para procesar el contenido y respetar saltos de línea
+  const processContent = (content: string) => {
+    if (!content) return '';
+    
+    // Dividir por saltos de línea dobles y crear párrafos
+    const paragraphs = content.split(/\n\s*\n/);
+    
+    return paragraphs
+      .map(paragraph => paragraph.trim())
+      .filter(paragraph => paragraph.length > 0)
+      .map(paragraph => `<p>${paragraph}</p>`)
+      .join('');
+  };
+
+  const processedContent = introContent?.content 
+    ? processContent(introContent.content)
+    : '<p>Sumérgete en un recorrido interactivo por los diferentes tracks que componen este álbum musical.</p>';
+
   return (
     <section 
       className="hero-section hero-bg-image"
@@ -30,9 +48,9 @@ const IntroSection: React.FC<IntroSectionProps> = ({ introContent, onStartJourne
         </h1>
         
         <div 
-          className="text-lg md:text-xl max-w-4xl mx-auto mb-12 animate-fade-in"
+          className="text-lg md:text-xl max-w-4xl mx-auto mb-12 animate-fade-in prose prose-lg prose-p:mb-6 prose-p:leading-relaxed"
           dangerouslySetInnerHTML={{ 
-            __html: introContent?.content || '<p>Sumérgete en un recorrido interactivo por los diferentes tracks que componen este álbum musical.</p>'
+            __html: processedContent
           }}
         />
         

@@ -24,7 +24,7 @@ const TrackSelector: React.FC<TrackSelectorProps> = ({
   return (
     <nav className="track-nav">
       <div className="container mx-auto px-4">
-        <div className="flex overflow-x-auto py-2 space-x-1">
+        <div className="flex overflow-x-auto py-2 space-x-1 justify-center">
           {/* Botón de Introducción */}
           {showIntroButton && (
             <button

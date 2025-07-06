@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -39,4 +40,25 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Mejoras para el espaciado de párrafos en contenido dinámico */
+.prose p + p {
+  margin-top: 1.5em;
+}
+
+.prose p {
+  margin-bottom: 1em;
+}
+
+/* Centrado del menú de navegación */
+.track-nav .container > div {
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .track-nav .container > div {
+    justify-content: flex-start;
+  }
 }
