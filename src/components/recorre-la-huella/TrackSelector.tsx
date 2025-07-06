@@ -49,7 +49,13 @@ const TrackSelector: React.FC<TrackSelectorProps> = ({
                 onClick={() => onTrackSelect(track)}
                 className={`track-nav-item ${isActive ? 'active' : ''}`}
               >
-                {trackContent?.menu_title || `Track ${track.order_position}`}
+                {isActive ? (
+                  // Mostrar título completo solo si está activo
+                  trackContent?.menu_title || `Track ${track.order_position}`
+                ) : (
+                  // Mostrar solo el número si no está activo
+                  track.order_position.toString()
+                )}
               </button>
             );
           })}
