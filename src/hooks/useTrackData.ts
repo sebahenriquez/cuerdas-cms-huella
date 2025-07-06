@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getLanguages } from '@/lib/supabase-helpers';
 import { useSupabaseQuery } from './useSupabaseQuery';
@@ -90,104 +89,78 @@ export const useTrackData = (trackId: number) => {
     }
   });
 
-  const { data: languages = [] } = useSupabaseQuery({
+  // Fetch languages
+  const { data: languages = [], isLoading: languagesLoading, error: languagesError } = useSupabaseQuery({
     queryKey: ['languages'],
     queryFn: async () => {
       console.log('Fetching languages...');
-      try {
-        const languages = await getLanguages();
-        console.log('Languages fetched successfully:', languages);
-        return languages;
-      } catch (error) {
-        console.error('Error fetching languages:', error);
-        throw error;
-      }
+      const languages = await getLanguages();
+      console.log('Languages fetched:', languages);
+      return languages;
     }
   });
 
-  const { data: existingTrack, isLoading, error } = useSupabaseQuery({
+  // Fetch track data only if trackId > 0
+  const { data: existingTrack, isLoading: trackLoading, error: trackError } = useSupabaseQuery({
     queryKey: ['track', trackId],
     queryFn: async () => {
-      if (trackId === 0) return null;
-      
       console.log('Fetching track data for ID:', trackId);
       
-      try {
-        const { data, error } = await supabase
-          .from('tracks')
-          .select(`
-            *,
-            track_contents(*),
-            videos(*, video_contents(*)),
-            track_featured_images(*),
-            track_cta_settings(*)
-          `)
-          .eq('id', trackId)
-          .single();
-        
-        if (error) {
-          console.error('Supabase error fetching track:', error);
-          throw new Error(`Error fetching track: ${error.message}`);
-        }
-        
-        console.log('Track data fetched successfully:', data);
-        return data;
-      } catch (error) {
-        console.error('Error in track fetch query:', error);
-        throw error;
+      const { data, error } = await supabase
+        .from('tracks')
+        .select(`
+          *,
+          track_contents(*),
+          videos(*, video_contents(*)),
+          track_featured_images(*),
+          track_cta_settings(*)
+        `)
+        .eq('id', trackId)
+        .single();
+      
+      if (error) {
+        console.error('Supabase error fetching track:', error);
+        throw new Error(`Error fetching track: ${error.message}`);
       }
+      
+      console.log('Track data fetched:', data);
+      return data;
     },
     enabled: trackId > 0
   });
 
-  // Log any query errors
-  useEffect(() => {
-    if (error) {
-      console.error('Track data query error:', error);
-    }
-  }, [error]);
+  // Combine loading states
+  const isLoading = languagesLoading || trackLoading;
+  const error = languagesError || trackError;
 
-  // Función para asegurar contenido para todos los idiomas
+  // Function to ensure content for all languages
   const ensureContentForAllLanguages = (existingContents: TrackContent[], languages: Language[]) => {
-    console.log('Ensuring content for all languages:', { existingContents, languages });
+    console.log('Ensuring content for all languages');
     
-    const contentMap = new Map();
-    
-    // Mapear contenido existente por language_id
-    existingContents.forEach(content => {
-      contentMap.set(content.language_id, content);
-    });
-    
-    // Asegurar que hay contenido para cada idioma
-    const completeContents = languages.map(language => {
-      const existingContent = contentMap.get(language.id);
+    return languages.map(language => {
+      const existingContent = existingContents.find(content => content.language_id === language.id);
       if (existingContent) {
-        console.log(`Found existing content for language ${language.id}:`, existingContent);
         return existingContent;
-      } else {
-        console.log(`Creating empty content for language ${language.id}`);
-        return {
-          title: '',
-          menu_title: '',
-          description: '',
-          long_text_content: '',
-          hero_image_url: '',
-          language_id: language.id
-        };
       }
+      
+      return {
+        title: '',
+        menu_title: '',
+        description: '',
+        long_text_content: '',
+        hero_image_url: '',
+        language_id: language.id
+      };
     });
-    
-    console.log('Complete contents result:', completeContents);
-    return completeContents;
   };
 
+  // Update track data when dependencies change
   useEffect(() => {
-    console.log('useEffect triggered with:', { existingTrack, languages });
-    
-    if (existingTrack && languages.length > 0) {
-      console.log('Processing existing track data:', existingTrack);
+    if (languages.length === 0) return;
+
+    if (existingTrack) {
+      console.log('Processing existing track data');
       
-      // Asegurar contenido para todos los idiomas
       const completeTrackContents = ensureContentForAllLanguages(
         existingTrack.track_contents || [], 
         languages
@@ -209,17 +182,7 @@ export const useTrackData = (trackId: number) => {
           image_url: photo.image_url || '',
           order_position: photo.order_position || index + 1
         })) || [],
-        cta_settings: existingTrack.track_cta_settings?.[0] ? {
-          show_texts: existingTrack.track_cta_settings[0].show_texts ?? true,
-          show_videos: existingTrack.track_cta_settings[0].show_videos ?? true,
-          show_photos: existingTrack.track_cta_settings[0].show_photos ?? true,
-          texts_label_es: existingTrack.track_cta_settings[0].texts_label_es || 'Textos',
-          texts_label_en: existingTrack.track_cta_settings[0].texts_label_en || 'Texts',
-          videos_label_es: existingTrack.track_cta_settings[0].videos_label_es || 'Videos',
-          videos_label_en: existingTrack.track_cta_settings[0].videos_label_en || 'Videos',
-          photos_label_es: existingTrack.track_cta_settings[0].photos_label_es || 'Fotos',
-          photos_label_en: existingTrack.track_cta_settings[0].photos_label_en || 'Photos'
-        } : {
+        cta_settings: existingTrack.track_cta_settings?.[0] || {
           show_texts: true,
           show_videos: true,
           show_photos: true,
@@ -232,10 +195,10 @@ export const useTrackData = (trackId: number) => {
         }
       };
       
-      console.log('Final transformed track data:', transformedTrack);
+      console.log('Setting transformed track data:', transformedTrack);
       setTrackData(transformedTrack);
-    } else if (!existingTrack && languages.length > 0 && trackId > 0) {
-      console.log('Initializing new track with empty content for all languages');
+    } else if (trackId === 0) {
+      console.log('Initializing new track');
       const emptyContents = languages.map(lang => ({
         title: '',
         menu_title: '',
@@ -256,15 +219,15 @@ export const useTrackData = (trackId: number) => {
     console.log(`Updating content for language ${languageId}, field ${field}:`, value);
     
     setTrackData(prev => {
-      const updatedContents = prev.track_contents?.map(content =>
-        content.language_id === languageId
-          ? { ...content, [field]: value }
-          : content
-      ) || [];
+      const updatedContents = [...(prev.track_contents || [])];
+      const contentIndex = updatedContents.findIndex(c => c.language_id === languageId);
       
-      // Si no existe contenido para este idioma, crearlo
-      if (!updatedContents.find(c => c.language_id === languageId)) {
-        console.log(`Creating new content entry for language ${languageId}`);
+      if (contentIndex >= 0) {
+        updatedContents[contentIndex] = {
+          ...updatedContents[contentIndex],
+          [field]: value
+        };
+      } else {
         updatedContents.push({
           title: '',
           menu_title: '',
@@ -275,8 +238,6 @@ export const useTrackData = (trackId: number) => {
           [field]: value
         });
       }
-      
-      console.log('Updated track contents:', updatedContents);
       
       return {
         ...prev,
