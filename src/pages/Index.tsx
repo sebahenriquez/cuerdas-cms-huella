@@ -34,19 +34,19 @@ const Index = () => {
 
   const pageContent = homeData?.page_contents?.[0];
   
-  // Get CTA button texts - simplified approach
+  // Get CTA button texts correctly from the database
   let exploreButtonText = 'Recorré la Huella';
   let listenButtonText = 'Escuchar el Álbum';
   
   if (ctaButtons && Array.isArray(ctaButtons)) {
-    const exploreButton = ctaButtons.find((b: any) => b?.key === 'explore_trail');
-    const listenButton = ctaButtons.find((b: any) => b?.key === 'listen_album');
+    const exploreButton = ctaButtons.find((b: any) => b?.key === 'explore_tracks');
+    const listenButton = ctaButtons.find((b: any) => b?.key === 'listen_tracks');
     
-    if (exploreButton?.cta_button_contents?.[0]?.text) {
-      exploreButtonText = exploreButton.cta_button_contents[0].text;
+    if (exploreButton?.cta_button_contents?.[0]?.label) {
+      exploreButtonText = exploreButton.cta_button_contents[0].label;
     }
-    if (listenButton?.cta_button_contents?.[0]?.text) {
-      listenButtonText = listenButton.cta_button_contents[0].text;
+    if (listenButton?.cta_button_contents?.[0]?.label) {
+      listenButtonText = listenButton.cta_button_contents[0].label;
     }
   }
 
