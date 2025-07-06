@@ -40,13 +40,38 @@ export const getNavigation = async (languageId: number) => {
     .from('navigation_items')
     .select(`
       *,
-      navigation_contents!inner(title)
+      navigation_contents!inner(
+        title,
+        language_id
+      )
     `)
     .eq('navigation_contents.language_id', languageId)
     .order('order_position');
-  
-  if (error) throw error;
-  return data;
+
+  if (error) {
+    console.error('Error fetching navigation:', error);
+    return [];
+  }
+
+  // Filter out specific items based on language
+  const filteredData = data?.filter(item => {
+    const isSpanish = languageId === 1; // Assuming Spanish has ID 1
+    const isEnglish = languageId === 2; // Assuming English has ID 2
+    
+    // Remove "Contacto", "Ficha Técnica", and "Prensa" from Spanish
+    if (isSpanish && (item.url === '/contacto' || item.url === '/ficha-tecnica' || item.url === '/prensa')) {
+      return false;
+    }
+    
+    // Remove "Contact" from English
+    if (isEnglish && item.url === '/contacto') {
+      return false;
+    }
+    
+    return true;
+  });
+
+  return filteredData || [];
 };
 
 // Page helpers

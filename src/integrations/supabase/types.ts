@@ -610,6 +610,44 @@ export type Database = {
         }
         Relationships: []
       }
+      press_kit_settings: {
+        Row: {
+          button_label: string | null
+          created_at: string | null
+          description: string | null
+          download_url: string | null
+          id: number
+          language_id: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          button_label?: string | null
+          created_at?: string | null
+          description?: string | null
+          download_url?: string | null
+          id?: number
+          language_id?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          button_label?: string | null
+          created_at?: string | null
+          description?: string | null
+          download_url?: string | null
+          id?: number
+          language_id?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "press_kit_settings_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_settings: {
         Row: {
           created_at: string | null
