@@ -124,13 +124,57 @@ export const useTrackData = (trackId: number) => {
     enabled: trackId > 0
   });
 
+  // Función para asegurar contenido para todos los idiomas
+  const ensureContentForAllLanguages = (existingContents: TrackContent[], languages: Language[]) => {
+    console.log('Ensuring content for all languages:', { existingContents, languages });
+    
+    const contentMap = new Map();
+    
+    // Mapear contenido existente por language_id
+    existingContents.forEach(content => {
+      contentMap.set(content.language_id, content);
+    });
+    
+    // Asegurar que hay contenido para cada idioma
+    const completeContents = languages.map(language => {
+      const existingContent = contentMap.get(language.id);
+      if (existingContent) {
+        console.log(`Found existing content for language ${language.id}:`, existingContent);
+        return existingContent;
+      } else {
+        console.log(`Creating empty content for language ${language.id}`);
+        return {
+          title: '',
+          menu_title: '',
+          description: '',
+          long_text_content: '',
+          hero_image_url: '',
+          language_id: language.id
+        };
+      }
+    });
+    
+    console.log('Complete contents result:', completeContents);
+    return completeContents;
+  };
+
   useEffect(() => {
-    if (existingTrack) {
+    console.log('useEffect triggered with:', { existingTrack, languages });
+    
+    if (existingTrack && languages.length > 0) {
       console.log('Processing existing track data:', existingTrack);
-      console.log('CTA settings from DB:', existingTrack.track_cta_settings);
+      console.log('Available languages:', languages);
+      console.log('Existing track contents:', existingTrack.track_contents);
+      
+      // Asegurar contenido para todos los idiomas
+      const completeTrackContents = ensureContentForAllLanguages(
+        existingTrack.track_contents || [], 
+        languages
+      );
       
       const transformedTrack = {
         ...existingTrack,
+        track_contents: completeTrackContents,
         videos: existingTrack.videos?.map(video => ({
           ...video,
           video_contents: video.video_contents || languages.map(lang => ({
@@ -167,36 +211,58 @@ export const useTrackData = (trackId: number) => {
         }
       };
       
-      console.log('Transformed track data:', transformedTrack);
-      console.log('Final CTA settings:', transformedTrack.cta_settings);
-      
+      console.log('Final transformed track data:', transformedTrack);
       setTrackData(transformedTrack);
-    } else if (languages.length > 0 && trackData.track_contents.length === 0) {
-      // Initialize new track with default content for all languages
+    } else if (!existingTrack && languages.length > 0 && trackId > 0) {
+      // Para tracks nuevos, inicializar con contenido vacío para todos los idiomas
+      console.log('Initializing new track with empty content for all languages');
+      const emptyContents = languages.map(lang => ({
+        title: '',
+        menu_title: '',
+        description: '',
+        long_text_content: '',
+        hero_image_url: '',
+        language_id: lang.id
+      }));
+      
       setTrackData(prev => ({
         ...prev,
-        track_contents: languages.map(lang => ({
+        track_contents: emptyContents
+      }));
+    }
+  }, [existingTrack, languages, trackId]);
+
+  const updateTrackContent = (languageId: number, field: keyof TrackContent, value: string) => {
+    console.log(`Updating content for language ${languageId}, field ${field}:`, value);
+    
+    setTrackData(prev => {
+      const updatedContents = prev.track_contents?.map(content =>
+        content.language_id === languageId
+          ? { ...content, [field]: value }
+          : content
+      ) || [];
+      
+      // Si no existe contenido para este idioma, crearlo
+      if (!updatedContents.find(c => c.language_id === languageId)) {
+        console.log(`Creating new content entry for language ${languageId}`);
+        updatedContents.push({
           title: '',
           menu_title: '',
           description: '',
           long_text_content: '',
           hero_image_url: '',
-          language_id: lang.id
-        }))
-      }));
-    }
-  }, [existingTrack, languages]);
-
-  const updateTrackContent = (languageId: number, field: keyof TrackContent, value: string) => {
-    console.log(`Updating content for language ${languageId}, field ${field}:`, value);
-    setTrackData(prev => ({
-      ...prev,
-      track_contents: prev.track_contents?.map(content =>
-        content.language_id === languageId
-          ? { ...content, [field]: value }
-          : content
-      ) || []
-    }));
+          language_id: languageId,
+          [field]: value
+        });
+      }
+      
+      console.log('Updated track contents:', updatedContents);
+      
+      return {
+        ...prev,
+        track_contents: updatedContents
+      };
+    });
   };
 
   const updateVideoContent = (videoIndex: number, languageId: number, field: keyof VideoContent, value: string) => {

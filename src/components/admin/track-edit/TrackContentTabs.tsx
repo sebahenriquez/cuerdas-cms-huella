@@ -44,7 +44,13 @@ const TrackContentTabs: React.FC<TrackContentTabsProps> = ({
   const ensureContentForAllLanguages = () => {
     return languages.map(language => {
       const existingContent = trackContents.find(c => c.language_id === language.id);
-      return existingContent || {
+      if (existingContent) {
+        return existingContent;
+      }
+      
+      // Crear contenido vacío si no existe
+      console.log(`Creating empty content for language ${language.name} (${language.id})`);
+      return {
         title: '',
         menu_title: '',
         description: '',
@@ -56,6 +62,18 @@ const TrackContentTabs: React.FC<TrackContentTabsProps> = ({
   };
 
   const completeTrackContents = ensureContentForAllLanguages();
+
+  if (languages.length === 0) {
+    return (
+      <Card className="lg:col-span-3">
+        <CardContent className="p-6">
+          <div className="text-center">
+            <p>Cargando idiomas...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="lg:col-span-3">
