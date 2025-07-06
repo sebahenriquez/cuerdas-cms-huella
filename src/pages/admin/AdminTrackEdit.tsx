@@ -8,8 +8,6 @@ import { useTrackSave } from '@/hooks/useTrackSave';
 import TrackHeader from '@/components/admin/track-edit/TrackHeader';
 import TrackSidebar from '@/components/admin/track-edit/TrackSidebar';
 import TrackContentTabs from '@/components/admin/track-edit/TrackContentTabs';
-import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
 
 const AdminTrackEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,7 +21,6 @@ const AdminTrackEdit: React.FC = () => {
     setTrackData,
     languages,
     isLoading,
-    error,
     updateTrackContent,
     updateVideoContent
   } = useTrackData(trackId);
@@ -64,21 +61,6 @@ const AdminTrackEdit: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <span className="ml-2">Cargando track...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <div className="text-red-600">
-          Error al cargar el track: {error.message || 'Error desconocido'}
-        </div>
-        <Button onClick={() => window.location.reload()} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Recargar página
-        </Button>
       </div>
     );
   }

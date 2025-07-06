@@ -2,201 +2,131 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Language helpers
 export const getDefaultLanguage = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('languages')
-      .select('*')
-      .eq('is_default', true)
-      .single();
-    
-    if (error) {
-      console.error('Error fetching default language:', error);
-      throw error;
-    }
-    return data;
-  } catch (error) {
-    console.error('Error in getDefaultLanguage:', error);
-    throw error;
-  }
+  const { data, error } = await supabase
+    .from('languages')
+    .select('*')
+    .eq('is_default', true)
+    .single();
+  
+  if (error) throw error;
+  return data;
 };
 
 export const getLanguages = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('languages')
-      .select('*')
-      .order('is_default', { ascending: false });
-    
-    if (error) {
-      console.error('Error fetching languages:', error);
-      throw error;
-    }
-    return data || [];
-  } catch (error) {
-    console.error('Error in getLanguages:', error);
-    throw error;
-  }
+  const { data, error } = await supabase
+    .from('languages')
+    .select('*')
+    .order('is_default', { ascending: false });
+  
+  if (error) throw error;
+  return data;
 };
 
 // Theme helpers
 export const getThemeSettings = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('theme_settings')
-      .select('*')
-      .limit(1)
-      .single();
-    
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error fetching theme settings:', error);
-      throw error;
-    }
-    return data;
-  } catch (error) {
-    console.error('Error in getThemeSettings:', error);
-    throw error;
-  }
+  const { data, error } = await supabase
+    .from('theme_settings')
+    .select('*')
+    .limit(1)
+    .single();
+  
+  if (error) throw error;
+  return data;
 };
 
 // Navigation helpers
 export const getNavigation = async (languageId: number) => {
-  try {
-    const { data, error } = await supabase
-      .from('navigation_items')
-      .select(`
-        *,
-        navigation_contents!inner(
-          title,
-          language_id
-        )
-      `)
-      .eq('navigation_contents.language_id', languageId)
-      .order('order_position');
-
-    if (error) {
-      console.error('Error fetching navigation:', error);
-      return [];
-    }
-
-    // Filter out specific items based on language
-    const filteredData = data?.filter(item => {
-      const isSpanish = languageId === 1;
-      const isEnglish = languageId === 2;
-      
-      if (isSpanish && (item.url === '/contacto' || item.url === '/ficha-tecnica' || item.url === '/prensa')) {
-        return false;
-      }
-      
-      if (isEnglish && item.url === '/contacto') {
-        return false;
-      }
-      
-      return true;
-    });
-
-    return filteredData || [];
-  } catch (error) {
-    console.error('Error in getNavigation:', error);
-    return [];
-  }
+  const { data, error } = await supabase
+    .from('navigation_items')
+    .select(`
+      *,
+      navigation_contents!inner(title)
+    `)
+    .eq('navigation_contents.language_id', languageId)
+    .order('order_position');
+  
+  if (error) throw error;
+  return data;
 };
 
 // Page helpers
 export const getPageBySlug = async (slug: string, languageId: number) => {
-  try {
-    const { data, error } = await supabase
-      .from('pages')
-      .select(`
-        *,
-        page_contents!inner(*)
-      `)
-      .eq('slug', slug)
-      .eq('page_contents.language_id', languageId)
-      .eq('status', 'published')
-      .single();
-    
-    if (error) {
-      console.error('Error fetching page by slug:', error);
-      throw error;
-    }
-    return data;
-  } catch (error) {
-    console.error('Error in getPageBySlug:', error);
-    throw error;
-  }
+  const { data, error } = await supabase
+    .from('pages')
+    .select(`
+      *,
+      page_contents!inner(*)
+    `)
+    .eq('slug', slug)
+    .eq('page_contents.language_id', languageId)
+    .eq('status', 'published')
+    .single();
+  
+  if (error) throw error;
+  return data;
 };
 
 // Track helpers
 export const getTracks = async (languageId: number) => {
-  try {
-    console.log(`Getting tracks for language ${languageId}`);
-    
-    const { data, error } = await supabase
-      .from('tracks')
-      .select(`
-        *,
-        track_contents!inner(*),
-        videos(*, video_contents(*)),
-        track_featured_images(*),
-        track_cta_settings(*)
-      `)
-      .eq('track_contents.language_id', languageId)
-      .eq('status', 'published')
-      .order('order_position');
-    
-    if (error) {
-      console.error('Error fetching tracks:', error);
-      throw error;
-    }
-    
-    console.log('Fetched tracks data:', data);
-    return data || [];
-  } catch (error) {
-    console.error('Error in getTracks:', error);
+  console.log(`Getting tracks for language ${languageId}`);
+  
+  const { data, error } = await supabase
+    .from('tracks')
+    .select(`
+      *,
+      track_contents!inner(*),
+      videos(*, video_contents(*)),
+      track_featured_images(*),
+      track_cta_settings(*)
+    `)
+    .eq('track_contents.language_id', languageId)
+    .eq('status', 'published')
+    .order('order_position');
+  
+  if (error) {
+    console.error('Error fetching tracks:', error);
     throw error;
   }
+  
+  console.log('Fetched tracks data:', data);
+  return data;
 };
 
 export const getTrackWithContent = async (trackId: number, languageId: number) => {
-  try {
-    console.log(`Getting track ${trackId} for language ${languageId}`);
-    
-    const { data, error } = await supabase
-      .from('tracks')
-      .select(`
-        *,
-        track_contents(*),
-        track_quotes(*),
-        track_featured_images(*),
-        track_cta_settings(*),
-        videos(*, video_contents(*))
-      `)
-      .eq('id', trackId)
-      .eq('status', 'published')
-      .single();
-    
-    if (error) {
-      console.error('Error fetching track:', error);
-      throw error;
-    }
-
-    // Filter content by language
-    const filteredData = {
-      ...data,
-      track_contents: data.track_contents?.filter(content => content.language_id === languageId) || [],
-      track_quotes: data.track_quotes?.filter(quote => quote.language_id === languageId) || [],
-      videos: data.videos?.map(video => ({
-        ...video,
-        video_contents: video.video_contents?.filter(content => content.language_id === languageId) || []
-      })) || []
-    };
-    
-    console.log('Filtered track data:', filteredData);
-    return filteredData;
-  } catch (error) {
-    console.error('Error in getTrackWithContent:', error);
+  console.log(`Getting track ${trackId} for language ${languageId}`);
+  
+  const { data, error } = await supabase
+    .from('tracks')
+    .select(`
+      *,
+      track_contents(*),
+      track_quotes(*),
+      track_featured_images(*),
+      track_cta_settings(*),
+      videos(*, video_contents(*))
+    `)
+    .eq('id', trackId)
+    .eq('status', 'published')
+    .single();
+  
+  if (error) {
+    console.error('Error fetching track:', error);
     throw error;
   }
+
+  // Filter content by language
+  const filteredData = {
+    ...data,
+    track_contents: data.track_contents?.filter(content => content.language_id === languageId) || [],
+    track_quotes: data.track_quotes?.filter(quote => quote.language_id === languageId) || [],
+    videos: data.videos?.map(video => ({
+      ...video,
+      video_contents: video.video_contents?.filter(content => content.language_id === languageId) || []
+    })) || []
+  };
+  
+  console.log('Filtered track data:', filteredData);
+  return filteredData;
 };
 
 // Media helpers

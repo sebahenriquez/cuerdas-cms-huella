@@ -1,66 +1,65 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Download } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
+import { getPageBySlug } from '@/lib/supabase-helpers';
 
-const Prensa: React.FC = () => {
+const Prensa = () => {
   const { currentLanguage } = useLanguage();
 
-  const { data: pressKitSettings } = useQuery({
-    queryKey: ['press-kit-settings', currentLanguage?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('press_kit_settings')
-        .select('*')
-        .eq('language_id', currentLanguage?.id)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
+  const { data: pageData, isLoading } = useQuery({
+    queryKey: ['page', 'prensa', currentLanguage?.id],
+    queryFn: () => currentLanguage ? getPageBySlug('prensa', currentLanguage.id) : null,
     enabled: !!currentLanguage,
   });
 
-  const handleDownload = () => {
-    if (pressKitSettings?.download_url) {
-      window.open(pressKitSettings.download_url, '_blank');
-    }
-  };
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-pulse text-lg">Cargando...</div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const pageContent = pageData?.page_contents?.[0];
 
   return (
-    <Layout>
-      <div 
-        className="min-h-screen flex items-center justify-center relative"
+    <Layout showAudioPlayer={true}>
+      {/* Hero Section */}
+      <section 
+        className="hero-section"
         style={{
-          backgroundImage: 'url(https://i.ibb.co/b5ZP5v2w/Huellas-27-05-201.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
+          backgroundImage: `url(${pageContent?.hero_image_url || 'https://images.unsplash.com/photo-1423666639041-f56000c27a9a'})`
         }}
       >
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/40"></div>
-        
-        {/* Content */}
-        <div className="relative z-10 text-center text-white max-w-2xl mx-auto px-4">
-          <h1 className="text-4xl md:text-6xl font-bold mb-8">
-            {pressKitSettings?.description || (currentLanguage?.code === 'es' ? 'Descargue el kit de prensa' : 'Download the press kit')}
+        <div className="hero-overlay" />
+        <div className="hero-content">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
+            {pageContent?.title || 'Prensa'}
           </h1>
-          
-          <Button
-            onClick={handleDownload}
-            size="lg"
-            className="bg-white text-black hover:bg-gray-100 transition-colors text-lg px-8 py-4"
-          >
-            <Download className="mr-2 h-5 w-5" />
-            {pressKitSettings?.button_label || (currentLanguage?.code === 'es' ? 'Kit de Prensa' : 'Press Kit')}
-          </Button>
+          <div 
+            className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto animate-fade-in"
+            dangerouslySetInnerHTML={{ 
+              __html: pageContent?.content || '<p>Información para medios de comunicación...</p>'
+            }}
+          />
         </div>
-      </div>
+      </section>
+
+      {/* Content Section */}
+      <section className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="prose prose-lg max-w-none">
+            <div 
+              dangerouslySetInnerHTML={{ 
+                __html: pageContent?.content || '<p>Material de prensa disponible.</p>'
+              }}
+            />
+          </div>
+        </div>
+      </section>
     </Layout>
   );
 };
