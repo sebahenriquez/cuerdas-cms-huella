@@ -42,16 +42,6 @@
   color: #888;
 }
 
-/* Estilos mejorados para párrafos en contenido dinámico */
-.prose p {
-  margin-bottom: 1.5em !important;
-  line-height: 1.8 !important;
-}
-
-.prose p:last-child {
-  margin-bottom: 0 !important;
-}
-
 /* Centrado del menú de navegación */
 .track-nav .container > div {
   display: flex;
@@ -64,7 +54,97 @@
   }
 }
 
-/* Estilos específicos para el contenido de texto procesado */
+/* Estilos optimizados para contenido de texto formateado */
+.text-content-formatted {
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 17px;
+  line-height: 1.7;
+  font-family: 'Inter', Georgia, serif;
+  text-align: left;
+  color: inherit;
+}
+
+.text-content-formatted p {
+  margin-bottom: 1.5em;
+  text-align: left;
+}
+
+.text-content-formatted p:last-child {
+  margin-bottom: 0;
+}
+
+.text-content-formatted br {
+  line-height: 1.2;
+}
+
+/* Estilos para contenido de texto en hero sections */
+.text-content-formatted-hero {
+  max-width: 700px;
+  margin: 0 auto;
+  font-size: 18px;
+  line-height: 1.6;
+  font-family: 'Inter', Georgia, serif;
+  text-align: center;
+  color: inherit;
+}
+
+.text-content-formatted-hero p {
+  margin-bottom: 1.2em;
+  text-align: center;
+}
+
+.text-content-formatted-hero p:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive adjustments for text content */
+@media (max-width: 768px) {
+  .text-content-formatted {
+    max-width: 95%;
+    font-size: 16px;
+    line-height: 1.6;
+    padding: 0 10px;
+  }
+  
+  .text-content-formatted p {
+    margin-bottom: 1.3em;
+  }
+
+  .text-content-formatted-hero {
+    max-width: 95%;
+    font-size: 17px;
+    line-height: 1.5;
+    padding: 0 15px;
+  }
+  
+  .text-content-formatted-hero p {
+    margin-bottom: 1.1em;
+  }
+}
+
+@media (max-width: 480px) {
+  .text-content-formatted {
+    font-size: 15px;
+    padding: 0 5px;
+  }
+  
+  .text-content-formatted-hero {
+    font-size: 16px;
+    padding: 0 10px;
+  }
+}
+
+/* Legacy support for existing styles */
+.prose p {
+  margin-bottom: 1.5em !important;
+  line-height: 1.8 !important;
+}
+
+.prose p:last-child {
+  margin-bottom: 0 !important;
+}
+
 [data-text-content] p {
   margin-bottom: 1.5rem;
   line-height: 1.8;
@@ -74,7 +154,6 @@
   margin-bottom: 0;
 }
 
-/* Mejora para párrafos con clase mb-6 */
 .mb-6 {
   margin-bottom: 1.5rem;
 }

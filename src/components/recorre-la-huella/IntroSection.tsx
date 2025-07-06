@@ -14,33 +14,31 @@ interface IntroSectionProps {
 }
 
 const IntroSection: React.FC<IntroSectionProps> = ({ introContent, onStartJourney }) => {
-  // Función mejorada para procesar el contenido y mantener saltos de línea
+  // Función mejorada para procesar el contenido y crear párrafos reales
   const processContent = (content: string) => {
     if (!content) return '';
     
     // Normalizar los saltos de línea
     const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     
-    // Dividir por saltos de línea dobles para crear párrafos
-    const paragraphs = normalizedContent.split(/\n\s*\n/);
+    // Dividir por uno o más saltos de línea para crear párrafos
+    const paragraphs = normalizedContent
+      .split(/\n\s*\n+/) // Dividir por dobles saltos de línea o más
+      .map(paragraph => paragraph.trim())
+      .filter(paragraph => paragraph.length > 0);
     
     return paragraphs
       .map(paragraph => {
-        const cleanParagraph = paragraph.trim();
-        if (cleanParagraph.length === 0) return '';
-        
-        // Convertir saltos de línea simples en <br>
-        const paragraphWithBreaks = cleanParagraph.replace(/\n/g, '<br>');
-        
-        return `<p class="mb-6">${paragraphWithBreaks}</p>`;
+        // Reemplazar saltos de línea simples dentro del párrafo con <br>
+        const paragraphWithBreaks = paragraph.replace(/\n/g, '<br>');
+        return `<p>${paragraphWithBreaks}</p>`;
       })
-      .filter(paragraph => paragraph.length > 0)
       .join('');
   };
 
   const processedContent = introContent?.content 
     ? processContent(introContent.content)
-    : '<p class="mb-6">Sumérgete en un recorrido interactivo por los diferentes tracks que componen este álbum musical.</p>';
+    : '<p>Sumérgete en un recorrido interactivo por los diferentes tracks que componen este álbum musical.</p>';
 
   return (
     <section 
@@ -57,15 +55,14 @@ const IntroSection: React.FC<IntroSectionProps> = ({ introContent, onStartJourne
           {introContent?.title || 'Recorre la Huella'}
         </h1>
         
-        <div 
-          className="text-lg md:text-xl max-w-4xl mx-auto mb-12 animate-fade-in text-white"
-          style={{
-            lineHeight: '1.7',
-          }}
-          dangerouslySetInnerHTML={{ 
-            __html: processedContent
-          }}
-        />
+        <div className="max-w-4xl mx-auto mb-12 animate-fade-in">
+          <div 
+            className="text-content-formatted-hero text-white"
+            dangerouslySetInnerHTML={{ 
+              __html: processedContent
+            }}
+          />
+        </div>
         
         {/* Action Button */}
         <div className="flex justify-center">

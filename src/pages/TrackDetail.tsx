@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -75,6 +74,24 @@ const TrackDetail = () => {
     }
   };
 
+  // Function to process text content for better paragraph handling
+  const processTextContent = (content: string) => {
+    if (!content) return '';
+    
+    const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const paragraphs = normalizedContent
+      .split(/\n\s*\n+/)
+      .map(paragraph => paragraph.trim())
+      .filter(paragraph => paragraph.length > 0);
+    
+    return paragraphs
+      .map(paragraph => {
+        const paragraphWithBreaks = paragraph.replace(/\n/g, '<br>');
+        return `<p>${paragraphWithBreaks}</p>`;
+      })
+      .join('');
+  };
+
   return (
     <Layout showAudioPlayer={true}>
       {/* Hero Section */}
@@ -143,18 +160,16 @@ const TrackDetail = () => {
       {/* Content Section - Only show if CTA settings allow it */}
       {ctaSettings?.show_texts && trackContent?.long_text_content && (
         <section className="py-16 px-4">
-          <div className="max-w-4xl mx-auto">
-            <div 
-              className="prose prose-lg max-w-none text-foreground prose-p:mb-4 prose-p:leading-relaxed"
-              style={{
-                lineHeight: '1.7',
-              }}
-            >
-              <div 
-                dangerouslySetInnerHTML={{ 
-                  __html: trackContent.long_text_content
-                }}
-              />
+          <div className="container mx-auto">
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-lg border border-border/30">
+                <div 
+                  className="text-content-formatted text-foreground"
+                  dangerouslySetInnerHTML={{ 
+                    __html: processTextContent(trackContent.long_text_content)
+                  }}
+                />
+              </div>
             </div>
           </div>
         </section>
