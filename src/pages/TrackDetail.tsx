@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { getTrackWithContent } from '@/lib/supabase-helpers';
+import { getTrackWithContent, getTrackCTALabels } from '@/lib/supabase-helpers';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import TrackDetailHero from '@/components/track-detail/TrackDetailHero';
 import TrackTextContent from '@/components/track-detail/TrackTextContent';
@@ -61,22 +61,8 @@ const TrackDetail = () => {
     }
   };
 
-  // Get CTA labels based on language
-  const getCtaLabel = (type: 'texts' | 'videos' | 'photos') => {
-    if (!ctaSettings) return '';
-    const langCode = currentLanguage?.code?.toLowerCase();
-    
-    switch (type) {
-      case 'texts':
-        return langCode === 'en' ? ctaSettings.texts_label_en : ctaSettings.texts_label_es;
-      case 'videos':
-        return langCode === 'en' ? ctaSettings.videos_label_en : ctaSettings.videos_label_es;
-      case 'photos':
-        return langCode === 'en' ? ctaSettings.photos_label_en : ctaSettings.photos_label_es;
-      default:
-        return '';
-    }
-  };
+  // Get CTA labels using the helper function
+  const ctaLabels = getTrackCTALabels(ctaSettings, currentLanguage);
 
   return (
     <Layout showAudioPlayer={true}>
@@ -88,23 +74,29 @@ const TrackDetail = () => {
         isCurrentTrack={isCurrentTrack}
         isPlaying={isPlaying}
         onPlayPause={handlePlayPause}
-        getCtaLabel={getCtaLabel}
       />
 
       {ctaSettings?.show_texts && trackContent?.long_text_content && (
-        <TrackTextContent content={trackContent.long_text_content} />
+        <TrackTextContent 
+          content={trackContent.long_text_content}
+          sectionTitle={ctaLabels.textsLabel}
+        />
       )}
 
       <TrackQuotes quotes={trackData.track_quotes || []} />
 
       {ctaSettings?.show_videos && trackData.videos && (
-        <TrackVideos videos={trackData.videos} />
+        <TrackVideos 
+          videos={trackData.videos}
+          sectionTitle={ctaLabels.videosLabel}
+        />
       )}
 
       {ctaSettings?.show_photos && trackData.track_featured_images && (
         <TrackPhotos 
           images={trackData.track_featured_images} 
           currentLanguage={currentLanguage}
+          sectionTitle={ctaLabels.photosLabel}
         />
       )}
     </Layout>

@@ -1,53 +1,69 @@
 
 import React from 'react';
-
-interface VideoContent {
-  title?: string;
-  description?: string;
-}
+import ReactPlayer from 'react-player/vimeo';
 
 interface Video {
   id: number;
   vimeo_url: string;
-  order_position: number;
-  video_contents?: VideoContent[];
+  thumbnail_url?: string;
+  video_contents?: Array<{
+    title?: string;
+    description?: string;
+    language_id: number;
+  }>;
 }
 
 interface TrackVideosProps {
   videos: Video[];
+  sectionTitle?: string;
 }
 
-const TrackVideos: React.FC<TrackVideosProps> = ({ videos }) => {
+const TrackVideos: React.FC<TrackVideosProps> = ({ 
+  videos, 
+  sectionTitle = 'Videos' 
+}) => {
   if (!videos || videos.length === 0) return null;
 
   return (
-    <section className="py-16 px-4">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-12">Videos</h2>
-        <div className="grid md:grid-cols-2 gap-8">
-          {videos.map((video) => (
-            <div key={video.id} className="bg-card rounded-lg overflow-hidden shadow-lg">
-              {video.vimeo_url && (
+    <section className="py-16 bg-muted/50">
+      <div className="container mx-auto px-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-foreground">
+          {sectionTitle}
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          {videos.map((video) => {
+            const videoContent = video.video_contents?.[0];
+            
+            return (
+              <div key={video.id} className="bg-background rounded-lg overflow-hidden shadow-lg">
                 <div className="aspect-video">
-                  <iframe
-                    src={video.vimeo_url}
-                    className="w-full h-full"
-                    frameBorder="0"
-                    allow="autoplay; fullscreen; picture-in-picture"
-                    allowFullScreen
+                  <ReactPlayer
+                    url={video.vimeo_url}
+                    width="100%"
+                    height="100%"
+                    controls
+                    light={video.thumbnail_url}
                   />
                 </div>
-              )}
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">
-                  {video.video_contents?.[0]?.title || `Video ${video.order_position}`}
-                </h3>
-                <p className="text-muted-foreground">
-                  {video.video_contents?.[0]?.description}
-                </p>
+                
+                {videoContent && (
+                  <div className="p-6">
+                    {videoContent.title && (
+                      <h3 className="text-xl font-semibold mb-2 text-foreground">
+                        {videoContent.title}
+                      </h3>
+                    )}
+                    {videoContent.description && (
+                      <p className="text-muted-foreground">
+                        {videoContent.description}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

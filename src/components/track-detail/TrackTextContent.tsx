@@ -3,64 +3,53 @@ import React from 'react';
 
 interface TrackTextContentProps {
   content: string;
+  sectionTitle?: string;
 }
 
-const TrackTextContent: React.FC<TrackTextContentProps> = ({ content }) => {
-  // Function to process text content for better paragraph handling and HTML support
-  const processTextContent = (content: string) => {
+const TrackTextContent: React.FC<TrackTextContentProps> = ({ 
+  content, 
+  sectionTitle = 'Textos' 
+}) => {
+  // Función para procesar el contenido y crear párrafos reales
+  const processContent = (content: string) => {
     if (!content) return '';
     
-    // Si el contenido contiene etiquetas HTML, procesarlo directamente
-    if (content.includes('<') && content.includes('>')) {
-      let processedContent = content
-        .replace(/\r\n/g, '\n')
-        .replace(/\r/g, '\n')
-        // Normalizar etiquetas <br>
-        .replace(/<br\s*\/?>/gi, '<br>')
-        // Limpiar párrafos vacíos
-        .replace(/<p>\s*<\/p>/gi, '')
-        .trim();
-      
-      // Si no hay párrafos pero hay contenido, crear párrafos
-      if (!processedContent.includes('<p>') && processedContent.length > 0) {
-        const parts = processedContent.split('<br>');
-        processedContent = parts
-          .map(part => part.trim())
-          .filter(part => part.length > 0)
-          .map(part => `<p>${part}</p>`)
-          .join('');
-      }
-      
-      return processedContent;
-    }
-    
-    // Procesamiento para texto plano
+    // Normalizar los saltos de línea
     const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    
+    // Dividir por uno o más saltos de línea para crear párrafos
     const paragraphs = normalizedContent
-      .split(/\n\s*\n+/)
+      .split(/\n\s*\n+/) // Dividir por dobles saltos de línea o más
       .map(paragraph => paragraph.trim())
       .filter(paragraph => paragraph.length > 0);
     
     return paragraphs
       .map(paragraph => {
+        // Reemplazar saltos de línea simples dentro del párrafo con <br>
         const paragraphWithBreaks = paragraph.replace(/\n/g, '<br>');
         return `<p>${paragraphWithBreaks}</p>`;
       })
       .join('');
   };
 
+  const processedContent = processContent(content);
+
+  if (!content) return null;
+
   return (
-    <section className="py-8 px-4">
-      <div className="container mx-auto">
+    <section className="py-16 bg-background">
+      <div className="container mx-auto px-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-foreground">
+          {sectionTitle}
+        </h2>
+        
         <div className="max-w-4xl mx-auto">
-          <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-lg border border-border/30">
-            <div 
-              className="text-content-formatted text-foreground"
-              dangerouslySetInnerHTML={{ 
-                __html: processTextContent(content)
-              }}
-            />
-          </div>
+          <div 
+            className="text-content-formatted prose prose-lg max-w-none"
+            dangerouslySetInnerHTML={{ 
+              __html: processedContent
+            }}
+          />
         </div>
       </div>
     </section>

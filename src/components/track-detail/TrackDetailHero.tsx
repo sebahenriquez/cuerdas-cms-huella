@@ -30,7 +30,6 @@ interface TrackDetailHeroProps {
   isCurrentTrack: boolean;
   isPlaying: boolean;
   onPlayPause: () => void;
-  getCtaLabel: (type: 'texts' | 'videos' | 'photos') => string;
 }
 
 const TrackDetailHero: React.FC<TrackDetailHeroProps> = ({
@@ -40,9 +39,25 @@ const TrackDetailHero: React.FC<TrackDetailHeroProps> = ({
   currentLanguage,
   isCurrentTrack,
   isPlaying,
-  onPlayPause,
-  getCtaLabel
+  onPlayPause
 }) => {
+  // Get CTA labels based on language
+  const getCtaLabel = (type: 'texts' | 'videos' | 'photos') => {
+    if (!ctaSettings) return '';
+    const isEnglish = currentLanguage?.code === 'en';
+    
+    switch (type) {
+      case 'texts':
+        return isEnglish ? (ctaSettings.texts_label_en || 'Texts') : (ctaSettings.texts_label_es || 'Textos');
+      case 'videos':
+        return isEnglish ? (ctaSettings.videos_label_en || 'Videos') : (ctaSettings.videos_label_es || 'Videos');
+      case 'photos':
+        return isEnglish ? (ctaSettings.photos_label_en || 'Photos') : (ctaSettings.photos_label_es || 'Fotos');
+      default:
+        return '';
+    }
+  };
+
   return (
     <section 
       className="hero-section"
@@ -87,17 +102,17 @@ const TrackDetailHero: React.FC<TrackDetailHeroProps> = ({
           <div className="flex flex-wrap justify-center gap-4 mt-8 animate-fade-in">
             {ctaSettings.show_texts && trackContent?.long_text_content && (
               <Button variant="outline" className="btn-secondary-hero">
-                {getCtaLabel('texts') || 'Textos'}
+                {getCtaLabel('texts')}
               </Button>
             )}
             {ctaSettings.show_videos && trackData.videos && trackData.videos.length > 0 && (
               <Button variant="outline" className="btn-secondary-hero">
-                {getCtaLabel('videos') || 'Videos'}
+                {getCtaLabel('videos')}
               </Button>
             )}
             {ctaSettings.show_photos && trackData.track_featured_images && trackData.track_featured_images.length > 0 && (
               <Button variant="outline" className="btn-secondary-hero">
-                {getCtaLabel('photos') || 'Fotos'}
+                {getCtaLabel('photos')}
               </Button>
             )}
           </div>
