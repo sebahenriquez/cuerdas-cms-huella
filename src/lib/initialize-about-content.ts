@@ -48,12 +48,14 @@ export const initializeAboutContent = async () => {
           {
             language_id: englishLang.id,
             title: 'The Project',
+            subtitle: '',
             content: `<p>Berta Rojas presents La Huella de las Cuerdas, a project tracing the cultural impact of the guitar in Latin America and illuminating the ties that bind it in so many ways to the wider family of stringed instruments in the Americas.</p>
             <p>A special edition unique high-quality multimedia package:</p>`
           },
           {
             language_id: spanishLang.id,
             title: 'El Proyecto',
+            subtitle: '',
             content: `<p>Berta Rojas presenta La Huella de las Cuerdas, un proyecto que rastrea el impacto cultural de la guitarra en América Latina e ilumina los lazos que la unen de tantas maneras a la gran familia de instrumentos de cuerda en las Américas.</p>
             <p>Un paquete multimedia especial de alta calidad único:</p>`
           }
@@ -65,6 +67,7 @@ export const initializeAboutContent = async () => {
           {
             language_id: englishLang.id,
             title: 'About the Book',
+            subtitle: '',
             content: `<p>This comprehensive volume documents the extraordinary journey across Latin America, capturing the essence of traditional stringed instruments and the master musicians who keep these traditions alive.</p>
             <p>Through stunning photography and detailed cultural analysis, the book reveals the deep connections between different musical traditions across the Americas, showing how the guitar serves as both a bridge and a distinctive voice in each culture it encounters.</p>
             <p>Each chapter focuses on a specific instrument and region, providing historical context, technical details, and personal stories from the musicians who have dedicated their lives to preserving and evolving these musical traditions.</p>`
@@ -72,6 +75,7 @@ export const initializeAboutContent = async () => {
           {
             language_id: spanishLang.id,
             title: 'Sobre el Libro',
+            subtitle: '',
             content: `<p>Este volumen integral documenta el extraordinario viaje a través de América Latina, capturando la esencia de los instrumentos de cuerda tradicionales y los músicos maestros que mantienen vivas estas tradiciones.</p>
             <p>A través de fotografías impresionantes y análisis culturales detallados, el libro revela las profundas conexiones entre las diferentes tradiciones musicales a través de las Américas, mostrando cómo la guitarra sirve tanto como puente como voz distintiva en cada cultura que encuentra.</p>
             <p>Cada capítulo se enfoca en un instrumento y región específicos, proporcionando contexto histórico, detalles técnicos e historias personales de los músicos que han dedicado sus vidas a preservar y hacer evolucionar estas tradiciones musicales.</p>`

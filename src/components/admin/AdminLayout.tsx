@@ -10,7 +10,7 @@ import {
   Users, 
   Languages, 
   Settings, 
-  Template,
+  Layout,
   MousePointer,
   Info
 } from 'lucide-react';
@@ -28,7 +28,7 @@ const AdminLayout: React.FC = () => {
     { icon: Users, label: 'Users', path: '/admin/users' },
     { icon: Languages, label: 'Languages', path: '/admin/languages' },
     { icon: MousePointer, label: 'CTA Buttons', path: '/admin/cta-buttons' },
-    { icon: Template, label: 'Templates', path: '/admin/templates' },
+    { icon: Layout, label: 'Templates', path: '/admin/templates' },
     { icon: Settings, label: 'Settings', path: '/admin/settings' },
   ];
 
