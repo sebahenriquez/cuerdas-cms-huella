@@ -19,7 +19,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        // Permitir HTML directo
         paragraph: {
           HTMLAttributes: {
             class: 'paragraph-block',
@@ -34,7 +33,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     ],
     content,
     onUpdate: ({ editor }) => {
-      // Preservar HTML y convertir saltos de línea
       const htmlContent = editor.getHTML();
       onChange(htmlContent);
     },
@@ -42,17 +40,53 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       attributes: {
         class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[200px] p-4 border rounded-md',
       },
-      // Permitir pegado de HTML
-      handlePaste: (view, event) => {
+      handlePaste: (view, event, slice) => {
         const clipboardData = event.clipboardData;
         if (clipboardData) {
           const htmlData = clipboardData.getData('text/html');
           const textData = clipboardData.getData('text/plain');
           
-          if (htmlData) {
-            // Si hay HTML, insertarlo directamente
-            const selection = view.state.selection;
-            const transaction = view.state.tr.insertText(htmlData, selection.from, selection.to);
+          // Si hay HTML, procesarlo de manera inteligente
+          if (htmlData && htmlData.trim() !== '') {
+            // Limpiar HTML innecesario y mantener solo formateo básico
+            let cleanHtml = htmlData
+              .replace(/<meta[^>]*>/gi, '')
+              .replace(/<style[^>]*>.*?<\/style>/gi, '')
+              .replace(/<script[^>]*>.*?<\/script>/gi, '')
+              .replace(/class="[^"]*"/gi, '')
+              .replace(/style="[^"]*"/gi, '')
+              .replace(/<span[^>]*>/gi, '')
+              .replace(/<\/span>/gi, '')
+              .replace(/<div[^>]*>/gi, '<p>')
+              .replace(/<\/div>/gi, '</p>')
+              .replace(/<font[^>]*>/gi, '')
+              .replace(/<\/font>/gi, '');
+            
+            // Insertar el HTML limpio
+            const { state } = view;
+            const { selection } = state;
+            const transaction = state.tr.replaceSelectionWith(
+              state.schema.text(cleanHtml)
+            );
+            view.dispatch(transaction);
+            return true;
+          } else if (textData) {
+            // Para texto plano, convertir saltos de línea dobles en párrafos
+            const processedText = textData
+              .split('\n\n')
+              .map(paragraph => paragraph.trim())
+              .filter(paragraph => paragraph.length > 0)
+              .map(paragraph => {
+                // Convertir saltos de línea simples en <br>
+                return paragraph.replace(/\n/g, '<br>');
+              })
+              .join('</p><p>');
+            
+            const htmlToInsert = processedText ? `<p>${processedText}</p>` : textData;
+            
+            const { state } = view;
+            const { selection } = state;
+            const transaction = state.tr.insertText(htmlToInsert, selection.from, selection.to);
             view.dispatch(transaction);
             return true;
           }
@@ -138,12 +172,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
         <div className="w-px h-6 bg-border mx-2" />
 
-        {/* Nuevos botones para saltos de línea */}
         <Button
           variant="ghost"
           size="sm"
           onClick={insertLineBreak}
-          title="Insertar salto de línea (BR)"
+          title="Insertar salto de línea"
         >
           <ArrowDown className="h-4 w-4" />
         </Button>
@@ -162,20 +195,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           variant="ghost"
           size="sm"
           onClick={() => insertManualHTML('<br>')}
-          title="Insertar <br> manual"
+          title="Insertar <br>"
           className="text-xs"
         >
-          &lt;br&gt;
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => insertManualHTML('<p></p>')}
-          title="Insertar <p> manual"
-          className="text-xs"
-        >
-          &lt;p&gt;
+          BR
         </Button>
       </div>
 
@@ -184,9 +207,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         <EditorContent editor={editor} placeholder={placeholder} />
       </div>
 
-      {/* Instrucciones */}
+      {/* Instrucciones mejoradas */}
       <div className="bg-muted/30 p-2 text-xs text-muted-foreground border-t">
-        <strong>Tip:</strong> Usa los botones para insertar saltos de línea o escribe HTML directamente (ej: &lt;br&gt;, &lt;p&gt;&lt;/p&gt;)
+        <strong>Tip:</strong> Pega texto normalmente - se convertirá automáticamente. Usa los botones para formateo adicional.
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ interface TrackContent {
   title?: string;
   description?: string;
   hero_image_url?: string;
+  long_text_content?: string;
 }
 
 interface TrackCTASettings {
