@@ -14,23 +14,33 @@ interface IntroSectionProps {
 }
 
 const IntroSection: React.FC<IntroSectionProps> = ({ introContent, onStartJourney }) => {
-  // Función para procesar el contenido y respetar saltos de línea
+  // Función mejorada para procesar el contenido y mantener saltos de línea
   const processContent = (content: string) => {
     if (!content) return '';
     
-    // Dividir por saltos de línea dobles y crear párrafos
-    const paragraphs = content.split(/\n\s*\n/);
+    // Normalizar los saltos de línea
+    const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    
+    // Dividir por saltos de línea dobles para crear párrafos
+    const paragraphs = normalizedContent.split(/\n\s*\n/);
     
     return paragraphs
-      .map(paragraph => paragraph.trim())
+      .map(paragraph => {
+        const cleanParagraph = paragraph.trim();
+        if (cleanParagraph.length === 0) return '';
+        
+        // Convertir saltos de línea simples en <br>
+        const paragraphWithBreaks = cleanParagraph.replace(/\n/g, '<br>');
+        
+        return `<p class="mb-6">${paragraphWithBreaks}</p>`;
+      })
       .filter(paragraph => paragraph.length > 0)
-      .map(paragraph => `<p>${paragraph}</p>`)
       .join('');
   };
 
   const processedContent = introContent?.content 
     ? processContent(introContent.content)
-    : '<p>Sumérgete en un recorrido interactivo por los diferentes tracks que componen este álbum musical.</p>';
+    : '<p class="mb-6">Sumérgete en un recorrido interactivo por los diferentes tracks que componen este álbum musical.</p>';
 
   return (
     <section 
@@ -48,7 +58,10 @@ const IntroSection: React.FC<IntroSectionProps> = ({ introContent, onStartJourne
         </h1>
         
         <div 
-          className="text-lg md:text-xl max-w-4xl mx-auto mb-12 animate-fade-in prose prose-lg prose-p:mb-6 prose-p:leading-relaxed"
+          className="text-lg md:text-xl max-w-4xl mx-auto mb-12 animate-fade-in text-white"
+          style={{
+            lineHeight: '1.7',
+          }}
           dangerouslySetInnerHTML={{ 
             __html: processedContent
           }}

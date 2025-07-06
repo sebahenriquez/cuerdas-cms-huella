@@ -42,13 +42,14 @@
   color: #888;
 }
 
-/* Mejoras para el espaciado de párrafos en contenido dinámico */
-.prose p + p {
-  margin-top: 1.5em;
+/* Estilos mejorados para párrafos en contenido dinámico */
+.prose p {
+  margin-bottom: 1.5em !important;
+  line-height: 1.8 !important;
 }
 
-.prose p {
-  margin-bottom: 1em;
+.prose p:last-child {
+  margin-bottom: 0 !important;
 }
 
 /* Centrado del menú de navegación */
@@ -61,4 +62,19 @@
   .track-nav .container > div {
     justify-content: flex-start;
   }
+}
+
+/* Estilos específicos para el contenido de texto procesado */
+[data-text-content] p {
+  margin-bottom: 1.5rem;
+  line-height: 1.8;
+}
+
+[data-text-content] p:last-child {
+  margin-bottom: 0;
+}
+
+/* Mejora para párrafos con clase mb-6 */
+.mb-6 {
+  margin-bottom: 1.5rem;
 }

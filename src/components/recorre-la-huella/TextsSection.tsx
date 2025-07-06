@@ -11,28 +11,39 @@ interface TextsSectionProps {
 }
 
 const TextsSection: React.FC<TextsSectionProps> = ({ currentTrackContent }) => {
-  // Función para procesar el texto y convertir saltos de línea dobles en párrafos
+  // Función mejorada para procesar el texto y mantener saltos de línea
   const processTextContent = (content: string) => {
     if (!content) return '';
     
-    // Dividir el texto por saltos de línea dobles y crear párrafos
-    const paragraphs = content.split(/\n\s*\n/);
+    // Primero, normalizar los saltos de línea (Windows, Mac, Unix)
+    const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    
+    // Dividir por saltos de línea dobles para crear párrafos
+    const paragraphs = normalizedContent.split(/\n\s*\n/);
     
     return paragraphs
-      .map(paragraph => paragraph.trim())
+      .map(paragraph => {
+        // Limpiar espacios al inicio y final
+        const cleanParagraph = paragraph.trim();
+        if (cleanParagraph.length === 0) return '';
+        
+        // Convertir saltos de línea simples dentro del párrafo en <br>
+        const paragraphWithBreaks = cleanParagraph.replace(/\n/g, '<br>');
+        
+        return `<p class="mb-6">${paragraphWithBreaks}</p>`;
+      })
       .filter(paragraph => paragraph.length > 0)
-      .map(paragraph => `<p>${paragraph}</p>`)
       .join('');
   };
 
   const processedContent = currentTrackContent?.long_text_content 
     ? processTextContent(currentTrackContent.long_text_content)
     : `
-      <p>Explora la profundidad musical y emocional de este track. Cada pieza ha sido cuidadosamente 
+      <p class="mb-6">Explora la profundidad musical y emocional de este track. Cada pieza ha sido cuidadosamente 
       crafted para transportarte a través de una experiencia única que refleja la esencia de 
       "La Huella de las Cuerdas".</p>
       
-      <p>El contenido de esta sección cambia dinámicamente según el track seleccionado, 
+      <p class="mb-6">El contenido de esta sección cambia dinámicamente según el track seleccionado, 
       proporcionando información contextual y detallada sobre cada composición musical.</p>
     `;
 
@@ -45,9 +56,9 @@ const TextsSection: React.FC<TextsSectionProps> = ({ currentTrackContent }) => {
           </h2>
           <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-border/30">
             <div 
-              className="prose prose-lg max-w-none text-foreground prose-p:mb-6 prose-p:leading-relaxed"
+              className="text-foreground text-lg leading-relaxed"
               style={{
-                lineHeight: '1.7',
+                lineHeight: '1.8',
               }}
               dangerouslySetInnerHTML={{ 
                 __html: processedContent
