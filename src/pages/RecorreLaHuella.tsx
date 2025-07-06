@@ -192,7 +192,7 @@ const RecorreLaHuella = () => {
                         />
                       ) : (
                         <div className="w-full h-full bg-muted flex items-center justify-center rounded-t-lg">
-                          <p className="text-muted-foreground">Video no disponible</p>
+                          <p className="text-muted-foreground">Cooming soon / Próximamente...</p>
                         </div>
                       )}
                     </div>
