@@ -5,6 +5,7 @@ import Layout from '@/components/layout/Layout';
 import AudioPlayer from '@/components/audio/AudioPlayer';
 import TrackSelector from '@/components/recorre-la-huella/TrackSelector';
 import HeroSection from '@/components/recorre-la-huella/HeroSection';
+import IntroSection from '@/components/recorre-la-huella/IntroSection';
 import TextsSection from '@/components/recorre-la-huella/TextsSection';
 import VideosSection from '@/components/recorre-la-huella/VideosSection';
 import PhotosSection from '@/components/recorre-la-huella/PhotosSection';
@@ -19,10 +20,12 @@ const RecorreLaHuella = () => {
   const { playTrack, setTracks } = useAudioPlayer();
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [showIntro, setShowIntro] = useState(true);
 
-  const { data: pageData, isLoading: pageLoading } = useQuery({
-    queryKey: ['page', 'recorre-la-huella', currentLanguage?.id],
-    queryFn: () => currentLanguage ? getPageBySlug('recorre-la-huella', currentLanguage.id) : null,
+  // Query para la página de introducción
+  const { data: introData, isLoading: introLoading } = useQuery({
+    queryKey: ['page', 'recorre-la-huella-intro', currentLanguage?.id],
+    queryFn: () => currentLanguage ? getPageBySlug('recorre-la-huella-intro', currentLanguage.id) : null,
     enabled: !!currentLanguage,
   });
 
@@ -36,13 +39,10 @@ const RecorreLaHuella = () => {
   useEffect(() => {
     if (tracks.length > 0) {
       setTracks(tracks);
-      if (!selectedTrack) {
-        setSelectedTrack(tracks[0]);
-      }
     }
-  }, [tracks, setTracks, selectedTrack]);
+  }, [tracks, setTracks]);
 
-  if (pageLoading || tracksLoading) {
+  if (introLoading || tracksLoading) {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
@@ -54,8 +54,15 @@ const RecorreLaHuella = () => {
 
   const handleTrackSelect = (track: Track) => {
     setSelectedTrack(track);
-    // Also set it as the current track in the audio player
+    setShowIntro(false);
     playTrack(track);
+  };
+
+  const handleStartJourney = () => {
+    setShowIntro(false);
+    if (tracks.length > 0) {
+      setSelectedTrack(tracks[0]);
+    }
   };
 
   const getCurrentTrackContent = () => {
@@ -64,7 +71,32 @@ const RecorreLaHuella = () => {
   };
 
   const currentTrackContent = getCurrentTrackContent();
+  const introContent = introData?.page_contents?.[0];
 
+  // Si estamos mostrando la introducción
+  if (showIntro) {
+    return (
+      <Layout showAudioPlayer={false}>
+        {/* Track Menu - siempre visible */}
+        <TrackSelector 
+          tracks={tracks}
+          selectedTrack={null}
+          onTrackSelect={handleTrackSelect}
+          showIntroButton={true}
+          isIntroActive={true}
+          onIntroClick={() => setShowIntro(true)}
+        />
+
+        {/* Intro Section */}
+        <IntroSection 
+          introContent={introContent}
+          onStartJourney={handleStartJourney}
+        />
+      </Layout>
+    );
+  }
+
+  // Si estamos mostrando un track específico
   return (
     <Layout showAudioPlayer={false}>
       {/* Audio Player Section */}
@@ -83,6 +115,9 @@ const RecorreLaHuella = () => {
         tracks={tracks}
         selectedTrack={selectedTrack}
         onTrackSelect={handleTrackSelect}
+        showIntroButton={true}
+        isIntroActive={false}
+        onIntroClick={() => setShowIntro(true)}
       />
 
       {/* Hero Section */}
