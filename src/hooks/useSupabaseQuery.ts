@@ -16,15 +16,6 @@ export const useSupabaseQuery = <T>(options: SupabaseQueryOptions<T>) => {
       // Retry up to 3 times for other errors
       return failureCount < 3;
     },
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    onError: (error: any) => {
-      console.error('Supabase query error:', error);
-      if (error?.message) {
-        console.error('Error message:', error.message);
-      }
-      if (error?.details) {
-        console.error('Error details:', error.details);
-      }
-    }
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 };
