@@ -20,9 +20,10 @@ interface Track {
 interface VideosSectionProps {
   selectedTrack: Track | null;
   currentLanguage: { id: number } | null;
+  sectionTitle?: string;
 }
 
-const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLanguage }) => {
+const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLanguage, sectionTitle }) => {
   // Extract YouTube video ID from various URL formats
   const getYouTubeId = (url: string) => {
     const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
@@ -34,7 +35,9 @@ const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLan
     <section id="videos" className="py-16 bg-muted/50">
       <div className="container mx-auto px-4">
         <div className="w-full max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-foreground">Videos</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-foreground">
+            {sectionTitle || 'Videos'}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {selectedTrack?.videos?.slice(0, 2).map((video, index) => {
               const videoId = getYouTubeId(video.vimeo_url);

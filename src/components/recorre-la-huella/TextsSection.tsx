@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface TrackContent {
@@ -8,9 +7,10 @@ interface TrackContent {
 
 interface TextsSectionProps {
   currentTrackContent: TrackContent | null;
+  sectionTitle?: string;
 }
 
-const TextsSection: React.FC<TextsSectionProps> = ({ currentTrackContent }) => {
+const TextsSection: React.FC<TextsSectionProps> = ({ currentTrackContent, sectionTitle }) => {
   // Función mejorada para procesar el contenido HTML y crear párrafos
   const processTextContent = (content: string) => {
     if (!content) return '';
@@ -79,7 +79,7 @@ const TextsSection: React.FC<TextsSectionProps> = ({ currentTrackContent }) => {
       <div className="container mx-auto px-4">
         <div className="w-full max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground">
-            {currentTrackContent?.menu_title || 'Sobre este Track'}
+            {sectionTitle || currentTrackContent?.menu_title || 'Sobre este Track'}
           </h2>
           <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-lg border border-border/30">
             <div 
