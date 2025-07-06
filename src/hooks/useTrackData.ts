@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getLanguages } from '@/lib/supabase-helpers';
+import { useSupabaseQuery } from './useSupabaseQuery';
 
 interface Language {
   id: number;
@@ -89,40 +90,62 @@ export const useTrackData = (trackId: number) => {
     }
   });
 
-  const { data: languages = [] } = useQuery({
+  const { data: languages = [] } = useSupabaseQuery({
     queryKey: ['languages'],
-    queryFn: getLanguages
+    queryFn: async () => {
+      console.log('Fetching languages...');
+      try {
+        const languages = await getLanguages();
+        console.log('Languages fetched successfully:', languages);
+        return languages;
+      } catch (error) {
+        console.error('Error fetching languages:', error);
+        throw error;
+      }
+    }
   });
 
-  const { data: existingTrack, isLoading } = useQuery({
+  const { data: existingTrack, isLoading, error } = useSupabaseQuery({
     queryKey: ['track', trackId],
     queryFn: async () => {
       if (trackId === 0) return null;
       
       console.log('Fetching track data for ID:', trackId);
       
-      const { data, error } = await supabase
-        .from('tracks')
-        .select(`
-          *,
-          track_contents(*),
-          videos(*, video_contents(*)),
-          track_featured_images(*),
-          track_cta_settings(*)
-        `)
-        .eq('id', trackId)
-        .single();
-      
-      if (error) {
-        console.error('Error fetching track:', error);
+      try {
+        const { data, error } = await supabase
+          .from('tracks')
+          .select(`
+            *,
+            track_contents(*),
+            videos(*, video_contents(*)),
+            track_featured_images(*),
+            track_cta_settings(*)
+          `)
+          .eq('id', trackId)
+          .single();
+        
+        if (error) {
+          console.error('Supabase error fetching track:', error);
+          throw new Error(`Error fetching track: ${error.message}`);
+        }
+        
+        console.log('Track data fetched successfully:', data);
+        return data;
+      } catch (error) {
+        console.error('Error in track fetch query:', error);
         throw error;
       }
-      
-      console.log('Fetched track data:', data);
-      return data;
     },
     enabled: trackId > 0
   });
+
+  // Log any query errors
+  useEffect(() => {
+    if (error) {
+      console.error('Track data query error:', error);
+    }
+  }, [error]);
 
   // Función para asegurar contenido para todos los idiomas
   const ensureContentForAllLanguages = (existingContents: TrackContent[], languages: Language[]) => {
@@ -163,8 +186,6 @@ export const useTrackData = (trackId: number) => {
     
     if (existingTrack && languages.length > 0) {
       console.log('Processing existing track data:', existingTrack);
-      console.log('Available languages:', languages);
-      console.log('Existing track contents:', existingTrack.track_contents);
       
       // Asegurar contenido para todos los idiomas
       const completeTrackContents = ensureContentForAllLanguages(
@@ -214,7 +235,6 @@ export const useTrackData = (trackId: number) => {
       console.log('Final transformed track data:', transformedTrack);
       setTrackData(transformedTrack);
     } else if (!existingTrack && languages.length > 0 && trackId > 0) {
-      // Para tracks nuevos, inicializar con contenido vacío para todos los idiomas
       console.log('Initializing new track with empty content for all languages');
       const emptyContents = languages.map(lang => ({
         title: '',
@@ -286,6 +306,7 @@ export const useTrackData = (trackId: number) => {
     setTrackData,
     languages,
     isLoading,
+    error,
     updateTrackContent,
     updateVideoContent
   };
