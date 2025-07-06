@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -5,9 +6,6 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { CMSAuthProvider } from '@/contexts/CMSAuthContext';
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerContext';
 import { Toaster } from '@/components/ui/toaster';
-
-// Import the about content initializer
-import '@/lib/initialize-about-content';
 
 // Import pages
 import Index from '@/pages/Index';
@@ -43,7 +41,15 @@ import AdminAbout from '@/pages/admin/AdminAbout';
 import AdminAboutSectionEdit from '@/pages/admin/AdminAboutSectionEdit';
 import AdminPressKit from '@/pages/admin/AdminPressKit';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 3,
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+  },
+});
 
 function App() {
   return (

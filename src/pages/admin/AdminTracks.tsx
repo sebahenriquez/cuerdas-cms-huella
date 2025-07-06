@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Edit, Play, Pause, Volume2, Plus, Eye, Music } from 'lucide-react';
+import { Edit, Play, Pause, Volume2, Plus, Eye, Music, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { getTracks } from '@/lib/supabase-helpers';
@@ -27,14 +28,38 @@ const AdminTracks: React.FC = () => {
   const queryClient = useQueryClient();
   const { currentTrack, isPlaying, playTrack, pauseTrack, setTracks } = useAudioPlayer();
 
-  const { data: tracksES = [], isLoading } = useQuery({
+  const { data: tracksES = [], isLoading, error, refetch } = useQuery({
     queryKey: ['admin-tracks-es'],
-    queryFn: () => getTracks(1) // Spanish language ID
+    queryFn: async () => {
+      try {
+        console.log('Fetching Spanish tracks...');
+        const tracks = await getTracks(1);
+        console.log('Spanish tracks fetched:', tracks);
+        return tracks;
+      } catch (error) {
+        console.error('Error fetching Spanish tracks:', error);
+        throw error;
+      }
+    },
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 
   const { data: tracksEN = [] } = useQuery({
     queryKey: ['admin-tracks-en'],
-    queryFn: () => getTracks(2) // English language ID
+    queryFn: async () => {
+      try {
+        console.log('Fetching English tracks...');
+        const tracks = await getTracks(2);
+        console.log('English tracks fetched:', tracks);
+        return tracks;
+      } catch (error) {
+        console.error('Error fetching English tracks:', error);
+        throw error;
+      }
+    },
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 
   React.useEffect(() => {
@@ -63,6 +88,21 @@ const AdminTracks: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2">Cargando tracks...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="text-red-600">
+          Error al cargar los tracks: {error instanceof Error ? error.message : 'Error desconocido'}
+        </div>
+        <Button onClick={() => refetch()} variant="outline">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Reintentar
+        </Button>
       </div>
     );
   }
@@ -76,12 +116,18 @@ const AdminTracks: React.FC = () => {
             Administra el contenido de todos los tracks del álbum
           </p>
         </div>
-        <Button asChild>
-          <Link to="/admin/tracks/new">
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Track
-          </Link>
-        </Button>
+        <div className="flex space-x-2">
+          <Button onClick={() => refetch()} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Actualizar
+          </Button>
+          <Button asChild>
+            <Link to="/admin/tracks/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo Track
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4">
@@ -166,7 +212,7 @@ const AdminTracks: React.FC = () => {
         ))}
       </div>
 
-      {tracksES.length === 0 && (
+      {tracksES.length === 0 && !isLoading && (
         <Card>
           <CardContent className="text-center py-12">
             <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -174,6 +220,10 @@ const AdminTracks: React.FC = () => {
             <p className="text-muted-foreground mb-4">
               Los tracks se cargan automáticamente desde la base de datos.
             </p>
+            <Button onClick={() => refetch()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Verificar conexión
+            </Button>
           </CardContent>
         </Card>
       )}
