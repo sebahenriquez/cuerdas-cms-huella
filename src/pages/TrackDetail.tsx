@@ -74,10 +74,21 @@ const TrackDetail = () => {
     }
   };
 
-  // Function to process text content for better paragraph handling
+  // Function to process text content for better paragraph handling and HTML support
   const processTextContent = (content: string) => {
     if (!content) return '';
     
+    // Si ya contiene HTML, preservarlo y mejorarlo
+    if (content.includes('<p>') || content.includes('<br>') || content.includes('<div>')) {
+      return content
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/<br\s*\/?>/gi, '<br>')
+        .replace(/<p>\s*<\/p>/gi, '') // Eliminar párrafos vacíos
+        .trim();
+    }
+    
+    // Si es texto plano, procesarlo
     const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     const paragraphs = normalizedContent
       .split(/\n\s*\n+/)

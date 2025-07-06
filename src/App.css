@@ -56,18 +56,20 @@
 
 /* Estilos optimizados para contenido de texto formateado */
 .text-content-formatted {
-  max-width: 800px;
+  max-width: 700px;
   margin: 0 auto;
   font-size: 17px;
   line-height: 1.7;
   font-family: 'Inter', Georgia, serif;
-  text-align: left;
+  text-align: justify; /* Justificado para textos de tracks */
   color: inherit;
+  padding: 0 20px;
 }
 
 .text-content-formatted p {
   margin-bottom: 1.5em;
-  text-align: left;
+  text-align: justify; /* Justificado para párrafos */
+  text-justify: inter-word; /* Mejor distribución del texto */
 }
 
 .text-content-formatted p:last-child {
@@ -76,6 +78,19 @@
 
 .text-content-formatted br {
   line-height: 1.2;
+  display: block;
+  margin: 0.5em 0;
+}
+
+/* Estilos específicos para HTML directo */
+.text-content-formatted .paragraph-block {
+  margin-bottom: 1.5em;
+  text-align: justify;
+}
+
+.text-content-formatted .line-break {
+  display: block;
+  height: 0.5em;
 }
 
 /* Estilos para contenido de texto en hero sections */
@@ -104,11 +119,12 @@
     max-width: 95%;
     font-size: 16px;
     line-height: 1.6;
-    padding: 0 10px;
+    padding: 0 15px;
   }
   
   .text-content-formatted p {
     margin-bottom: 1.3em;
+    text-align: left; /* En móviles, alineación izquierda para mejor legibilidad */
   }
 
   .text-content-formatted-hero {
@@ -126,7 +142,11 @@
 @media (max-width: 480px) {
   .text-content-formatted {
     font-size: 15px;
-    padding: 0 5px;
+    padding: 0 10px;
+  }
+  
+  .text-content-formatted p {
+    text-align: left; /* En pantallas muy pequeñas, alineación izquierda */
   }
   
   .text-content-formatted-hero {

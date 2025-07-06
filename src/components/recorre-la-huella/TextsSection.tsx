@@ -11,11 +11,27 @@ interface TextsSectionProps {
 }
 
 const TextsSection: React.FC<TextsSectionProps> = ({ currentTrackContent }) => {
-  // Función mejorada para procesar el texto y crear párrafos reales
+  // Función mejorada para procesar el contenido HTML y crear párrafos
   const processTextContent = (content: string) => {
     if (!content) return '';
     
-    // Normalizar los saltos de línea (Windows, Mac, Unix)
+    // Si ya contiene HTML, preservarlo
+    if (content.includes('<p>') || content.includes('<br>') || content.includes('<div>')) {
+      // Limpiar y mejorar el HTML existente
+      let processedContent = content
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        // Asegurar que los <br> tengan espaciado adecuado
+        .replace(/<br\s*\/?>/gi, '<br>')
+        // Mejorar párrafos existentes
+        .replace(/<p>\s*<\/p>/gi, '') // Eliminar párrafos vacíos
+        .replace(/<p>/gi, '<p>')
+        .replace(/<\/p>/gi, '</p>');
+      
+      return processedContent;
+    }
+    
+    // Si es texto plano, procesarlo como antes pero con mejor soporte para HTML
     const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     
     // Dividir por uno o más saltos de línea para crear párrafos
