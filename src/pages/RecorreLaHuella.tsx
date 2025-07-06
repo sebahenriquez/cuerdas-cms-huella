@@ -143,7 +143,10 @@ const RecorreLaHuella = () => {
             </h2>
             <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-border/30">
               <div 
-                className="prose prose-lg max-w-none text-foreground"
+                className="prose prose-lg max-w-none text-foreground prose-p:mb-4 prose-p:leading-relaxed"
+                style={{
+                  lineHeight: '1.7',
+                }}
                 dangerouslySetInnerHTML={{ 
                   __html: currentTrackContent?.long_text_content || `
                     <p>Explora la profundidad musical y emocional de este track. Cada pieza ha sido cuidadosamente 

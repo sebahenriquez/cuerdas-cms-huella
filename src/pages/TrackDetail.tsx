@@ -144,7 +144,12 @@ const TrackDetail = () => {
       {ctaSettings?.show_texts && trackContent?.long_text_content && (
         <section className="py-16 px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="prose prose-lg max-w-none text-foreground">
+            <div 
+              className="prose prose-lg max-w-none text-foreground prose-p:mb-4 prose-p:leading-relaxed"
+              style={{
+                lineHeight: '1.7',
+              }}
+            >
               <div 
                 dangerouslySetInnerHTML={{ 
                   __html: trackContent.long_text_content
