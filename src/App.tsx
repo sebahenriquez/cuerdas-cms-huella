@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
 import { CMSAuthProvider } from "@/contexts/CMSAuthContext";
@@ -51,7 +51,7 @@ function App() {
               <BrowserRouter>
                 <Routes>
                   {/* Public Routes */}
-                  <Route path="/" element={<Layout />}>
+                  <Route path="/" element={<Layout><Outlet /></Layout>}>
                     <Route index element={<Index />} />
                     <Route path="recorre-la-huella" element={<RecorreLaHuella />} />
                     <Route path="track/:trackId" element={<TrackDetail />} />

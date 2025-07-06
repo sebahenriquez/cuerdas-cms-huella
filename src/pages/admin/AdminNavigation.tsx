@@ -194,7 +194,10 @@ const AdminNavigation: React.FC = () => {
     }
   });
 
-  const handleSave = (formData: FormData) => {
+  const handleSave = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    
     const url = formData.get('url') as string;
     const icon = formData.get('icon') as string;
     
@@ -263,7 +266,7 @@ const AdminNavigation: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form action={handleSave} className="space-y-4">
+            <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="url">URL</Label>
