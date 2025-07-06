@@ -10,9 +10,10 @@ import {
   Users, 
   Languages, 
   Settings, 
-  Template,
+  Layout,
   MousePointer,
-  Info
+  Info,
+  Download
 } from 'lucide-react';
 
 const AdminLayout: React.FC = () => {
@@ -24,11 +25,12 @@ const AdminLayout: React.FC = () => {
     { icon: Video, label: 'Videos', path: '/admin/videos' },
     { icon: FileText, label: 'Pages', path: '/admin/pages' },
     { icon: Info, label: 'About Page', path: '/admin/about' },
+    { icon: Download, label: 'Press Kit', path: '/admin/press-kit' },
     { icon: Upload, label: 'Media', path: '/admin/media' },
     { icon: Users, label: 'Users', path: '/admin/users' },
     { icon: Languages, label: 'Languages', path: '/admin/languages' },
     { icon: MousePointer, label: 'CTA Buttons', path: '/admin/cta-buttons' },
-    { icon: Template, label: 'Templates', path: '/admin/templates' },
+    { icon: Layout, label: 'Templates', path: '/admin/templates' },
     { icon: Settings, label: 'Settings', path: '/admin/settings' },
   ];
 
