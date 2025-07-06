@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -134,9 +135,15 @@ All colors MUST be HSL and editable from CMS backend.
 }
 
 @layer components {
-  /* Hero Section Components */
+  /* Hero Section Components - Optimized for image display */
   .hero-section {
-    @apply relative min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat;
+    @apply relative min-h-screen flex items-center justify-center;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-attachment: fixed;
   }
 
   .hero-section-short {
@@ -251,5 +258,29 @@ All colors MUST be HSL and editable from CMS backend.
   
   .section-padding {
     @apply py-16 lg:py-24;
+  }
+}
+
+/* Utilities for better hero image display */
+@layer utilities {
+  .hero-bg-image {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-attachment: scroll;
+  }
+  
+  @media (min-width: 768px) {
+    .hero-bg-image {
+      background-attachment: fixed;
+    }
+  }
+  
+  .hero-bg-top {
+    background-position: center top;
+  }
+  
+  .hero-bg-center-top {
+    background-position: center 25%;
   }
 }

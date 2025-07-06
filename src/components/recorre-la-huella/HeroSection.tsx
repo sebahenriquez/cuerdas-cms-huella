@@ -14,15 +14,15 @@ interface HeroSectionProps {
 const HeroSection: React.FC<HeroSectionProps> = ({ currentTrackContent }) => {
   return (
     <section 
-      className="relative h-[50vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
+      className="hero-section hero-bg-image"
       style={{
         backgroundImage: currentTrackContent?.hero_image_url 
           ? `url(${currentTrackContent.hero_image_url})`
           : 'url(https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f)'
       }}
     >
-      <div className="absolute inset-0 bg-black/60" />
-      <div className="relative z-10 text-center text-white px-4">
+      <div className="hero-overlay" />
+      <div className="hero-content">
         <h1 className="text-4xl md:text-6xl font-bold mb-4 animate-fade-in">
           {currentTrackContent?.title || 'Recorre la Huella'}
         </h1>

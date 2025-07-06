@@ -16,6 +16,8 @@ interface AudioPlayerContextType {
   setVolume: (volume: number) => void;
   setTracks: (tracks: Track[]) => void;
   tracks: Track[];
+  nextTrack: () => void;
+  previousTrack: () => void;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
@@ -104,6 +106,22 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   };
 
+  const nextTrack = () => {
+    if (!currentTrack || tracks.length === 0) return;
+    
+    const currentIndex = tracks.findIndex(track => track.id === currentTrack.id);
+    const nextIndex = (currentIndex + 1) % tracks.length;
+    playTrack(tracks[nextIndex]);
+  };
+
+  const previousTrack = () => {
+    if (!currentTrack || tracks.length === 0) return;
+    
+    const currentIndex = tracks.findIndex(track => track.id === currentTrack.id);
+    const prevIndex = currentIndex === 0 ? tracks.length - 1 : currentIndex - 1;
+    playTrack(tracks[prevIndex]);
+  };
+
   return (
     <AudioPlayerContext.Provider
       value={{
@@ -120,6 +138,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setVolume: setVolumeHandler,
         setTracks,
         tracks,
+        nextTrack,
+        previousTrack,
       }}
     >
       {children}
