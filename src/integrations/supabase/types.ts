@@ -9,6 +9,234 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      about_feature_card_contents: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          feature_card_id: number | null
+          id: number
+          language_id: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          feature_card_id?: number | null
+          id?: number
+          language_id?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          feature_card_id?: number | null
+          id?: number
+          language_id?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "about_feature_card_contents_feature_card_id_fkey"
+            columns: ["feature_card_id"]
+            isOneToOne: false
+            referencedRelation: "about_feature_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "about_feature_card_contents_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      about_feature_cards: {
+        Row: {
+          card_key: string
+          created_at: string | null
+          icon_name: string | null
+          id: number
+          is_active: boolean | null
+          order_position: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          card_key: string
+          created_at?: string | null
+          icon_name?: string | null
+          id?: number
+          is_active?: boolean | null
+          order_position?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          card_key?: string
+          created_at?: string | null
+          icon_name?: string | null
+          id?: number
+          is_active?: boolean | null
+          order_position?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      about_project_stat_contents: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: number
+          label: string
+          language_id: number | null
+          project_stat_id: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          label: string
+          language_id?: number | null
+          project_stat_id?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          label?: string
+          language_id?: number | null
+          project_stat_id?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "about_project_stat_contents_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "about_project_stat_contents_project_stat_id_fkey"
+            columns: ["project_stat_id"]
+            isOneToOne: false
+            referencedRelation: "about_project_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      about_project_stats: {
+        Row: {
+          created_at: string | null
+          id: number
+          is_active: boolean | null
+          number_value: number | null
+          order_position: number | null
+          stat_key: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          is_active?: boolean | null
+          number_value?: number | null
+          order_position?: number | null
+          stat_key: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          is_active?: boolean | null
+          number_value?: number | null
+          order_position?: number | null
+          stat_key?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      about_section_contents: {
+        Row: {
+          about_section_id: number | null
+          content: string | null
+          created_at: string | null
+          id: number
+          language_id: number | null
+          metadata: Json | null
+          subtitle: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          about_section_id?: number | null
+          content?: string | null
+          created_at?: string | null
+          id?: number
+          language_id?: number | null
+          metadata?: Json | null
+          subtitle?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          about_section_id?: number | null
+          content?: string | null
+          created_at?: string | null
+          id?: number
+          language_id?: number | null
+          metadata?: Json | null
+          subtitle?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "about_section_contents_about_section_id_fkey"
+            columns: ["about_section_id"]
+            isOneToOne: false
+            referencedRelation: "about_sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "about_section_contents_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      about_sections: {
+        Row: {
+          created_at: string | null
+          id: number
+          is_active: boolean | null
+          order_position: number | null
+          section_key: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          is_active?: boolean | null
+          order_position?: number | null
+          section_key: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          is_active?: boolean | null
+          order_position?: number | null
+          section_key?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       cms_users: {
         Row: {
           created_at: string | null
