@@ -70,7 +70,6 @@ interface TrackData {
 
 export const useTrackData = (trackId: number) => {
   const [trackData, setTrackData] = useState<Partial<TrackData>>({
-    id: trackId,
     order_position: 1,
     audio_url: '',
     status: 'published',
@@ -95,29 +94,13 @@ export const useTrackData = (trackId: number) => {
     queryFn: getLanguages
   });
 
-  const { data: existingTrack, isLoading, error } = useQuery({
+  const { data: existingTrack, isLoading } = useQuery({
     queryKey: ['track', trackId],
     queryFn: async () => {
+      if (trackId === 0) return null;
+      
       console.log('Fetching track data for ID:', trackId);
       
-      // Primero verificar si el track existe
-      const { data: trackExists, error: trackError } = await supabase
-        .from('tracks')
-        .select('*')
-        .eq('id', trackId)
-        .maybeSingle();
-      
-      if (trackError) {
-        console.error('Error checking if track exists:', trackError);
-        throw trackError;
-      }
-      
-      if (!trackExists) {
-        console.log('Track does not exist, will create new one');
-        return null;
-      }
-      
-      // Si existe, obtener todos los datos relacionados
       const { data, error } = await supabase
         .from('tracks')
         .select(`
@@ -131,15 +114,14 @@ export const useTrackData = (trackId: number) => {
         .single();
       
       if (error) {
-        console.error('Error fetching track data:', error);
+        console.error('Error fetching track:', error);
         throw error;
       }
       
-      console.log('Successfully fetched track data:', data);
+      console.log('Fetched track data:', data);
       return data;
     },
-    enabled: trackId > 0,
-    retry: 1
+    enabled: trackId > 0
   });
 
   // Función para asegurar contenido para todos los idiomas
@@ -177,87 +159,78 @@ export const useTrackData = (trackId: number) => {
   };
 
   useEffect(() => {
-    console.log('useTrackData useEffect triggered with:', { 
-      existingTrack: existingTrack ? 'found' : 'not found', 
-      languages: languages.length,
-      trackId,
-      error: error?.message
-    });
+    console.log('useEffect triggered with:', { existingTrack, languages });
     
-    if (languages.length > 0) {
-      if (existingTrack) {
-        console.log('Processing existing track data:', existingTrack);
-        
-        // Asegurar contenido para todos los idiomas
-        const completeTrackContents = ensureContentForAllLanguages(
-          existingTrack.track_contents || [], 
-          languages
-        );
-        
-        const transformedTrack = {
-          id: existingTrack.id,
-          order_position: existingTrack.order_position,
-          audio_url: existingTrack.audio_url || '',
-          status: existingTrack.status || 'published',
-          track_contents: completeTrackContents,
-          videos: existingTrack.videos?.map(video => ({
-            ...video,
-            video_contents: video.video_contents || languages.map(lang => ({
-              title: '',
-              description: '',
-              language_id: lang.id
-            }))
-          })) || [],
-          photos: existingTrack.track_featured_images?.map((photo, index) => ({
-            ...photo,
-            image_url: photo.image_url || '',
-            order_position: photo.order_position || index + 1
-          })) || [],
-          cta_settings: existingTrack.track_cta_settings?.[0] ? {
-            show_texts: existingTrack.track_cta_settings[0].show_texts ?? true,
-            show_videos: existingTrack.track_cta_settings[0].show_videos ?? true,
-            show_photos: existingTrack.track_cta_settings[0].show_photos ?? true,
-            texts_label_es: existingTrack.track_cta_settings[0].texts_label_es || 'Textos',
-            texts_label_en: existingTrack.track_cta_settings[0].texts_label_en || 'Texts',
-            videos_label_es: existingTrack.track_cta_settings[0].videos_label_es || 'Videos',
-            videos_label_en: existingTrack.track_cta_settings[0].videos_label_en || 'Videos',
-            photos_label_es: existingTrack.track_cta_settings[0].photos_label_es || 'Fotos',
-            photos_label_en: existingTrack.track_cta_settings[0].photos_label_en || 'Photos'
-          } : {
-            show_texts: true,
-            show_videos: true,
-            show_photos: true,
-            texts_label_es: 'Textos',
-            texts_label_en: 'Texts',
-            videos_label_es: 'Videos',
-            videos_label_en: 'Videos',
-            photos_label_es: 'Fotos',
-            photos_label_en: 'Photos'
-          }
-        };
-        
-        console.log('Final transformed track data:', transformedTrack);
-        setTrackData(transformedTrack);
-      } else {
-        // Para tracks que no existen o nuevos, inicializar con contenido vacío
-        console.log('Initializing track with empty content for all languages');
-        const emptyContents = languages.map(lang => ({
-          title: '',
-          menu_title: '',
-          description: '',
-          long_text_content: '',
-          hero_image_url: '',
-          language_id: lang.id
-        }));
-        
-        setTrackData(prev => ({
-          ...prev,
-          id: trackId,
-          track_contents: emptyContents
-        }));
-      }
+    if (existingTrack && languages.length > 0) {
+      console.log('Processing existing track data:', existingTrack);
+      console.log('Available languages:', languages);
+      console.log('Existing track contents:', existingTrack.track_contents);
+      
+      // Asegurar contenido para todos los idiomas
+      const completeTrackContents = ensureContentForAllLanguages(
+        existingTrack.track_contents || [], 
+        languages
+      );
+      
+      const transformedTrack = {
+        ...existingTrack,
+        track_contents: completeTrackContents,
+        videos: existingTrack.videos?.map(video => ({
+          ...video,
+          video_contents: video.video_contents || languages.map(lang => ({
+            title: '',
+            description: '',
+            language_id: lang.id
+          }))
+        })) || [],
+        photos: existingTrack.track_featured_images?.map((photo, index) => ({
+          ...photo,
+          image_url: photo.image_url || '',
+          order_position: photo.order_position || index + 1
+        })) || [],
+        cta_settings: existingTrack.track_cta_settings?.[0] ? {
+          show_texts: existingTrack.track_cta_settings[0].show_texts ?? true,
+          show_videos: existingTrack.track_cta_settings[0].show_videos ?? true,
+          show_photos: existingTrack.track_cta_settings[0].show_photos ?? true,
+          texts_label_es: existingTrack.track_cta_settings[0].texts_label_es || 'Textos',
+          texts_label_en: existingTrack.track_cta_settings[0].texts_label_en || 'Texts',
+          videos_label_es: existingTrack.track_cta_settings[0].videos_label_es || 'Videos',
+          videos_label_en: existingTrack.track_cta_settings[0].videos_label_en || 'Videos',
+          photos_label_es: existingTrack.track_cta_settings[0].photos_label_es || 'Fotos',
+          photos_label_en: existingTrack.track_cta_settings[0].photos_label_en || 'Photos'
+        } : {
+          show_texts: true,
+          show_videos: true,
+          show_photos: true,
+          texts_label_es: 'Textos',
+          texts_label_en: 'Texts',
+          videos_label_es: 'Videos',
+          videos_label_en: 'Videos',
+          photos_label_es: 'Fotos',
+          photos_label_en: 'Photos'
+        }
+      };
+      
+      console.log('Final transformed track data:', transformedTrack);
+      setTrackData(transformedTrack);
+    } else if (!existingTrack && languages.length > 0 && trackId > 0) {
+      // Para tracks nuevos, inicializar con contenido vacío para todos los idiomas
+      console.log('Initializing new track with empty content for all languages');
+      const emptyContents = languages.map(lang => ({
+        title: '',
+        menu_title: '',
+        description: '',
+        long_text_content: '',
+        hero_image_url: '',
+        language_id: lang.id
+      }));
+      
+      setTrackData(prev => ({
+        ...prev,
+        track_contents: emptyContents
+      }));
     }
-  }, [existingTrack, languages, trackId, error]);
+  }, [existingTrack, languages, trackId]);
 
   const updateTrackContent = (languageId: number, field: keyof TrackContent, value: string) => {
     console.log(`Updating content for language ${languageId}, field ${field}:`, value);
@@ -313,7 +286,6 @@ export const useTrackData = (trackId: number) => {
     setTrackData,
     languages,
     isLoading,
-    error,
     updateTrackContent,
     updateVideoContent
   };

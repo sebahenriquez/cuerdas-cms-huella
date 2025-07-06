@@ -8,7 +8,6 @@ import { useTrackSave } from '@/hooks/useTrackSave';
 import TrackHeader from '@/components/admin/track-edit/TrackHeader';
 import TrackSidebar from '@/components/admin/track-edit/TrackSidebar';
 import TrackContentTabs from '@/components/admin/track-edit/TrackContentTabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const AdminTrackEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,7 +21,6 @@ const AdminTrackEdit: React.FC = () => {
     setTrackData,
     languages,
     isLoading,
-    error,
     updateTrackContent,
     updateVideoContent
   } = useTrackData(trackId);
@@ -63,46 +61,6 @@ const AdminTrackEdit: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <span className="ml-2">Cargando track {trackId}...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    console.error('Error loading track:', error);
-    return (
-      <div className="space-y-6">
-        <Alert variant="destructive">
-          <AlertDescription>
-            Error al cargar el track {trackId}: {error.message}
-          </AlertDescription>
-        </Alert>
-        <button 
-          onClick={() => navigate('/admin/tracks')}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded"
-        >
-          Volver a la lista de tracks
-        </button>
-      </div>
-    );
-  }
-
-  if (!trackData || !trackData.id) {
-    console.log('Track data not ready:', trackData);
-    return (
-      <div className="space-y-6">
-        <Alert>
-          <AlertDescription>
-            Este track no existe en la base de datos. Se creará uno nuevo al guardar.
-          </AlertDescription>
-        </Alert>
-        {languages.length === 0 && (
-          <Alert variant="destructive">
-            <AlertDescription>
-              No se han cargado los idiomas. Verifica la configuración de la base de datos.
-            </AlertDescription>
-          </Alert>
-        )}
       </div>
     );
   }
@@ -163,21 +121,6 @@ const AdminTrackEdit: React.FC = () => {
           onContentChange={updateTrackContent}
         />
       </div>
-
-      {/* Debug info - solo en desarrollo */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-8 p-4 bg-gray-100 rounded text-xs">
-          <h4 className="font-bold mb-2">Debug Info:</h4>
-          <pre>{JSON.stringify({ 
-            trackId, 
-            hasTrackData: !!trackData,
-            trackDataKeys: trackData ? Object.keys(trackData) : [],
-            languagesCount: languages.length,
-            isLoading,
-            hasError: !!error
-          }, null, 2)}</pre>
-        </div>
-      )}
     </div>
   );
 };
