@@ -50,7 +50,7 @@ const TrackTextContent: React.FC<TrackTextContentProps> = ({ content }) => {
   };
 
   return (
-    <section className="py-16 px-4">
+    <section className="py-8 px-4">
       <div className="container mx-auto">
         <div className="max-w-4xl mx-auto">
           <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-lg border border-border/30">
