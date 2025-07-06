@@ -11,7 +11,7 @@ import VideosSection from '@/components/recorre-la-huella/VideosSection';
 import PhotosSection from '@/components/recorre-la-huella/PhotosSection';
 import LightboxModal from '@/components/recorre-la-huella/LightboxModal';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { getPageBySlug, getTracks, getTrackCTALabels } from '@/lib/supabase-helpers';
+import { getPageBySlug, getTracks, getTrackCTALabels, getCTAButtons } from '@/lib/supabase-helpers';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { Track } from '@/types/track';
 
@@ -32,6 +32,13 @@ const RecorreLaHuella = () => {
   const { data: tracks = [], isLoading: tracksLoading } = useQuery({
     queryKey: ['tracks', currentLanguage?.id],
     queryFn: () => currentLanguage ? getTracks(currentLanguage.id) : [],
+    enabled: !!currentLanguage,
+  });
+
+  // Query para obtener el texto del botón "Comenzar el Recorrido"
+  const { data: ctaButtons } = useQuery({
+    queryKey: ['cta-buttons', currentLanguage?.id],
+    queryFn: () => currentLanguage ? getCTAButtons(currentLanguage.id) : null,
     enabled: !!currentLanguage,
   });
 
@@ -82,6 +89,17 @@ const RecorreLaHuella = () => {
   const currentCTASettings = getCurrentTrackCTASettings();
   const ctaLabels = getTrackCTALabels(currentCTASettings, currentLanguage);
 
+  // Get start journey button text
+  const getStartJourneyButtonText = () => {
+    if (ctaButtons && Array.isArray(ctaButtons)) {
+      const startJourneyButton = ctaButtons.find((b: any) => b?.key === 'start_journey');
+      if (startJourneyButton?.cta_button_contents?.[0]?.label) {
+        return startJourneyButton.cta_button_contents[0].label;
+      }
+    }
+    return 'Comenzar el Recorrido'; // Fallback
+  };
+
   console.log('Current CTA Settings:', currentCTASettings);
   console.log('Current Language:', currentLanguage);
   console.log('CTA Labels:', ctaLabels);
@@ -104,6 +122,7 @@ const RecorreLaHuella = () => {
         <IntroSection 
           introContent={introContent}
           onStartJourney={handleStartJourney}
+          startJourneyButtonText={getStartJourneyButtonText()}
         />
       </Layout>
     );

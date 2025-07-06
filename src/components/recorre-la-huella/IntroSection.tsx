@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -11,9 +10,14 @@ interface IntroContent {
 interface IntroSectionProps {
   introContent: IntroContent | null;
   onStartJourney: () => void;
+  startJourneyButtonText?: string;
 }
 
-const IntroSection: React.FC<IntroSectionProps> = ({ introContent, onStartJourney }) => {
+const IntroSection: React.FC<IntroSectionProps> = ({ 
+  introContent, 
+  onStartJourney, 
+  startJourneyButtonText = 'Comenzar el Recorrido'
+}) => {
   // Función mejorada para procesar el contenido y crear párrafos reales
   const processContent = (content: string) => {
     if (!content) return '';
@@ -71,7 +75,7 @@ const IntroSection: React.FC<IntroSectionProps> = ({ introContent, onStartJourne
             size="lg"
             className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
           >
-            Comenzar el Recorrido
+            {startJourneyButtonText}
           </Button>
         </div>
       </div>
