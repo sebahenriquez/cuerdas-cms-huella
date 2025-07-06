@@ -33,8 +33,8 @@ const AdminCTAButtons: React.FC = () => {
         if (button?.key && button?.cta_button_contents) {
           textsObj[button.key] = {};
           button.cta_button_contents.forEach((content: any) => {
-            if (content?.language_id && content?.text) {
-              textsObj[button.key][content.language_id] = content.text;
+            if (content?.language_id && content?.label) {
+              textsObj[button.key][content.language_id] = content.label;
             }
           });
         }
@@ -45,30 +45,47 @@ const AdminCTAButtons: React.FC = () => {
 
   const saveCTAButtons = useMutation({
     mutationFn: async (data: Record<string, Record<number, string>>) => {
+      console.log('Saving CTA buttons with data:', data);
+      
       for (const [buttonKey, languageTexts] of Object.entries(data)) {
         const button = ctaButtons?.find((b: any) => b?.key === buttonKey);
-        if (!button) continue;
+        if (!button) {
+          console.log(`Button with key ${buttonKey} not found`);
+          continue;
+        }
 
         for (const [languageId, text] of Object.entries(languageTexts)) {
           const existingContent = button.cta_button_contents?.find(
             (c: any) => c?.language_id === parseInt(languageId)
           );
 
+          console.log(`Processing ${buttonKey} for language ${languageId}:`, { existingContent, text });
+
           if (existingContent) {
+            // Update existing content - use 'label' field instead of 'text'
             const { error } = await supabase
-              .from('cta_button_contents' as any)
-              .update({ text })
+              .from('cta_button_contents')
+              .update({ label: text })
               .eq('id', existingContent.id);
-            if (error) throw error;
+            
+            if (error) {
+              console.error('Error updating CTA button content:', error);
+              throw error;
+            }
           } else {
+            // Insert new content - use 'label' field instead of 'text'
             const { error } = await supabase
-              .from('cta_button_contents' as any)
+              .from('cta_button_contents')
               .insert({
                 cta_button_id: button.id,
                 language_id: parseInt(languageId),
-                text
+                label: text
               });
-            if (error) throw error;
+            
+            if (error) {
+              console.error('Error inserting CTA button content:', error);
+              throw error;
+            }
           }
         }
       }
@@ -80,10 +97,11 @@ const AdminCTAButtons: React.FC = () => {
         description: 'Los cambios han sido aplicados correctamente.',
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Error saving CTA buttons:', error);
       toast({
         title: 'Error',
-        description: 'No se pudieron guardar los cambios.',
+        description: `No se pudieron guardar los cambios: ${error.message}`,
         variant: 'destructive',
       });
     }
@@ -100,6 +118,7 @@ const AdminCTAButtons: React.FC = () => {
   };
 
   const handleSave = () => {
+    console.log('Saving button texts:', buttonTexts);
     saveCTAButtons.mutate(buttonTexts);
   };
 

@@ -11,7 +11,7 @@ import VideosSection from '@/components/recorre-la-huella/VideosSection';
 import PhotosSection from '@/components/recorre-la-huella/PhotosSection';
 import LightboxModal from '@/components/recorre-la-huella/LightboxModal';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { getPageBySlug, getTracks } from '@/lib/supabase-helpers';
+import { getPageBySlug, getTracks, getTrackCTALabels } from '@/lib/supabase-helpers';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { Track } from '@/types/track';
 
@@ -73,6 +73,19 @@ const RecorreLaHuella = () => {
   const currentTrackContent = getCurrentTrackContent();
   const introContent = introData?.page_contents?.[0];
 
+  // Get CTA settings for the current track with proper language handling
+  const getCurrentTrackCTASettings = () => {
+    const track = selectedTrack || tracks[0];
+    return track?.track_cta_settings?.[0];
+  };
+
+  const currentCTASettings = getCurrentTrackCTASettings();
+  const ctaLabels = getTrackCTALabels(currentCTASettings, currentLanguage);
+
+  console.log('Current CTA Settings:', currentCTASettings);
+  console.log('Current Language:', currentLanguage);
+  console.log('CTA Labels:', ctaLabels);
+
   // Si estamos mostrando la introducción
   if (showIntro) {
     return (
@@ -123,21 +136,32 @@ const RecorreLaHuella = () => {
       {/* Hero Section */}
       <HeroSection currentTrackContent={currentTrackContent} />
 
-      {/* Textos Section */}
-      <TextsSection currentTrackContent={currentTrackContent} />
+      {/* Textos Section - usando las etiquetas correctas según el idioma */}
+      {currentCTASettings?.show_texts && (
+        <TextsSection 
+          currentTrackContent={currentTrackContent}
+          sectionTitle={ctaLabels.textsLabel}
+        />
+      )}
 
-      {/* Videos Section */}
-      <VideosSection 
-        selectedTrack={selectedTrack}
-        currentLanguage={currentLanguage}
-      />
+      {/* Videos Section - usando las etiquetas correctas según el idioma */}
+      {currentCTASettings?.show_videos && (
+        <VideosSection 
+          selectedTrack={selectedTrack}
+          currentLanguage={currentLanguage}
+          sectionTitle={ctaLabels.videosLabel}
+        />
+      )}
 
-      {/* Fotos Section */}
-      <PhotosSection 
-        selectedTrack={selectedTrack}
-        currentLanguage={currentLanguage}
-        onImageClick={setLightboxImage}
-      />
+      {/* Fotos Section - usando las etiquetas correctas según el idioma */}
+      {currentCTASettings?.show_photos && (
+        <PhotosSection 
+          selectedTrack={selectedTrack}
+          currentLanguage={currentLanguage}
+          onImageClick={setLightboxImage}
+          sectionTitle={ctaLabels.photosLabel}
+        />
+      )}
 
       {/* Lightbox Modal */}
       <LightboxModal 

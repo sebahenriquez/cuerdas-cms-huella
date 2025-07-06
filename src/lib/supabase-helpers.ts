@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 // Language helpers
@@ -241,4 +240,23 @@ export const getTrackCTASettings = async (trackId: number) => {
   
   if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows returned"
   return data;
+};
+
+// Helper function to get track CTA labels in the correct language
+export const getTrackCTALabels = (ctaSettings: any, currentLanguage: any) => {
+  if (!ctaSettings || !currentLanguage) {
+    return {
+      textsLabel: 'Textos',
+      videosLabel: 'Videos', 
+      photosLabel: 'Fotos'
+    };
+  }
+
+  const isEnglish = currentLanguage.code === 'en';
+  
+  return {
+    textsLabel: isEnglish ? (ctaSettings.texts_label_en || 'Texts') : (ctaSettings.texts_label_es || 'Textos'),
+    videosLabel: isEnglish ? (ctaSettings.videos_label_en || 'Videos') : (ctaSettings.videos_label_es || 'Videos'),
+    photosLabel: isEnglish ? (ctaSettings.photos_label_en || 'Photos') : (ctaSettings.photos_label_es || 'Fotos')
+  };
 };
