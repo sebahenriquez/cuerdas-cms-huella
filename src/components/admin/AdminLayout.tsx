@@ -1,99 +1,70 @@
 
 import React from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
+import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  FileText, 
   Music, 
   Video, 
-  Image, 
-  Settings, 
+  FileText, 
+  Upload, 
   Users, 
-  LogOut,
-  Globe,
-  Code,
-  Mouse
+  Languages, 
+  Settings, 
+  Template,
+  MousePointer,
+  Info
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useCMSAuth } from '@/contexts/CMSAuthContext';
 
 const AdminLayout: React.FC = () => {
-  const { user, logout } = useCMSAuth();
   const location = useLocation();
 
-  const navigation = [
-    { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'Páginas', href: '/admin/pages', icon: FileText },
-    { name: 'Tracks', href: '/admin/tracks', icon: Music },
-    { name: 'Videos', href: '/admin/videos', icon: Video },
-    { name: 'Media', href: '/admin/media', icon: Image },
-    { name: 'Botones CTA', href: '/admin/cta-buttons', icon: Mouse },
-    { name: 'Plantillas', href: '/admin/templates', icon: Code },
-    { name: 'Idiomas', href: '/admin/languages', icon: Globe },
-    { name: 'Configuración', href: '/admin/settings', icon: Settings },
-    { name: 'Usuarios', href: '/admin/users', icon: Users },
+  const navItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
+    { icon: Music, label: 'Tracks', path: '/admin/tracks' },
+    { icon: Video, label: 'Videos', path: '/admin/videos' },
+    { icon: FileText, label: 'Pages', path: '/admin/pages' },
+    { icon: Info, label: 'About Page', path: '/admin/about' },
+    { icon: Upload, label: 'Media', path: '/admin/media' },
+    { icon: Users, label: 'Users', path: '/admin/users' },
+    { icon: Languages, label: 'Languages', path: '/admin/languages' },
+    { icon: MousePointer, label: 'CTA Buttons', path: '/admin/cta-buttons' },
+    { icon: Template, label: 'Templates', path: '/admin/templates' },
+    { icon: Settings, label: 'Settings', path: '/admin/settings' },
   ];
 
   const isActiveRoute = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(path + '/');
+    if (path === '/admin') {
+      return location.pathname === '/admin';
+    }
+    return location.pathname.startsWith(path);
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className="admin-sidebar">
-        <div className="p-6 border-b border-border">
-          <h2 className="text-lg font-semibold text-primary">
-            CMS Admin
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            La Huella de las Cuerdas
-          </p>
+      <div className="w-64 bg-white shadow-lg">
+        <div className="p-6">
+          <h1 className="text-xl font-bold text-gray-800">CMS Admin</h1>
         </div>
-
-        <nav className="p-4 space-y-2">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActiveRoute(item.href)
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground hover:bg-muted'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{item.name}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="p-3 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground mb-2">
-              Conectado como:
-            </p>
-            <p className="text-sm font-medium truncate">
-              {user?.email}
-            </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={logout}
-              className="w-full mt-2 justify-start"
+        
+        <nav className="mt-6">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={`flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors ${
+                isActiveRoute(item.path) ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : ''
+              }`}
             >
-              <LogOut className="h-4 w-4 mr-2" />
-              Cerrar Sesión
-            </Button>
-          </div>
-        </div>
+              <item.icon className="h-5 w-5 mr-3" />
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
       </div>
 
       {/* Main Content */}
-      <div className="admin-content">
+      <div className="flex-1 p-8">
         <Outlet />
       </div>
     </div>

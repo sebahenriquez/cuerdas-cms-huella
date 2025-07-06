@@ -3,21 +3,28 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const initializeAboutContent = async () => {
   try {
-    // Get language IDs
-    const { data: languages } = await supabase
+    console.log('Initializing About content...');
+
+    // Obtener idiomas disponibles
+    const { data: languages, error: langError } = await supabase
       .from('languages')
-      .select('id, code');
+      .select('*');
     
-    const englishLang = languages?.find(l => l.code === 'en');
-    const spanishLang = languages?.find(l => l.code === 'es');
-    
-    if (!englishLang || !spanishLang) {
-      console.error('Languages not found');
+    if (langError) {
+      console.error('Error fetching languages:', langError);
       return;
     }
 
-    // Initialize section contents
-    const sectionContents = [
+    const spanishLang = languages.find(lang => lang.code === 'es');
+    const englishLang = languages.find(lang => lang.code === 'en');
+
+    if (!spanishLang || !englishLang) {
+      console.error('Spanish or English language not found');
+      return;
+    }
+
+    // Inicializar contenido de secciones
+    const sectionsContent = [
       {
         section_key: 'hero',
         contents: [
@@ -25,13 +32,13 @@ export const initializeAboutContent = async () => {
             language_id: englishLang.id,
             title: 'About the Project',
             subtitle: 'La Huella de las Cuerdas',
-            content: 'A multimedia journey through the cultural heritage of Latin American stringed instruments'
+            content: 'A musical journey through Latin America exploring the cultural impact of stringed instruments.'
           },
           {
             language_id: spanishLang.id,
             title: 'Sobre el Proyecto',
             subtitle: 'La Huella de las Cuerdas',
-            content: 'Un viaje multimedia a través del patrimonio cultural de los instrumentos de cuerda latinoamericanos'
+            content: 'Un viaje musical por América Latina explorando el impacto cultural de los instrumentos de cuerda.'
           }
         ]
       },
@@ -47,8 +54,8 @@ export const initializeAboutContent = async () => {
           {
             language_id: spanishLang.id,
             title: 'El Proyecto',
-            content: `<p>Berta Rojas presenta La Huella de las Cuerdas, un proyecto que rastrea el impacto cultural de la guitarra en América Latina e ilumina los lazos que la unen de tantas maneras a la gran familia de instrumentos de cuerda de las Américas.</p>
-            <p>Un paquete multimedia especial de alta calidad y edición única:</p>`
+            content: `<p>Berta Rojas presenta La Huella de las Cuerdas, un proyecto que rastrea el impacto cultural de la guitarra en América Latina e ilumina los lazos que la unen de tantas maneras a la gran familia de instrumentos de cuerda en las Américas.</p>
+            <p>Un paquete multimedia especial de alta calidad único:</p>`
           }
         ]
       },
@@ -58,48 +65,51 @@ export const initializeAboutContent = async () => {
           {
             language_id: englishLang.id,
             title: 'About the Book',
-            content: `<p>This comprehensive study documents the rich traditions and stories behind each instrument featured in the project. Through fascinating narratives and stunning large-format photography, readers are taken on Berta's journey as she encounters the remarkable musicians who are the heart and soul of this cultural exploration.</p>
-            
-            <p>The book serves as both an educational resource and a visual celebration of the incredible diversity found within Latin American musical traditions. Each chapter delves deep into the history, construction, and cultural significance of the featured instruments, while also sharing personal stories from the master craftsmen and virtuoso performers who keep these traditions alive.</p>
-            
-            <p>From the intimate workshops of guitar makers to concert halls filled with the sounds of ancient melodies given new life, this book captures the essence of a musical heritage that spans generations and crosses borders throughout the Americas.</p>`
+            content: `<p>This comprehensive volume documents the extraordinary journey across Latin America, capturing the essence of traditional stringed instruments and the master musicians who keep these traditions alive.</p>
+            <p>Through stunning photography and detailed cultural analysis, the book reveals the deep connections between different musical traditions across the Americas, showing how the guitar serves as both a bridge and a distinctive voice in each culture it encounters.</p>
+            <p>Each chapter focuses on a specific instrument and region, providing historical context, technical details, and personal stories from the musicians who have dedicated their lives to preserving and evolving these musical traditions.</p>`
           },
           {
             language_id: spanishLang.id,
             title: 'Sobre el Libro',
-            content: `<p>Este estudio integral documenta las ricas tradiciones e historias detrás de cada instrumento presentado en el proyecto. A través de narrativas fascinantes y fotografía impresionante de gran formato, los lectores son llevados en el viaje de Berta mientras se encuentra con los músicos extraordinarios que son el corazón y alma de esta exploración cultural.</p>
-            
-            <p>El libro sirve tanto como recurso educativo como celebración visual de la increíble diversidad encontrada dentro de las tradiciones musicales latinoamericanas. Cada capítulo profundiza en la historia, construcción y significado cultural de los instrumentos presentados, mientras también comparte historias personales de los maestros artesanos y virtuosos intérpretes que mantienen vivas estas tradiciones.</p>
-            
-            <p>Desde los talleres íntimos de los fabricantes de guitarras hasta las salas de concierto llenas con los sonidos de melodías ancestrales que cobran nueva vida, este libro captura la esencia de un patrimonio musical que abarca generaciones y cruza fronteras a través de las Américas.</p>`
+            content: `<p>Este volumen integral documenta el extraordinario viaje a través de América Latina, capturando la esencia de los instrumentos de cuerda tradicionales y los músicos maestros que mantienen vivas estas tradiciones.</p>
+            <p>A través de fotografías impresionantes y análisis culturales detallados, el libro revela las profundas conexiones entre las diferentes tradiciones musicales a través de las Américas, mostrando cómo la guitarra sirve tanto como puente como voz distintiva en cada cultura que encuentra.</p>
+            <p>Cada capítulo se enfoca en un instrumento y región específicos, proporcionando contexto histórico, detalles técnicos e historias personales de los músicos que han dedicado sus vidas a preservar y hacer evolucionar estas tradiciones musicales.</p>`
           }
         ]
       }
     ];
 
-    // Insert section contents
-    for (const section of sectionContents) {
-      // Get section ID
-      const { data: sectionData } = await supabase
+    // Insertar contenido de secciones
+    for (const section of sectionsContent) {
+      const { data: existingSection } = await supabase
         .from('about_sections')
         .select('id')
         .eq('section_key', section.section_key)
         .single();
-      
-      if (sectionData) {
+
+      if (existingSection) {
+        // Insertar contenidos para cada idioma
         for (const content of section.contents) {
-          await supabase
+          const { error: contentError } = await supabase
             .from('about_section_contents')
             .upsert({
-              about_section_id: sectionData.id,
-              ...content
+              about_section_id: existingSection.id,
+              language_id: content.language_id,
+              title: content.title,
+              subtitle: content.subtitle || null,
+              content: content.content
             });
+
+          if (contentError) {
+            console.error('Error inserting section content:', contentError);
+          }
         }
       }
     }
 
-    // Initialize feature card contents
-    const featureCardContents = [
+    // Inicializar contenido de tarjetas de características
+    const featureCardsContent = [
       {
         card_key: 'book',
         contents: [
@@ -111,7 +121,7 @@ export const initializeAboutContent = async () => {
           {
             language_id: spanishLang.id,
             title: 'LIBRO',
-            description: 'Un estudio profundo de cada instrumento y sus tradiciones. Historias fascinantes y fotos de gran formato documentando el viaje y los encuentros de Berta con los músicos en el centro del proyecto.'
+            description: 'Un estudio profundo de cada instrumento y sus tradiciones. Historias fascinantes y fotos de gran formato que documentan el viaje y los encuentros de Berta con los músicos en el centro del proyecto.'
           }
         ]
       },
@@ -126,7 +136,7 @@ export const initializeAboutContent = async () => {
           {
             language_id: spanishLang.id,
             title: 'VINILO',
-            description: 'Audio de excelente calidad en vinilo de 180 gramos; diez pistas que construyen y acompañan una aventura en sonido.'
+            description: 'Audio en vinilo de excelente calidad de 180 gramos; diez pistas que construyen y acompañan una aventura en sonido.'
           }
         ]
       },
@@ -147,41 +157,46 @@ export const initializeAboutContent = async () => {
       }
     ];
 
-    // Insert feature card contents
-    for (const card of featureCardContents) {
-      // Get card ID
-      const { data: cardData } = await supabase
+    // Insertar contenido de tarjetas
+    for (const card of featureCardsContent) {
+      const { data: existingCard } = await supabase
         .from('about_feature_cards')
         .select('id')
         .eq('card_key', card.card_key)
         .single();
-      
-      if (cardData) {
+
+      if (existingCard) {
         for (const content of card.contents) {
-          await supabase
+          const { error: cardContentError } = await supabase
             .from('about_feature_card_contents')
             .upsert({
-              feature_card_id: cardData.id,
-              ...content
+              feature_card_id: existingCard.id,
+              language_id: content.language_id,
+              title: content.title,
+              description: content.description
             });
+
+          if (cardContentError) {
+            console.error('Error inserting card content:', cardContentError);
+          }
         }
       }
     }
 
-    // Initialize project stats contents
-    const projectStatsContents = [
+    // Inicializar contenido de estadísticas
+    const statsContent = [
       {
         stat_key: 'instruments',
         contents: [
           {
             language_id: englishLang.id,
             label: 'Instruments',
-            description: 'Different stringed instruments represented'
+            description: 'Traditional stringed instruments documented'
           },
           {
             language_id: spanishLang.id,
             label: 'Instrumentos',
-            description: 'Diferentes instrumentos de cuerda representados'
+            description: 'Instrumentos de cuerda tradicionales documentados'
           }
         ]
       },
@@ -191,12 +206,12 @@ export const initializeAboutContent = async () => {
           {
             language_id: englishLang.id,
             label: 'Guest Artists',
-            description: 'Talented musicians who collaborated'
+            description: 'Master musicians featured in the project'
           },
           {
             language_id: spanishLang.id,
             label: 'Artistas Invitados',
-            description: 'Músicos talentosos que colaboraron'
+            description: 'Músicos maestros presentados en el proyecto'
           }
         ]
       },
@@ -206,40 +221,48 @@ export const initializeAboutContent = async () => {
           {
             language_id: englishLang.id,
             label: 'Countries Visited',
-            description: 'Nations explored for production'
+            description: 'Nations explored for this cultural journey'
           },
           {
             language_id: spanishLang.id,
             label: 'Países Visitados',
-            description: 'Naciones exploradas para la producción'
+            description: 'Naciones exploradas para este viaje cultural'
           }
         ]
       }
     ];
 
-    // Insert project stats contents
-    for (const stat of projectStatsContents) {
-      // Get stat ID
-      const { data: statData } = await supabase
+    // Insertar contenido de estadísticas
+    for (const stat of statsContent) {
+      const { data: existingStat } = await supabase
         .from('about_project_stats')
         .select('id')
         .eq('stat_key', stat.stat_key)
         .single();
-      
-      if (statData) {
+
+      if (existingStat) {
         for (const content of stat.contents) {
-          await supabase
+          const { error: statContentError } = await supabase
             .from('about_project_stat_contents')
             .upsert({
-              project_stat_id: statData.id,
-              ...content
+              project_stat_id: existingStat.id,
+              language_id: content.language_id,
+              label: content.label,
+              description: content.description
             });
+
+          if (statContentError) {
+            console.error('Error inserting stat content:', statContentError);
+          }
         }
       }
     }
 
-    console.log('About content initialized successfully');
+    console.log('About content initialized successfully!');
   } catch (error) {
-    console.error('Error initializing about content:', error);
+    console.error('Error initializing About content:', error);
   }
 };
+
+// Auto-ejecutar al importar este módulo
+initializeAboutContent();

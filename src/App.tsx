@@ -7,6 +7,9 @@ import { CMSAuthProvider } from '@/contexts/CMSAuthContext';
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerContext';
 import { Toaster } from '@/components/ui/toaster';
 
+// Import the about content initializer
+import '@/lib/initialize-about-content';
+
 // Import pages
 import Index from '@/pages/Index';
 import RecorreLaHuella from '@/pages/RecorreLaHuella';
