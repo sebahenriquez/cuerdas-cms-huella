@@ -4,6 +4,7 @@ import React from 'react';
 interface VideoContent {
   title?: string;
   description?: string;
+  language_id: number;
 }
 
 interface Video {
