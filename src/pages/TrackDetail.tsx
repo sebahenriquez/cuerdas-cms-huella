@@ -117,7 +117,7 @@ const TrackDetail = () => {
             </div>
           )}
 
-          {/* CTA Buttons Section */}
+          {/* CTA Buttons Section - Only show if CTA settings allow it */}
           {ctaSettings && (
             <div className="flex flex-wrap justify-center gap-4 mt-8 animate-fade-in">
               {ctaSettings.show_texts && trackContent?.long_text_content && (
@@ -140,7 +140,7 @@ const TrackDetail = () => {
         </div>
       </section>
 
-      {/* Content Section */}
+      {/* Content Section - Only show if CTA settings allow it */}
       {ctaSettings?.show_texts && trackContent?.long_text_content && (
         <section className="py-16 px-4">
           <div className="max-w-4xl mx-auto">
@@ -177,7 +177,7 @@ const TrackDetail = () => {
         </section>
       )}
 
-      {/* Videos Section */}
+      {/* Videos Section - Only show if CTA settings allow it */}
       {ctaSettings?.show_videos && trackData.videos && trackData.videos.length > 0 && (
         <section className="py-16 px-4">
           <div className="max-w-6xl mx-auto">
@@ -211,7 +211,7 @@ const TrackDetail = () => {
         </section>
       )}
 
-      {/* Photos Section */}
+      {/* Photos Section - Only show if CTA settings allow it */}
       {ctaSettings?.show_photos && trackData.track_featured_images && trackData.track_featured_images.length > 0 && (
         <section className="py-16 px-4 bg-muted/50">
           <div className="max-w-6xl mx-auto">
