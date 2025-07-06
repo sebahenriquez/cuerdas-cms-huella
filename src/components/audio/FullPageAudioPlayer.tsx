@@ -3,6 +3,7 @@ import React from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Track } from '@/types/track';
@@ -84,147 +85,163 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
   };
 
   return (
-    <div className="h-screen flex bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
-      {/* Track List */}
-      <div className="w-1/3 bg-black/30 backdrop-blur-sm border-r border-gray-700">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold mb-6">
-            {currentLanguage?.code === 'es' ? 'Lista de Pistas' : 'Track List'}
-          </h2>
-          <div className="space-y-2 max-h-[calc(100vh-120px)] overflow-y-auto">
-            {tracks.map((track, index) => {
-              const content = track.track_contents?.[0];
-              const isCurrentTrack = currentTrack?.id === track.id;
-              
-              return (
-                <div
-                  key={track.id}
-                  onClick={() => handleTrackSelect(track)}
-                  className={`p-4 rounded-lg cursor-pointer transition-all hover:bg-white/10 ${
-                    isCurrentTrack ? 'bg-primary/20 border border-primary/50' : 'bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-sm font-bold">
-                      {track.order_position}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium truncate">
-                        {content?.title || `Track ${track.order_position}`}
-                      </h3>
-                      {content?.description && (
-                        <p className="text-sm text-gray-400 truncate">
-                          {content.description}
-                        </p>
-                      )}
-                    </div>
-                    {isCurrentTrack && isPlaying && (
-                      <div className="flex-shrink-0">
-                        <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+      {/* Header */}
+      <div className="flex-shrink-0 p-6 border-b border-gray-700">
+        <h1 className="text-3xl font-bold mb-2">
+          {currentLanguage?.code === 'es' ? 'Escucha el Álbum' : 'Listen to the Album'}
+        </h1>
+        {currentTrack && (
+          <p className="text-lg text-gray-300">
+            {getCurrentTrackTitle(currentTrack)}
+          </p>
+        )}
       </div>
 
-      {/* Player Interface */}
-      <div className="flex-1 flex flex-col">
-        {/* Album Art & Track Info */}
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="text-center max-w-md">
-            {currentTrack && (
-              <>
-                <div className="w-64 h-64 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl mb-8 mx-auto flex items-center justify-center">
-                  <div className="text-6xl font-bold text-primary/30">
-                    {currentTrack.order_position}
-                  </div>
-                </div>
-                <h1 className="text-3xl font-bold mb-2">
-                  {getCurrentTrackTitle(currentTrack)}
-                </h1>
-                <p className="text-xl text-gray-400 mb-8">
-                  Track {currentTrack.order_position} of {tracks.length}
-                </p>
-              </>
-            )}
-            {!currentTrack && (
-              <div className="text-center">
-                <div className="w-64 h-64 bg-gray-800 rounded-2xl mb-8 mx-auto flex items-center justify-center">
-                  <Play className="w-16 h-16 text-gray-600" />
-                </div>
-                <h1 className="text-3xl font-bold mb-2">
-                  {currentLanguage?.code === 'es' ? 'Selecciona una pista' : 'Select a track'}
-                </h1>
-                <p className="text-xl text-gray-400">
-                  {currentLanguage?.code === 'es' ? 'Haz clic en una pista para comenzar' : 'Click on a track to start'}
+      {/* Track List */}
+      <div className="flex-1 min-h-0">
+        <ScrollArea className="h-full">
+          <div className="p-6">
+            {tracks.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-400">
+                  {currentLanguage?.code === 'es' ? 'No hay pistas disponibles' : 'No tracks available'}
                 </p>
               </div>
+            ) : (
+              <div className="space-y-1">
+                {tracks.map((track, index) => {
+                  const content = track.track_contents?.[0];
+                  const isCurrentTrack = currentTrack?.id === track.id;
+                  
+                  return (
+                    <div
+                      key={track.id}
+                      onClick={() => handleTrackSelect(track)}
+                      className={`group flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-white/10 ${
+                        isCurrentTrack ? 'bg-primary/20' : 'hover:bg-white/5'
+                      }`}
+                    >
+                      {/* Play/Pause button or track number */}
+                      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center mr-4">
+                        {isCurrentTrack && isPlaying ? (
+                          <Pause className="w-5 h-5 text-primary" />
+                        ) : isCurrentTrack ? (
+                          <Play className="w-5 h-5 text-primary" />
+                        ) : (
+                          <span className="text-gray-400 group-hover:hidden text-sm">
+                            {track.order_position}
+                          </span>
+                        )}
+                        {!isCurrentTrack && (
+                          <Play className="w-4 h-4 text-white hidden group-hover:block" />
+                        )}
+                      </div>
+
+                      {/* Track info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`font-medium truncate ${isCurrentTrack ? 'text-primary' : 'text-white'}`}>
+                          {content?.title || `Track ${track.order_position}`}
+                        </h3>
+                        {content?.description && (
+                          <p className="text-sm text-gray-400 truncate mt-1">
+                            {content.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Duration placeholder */}
+                      <div className="flex-shrink-0 text-sm text-gray-400 ml-4">
+                        --:--
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
+          </div>
+        </ScrollArea>
+      </div>
+
+      {/* Player Controls */}
+      <div className="flex-shrink-0 bg-gray-900/80 backdrop-blur-sm border-t border-gray-700 p-4">
+        {/* Progress Bar */}
+        <div className="mb-4">
+          <div className="flex items-center space-x-3">
+            <span className="text-xs text-gray-400 w-10 text-right">
+              {formatTime(currentTime)}
+            </span>
+            <Slider
+              value={[currentTime]}
+              max={duration || 100}
+              step={1}
+              onValueChange={handleSeek}
+              className="flex-1"
+              disabled={!currentTrack}
+            />
+            <span className="text-xs text-gray-400 w-10">
+              {formatTime(duration)}
+            </span>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="bg-black/40 backdrop-blur-sm border-t border-gray-700 p-6">
-          {/* Progress Bar */}
-          <div className="mb-6">
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-400 w-12 text-right">
-                {formatTime(currentTime)}
-              </span>
-              <Slider
-                value={[currentTime]}
-                max={duration || 100}
-                step={1}
-                onValueChange={handleSeek}
-                className="flex-1"
-              />
-              <span className="text-sm text-gray-400 w-12">
-                {formatTime(duration)}
-              </span>
-            </div>
+        <div className="flex items-center justify-between">
+          {/* Left side - Track info */}
+          <div className="flex-1 min-w-0">
+            {currentTrack ? (
+              <div>
+                <p className="text-sm font-medium text-white truncate">
+                  {getCurrentTrackTitle(currentTrack)}
+                </p>
+                <p className="text-xs text-gray-400">
+                  Track {currentTrack.order_position} of {tracks.length}
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400">
+                {currentLanguage?.code === 'es' ? 'Selecciona una pista' : 'Select a track'}
+              </p>
+            )}
           </div>
 
-          {/* Main Controls */}
-          <div className="flex items-center justify-center space-x-6 mb-4">
+          {/* Center - Main controls */}
+          <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
-              size="lg"
+              size="sm"
               onClick={previousTrack}
               disabled={!currentTrack}
-              className="w-12 h-12 rounded-full hover:bg-white/10"
+              className="w-8 h-8 rounded-full hover:bg-white/10"
             >
-              <SkipBack className="w-6 h-6" />
+              <SkipBack className="w-4 h-4" />
             </Button>
 
             <Button
               onClick={handlePlayPause}
               disabled={!currentTrack}
-              className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90"
+              className="w-10 h-10 rounded-full bg-primary hover:bg-primary/90"
             >
               {isPlaying ? (
-                <Pause className="w-8 h-8" />
+                <Pause className="w-5 h-5" />
               ) : (
-                <Play className="w-8 h-8 ml-1" />
+                <Play className="w-5 h-5 ml-0.5" />
               )}
             </Button>
 
             <Button
               variant="ghost"
-              size="lg"
+              size="sm"
               onClick={nextTrack}
               disabled={!currentTrack}
-              className="w-12 h-12 rounded-full hover:bg-white/10"
+              className="w-8 h-8 rounded-full hover:bg-white/10"
             >
-              <SkipForward className="w-6 h-6" />
+              <SkipForward className="w-4 h-4" />
             </Button>
           </div>
 
-          {/* Volume Control */}
-          <div className="flex items-center justify-center space-x-3">
+          {/* Right side - Volume */}
+          <div className="flex-1 flex items-center justify-end space-x-2">
             <Button
               variant="ghost"
               size="sm"
@@ -232,9 +249,9 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
               className="p-2 hover:bg-white/10"
             >
               {isMuted || volume === 0 ? (
-                <VolumeX className="w-5 h-5" />
+                <VolumeX className="w-4 h-4" />
               ) : (
-                <Volume2 className="w-5 h-5" />
+                <Volume2 className="w-4 h-4" />
               )}
             </Button>
             <Slider
@@ -242,7 +259,7 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
               max={1}
               step={0.01}
               onValueChange={handleVolumeChange}
-              className="w-32"
+              className="w-24"
             />
           </div>
         </div>
