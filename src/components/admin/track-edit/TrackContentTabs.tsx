@@ -79,7 +79,7 @@ const TrackContentTabs: React.FC<TrackContentTabsProps> = ({
     <Card className="lg:col-span-3">
       <CardHeader>
         <CardTitle>Contenido</CardTitle>
-        <CardDescription>Edita el contenido en diferentes idiomas</CardDescription>
+        <CardDescription>Edita el contenido en diferentes idiomas con el editor de texto enriquecido</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue={languages[0]?.code} className="w-full">
@@ -149,14 +149,16 @@ const TrackContentTabs: React.FC<TrackContentTabsProps> = ({
 
                 <div>
                   <Label htmlFor={`long_text_content-${language.id}`}>Contenido Largo</Label>
-                  <RichTextEditor
-                    content={content.long_text_content || ''}
-                    onChange={(value) => {
-                      console.log(`Updating long_text_content for language ${language.id}:`, value);
-                      onContentChange(language.id, 'long_text_content', value);
-                    }}
-                    placeholder="Contenido detallado del track"
-                  />
+                  <div className="mt-2">
+                    <RichTextEditor
+                      content={content.long_text_content || ''}
+                      onChange={(value) => {
+                        console.log(`Updating long_text_content for language ${language.id}:`, value);
+                        onContentChange(language.id, 'long_text_content', value);
+                      }}
+                      placeholder="Contenido detallado del track - usa el editor de texto enriquecido para formatear tu contenido"
+                    />
+                  </div>
                 </div>
 
                 <div>

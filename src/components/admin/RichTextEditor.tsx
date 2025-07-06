@@ -3,7 +3,7 @@ import React from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Button } from '@/components/ui/button';
-import { Bold, Italic, Heading1, Heading2, Heading3, Type, ArrowDown } from 'lucide-react';
+import { Bold, Italic, Heading1, Heading2, Heading3, Type, List, ListOrdered, Quote, Undo, Redo } from 'lucide-react';
 
 interface RichTextEditorProps {
   content: string;
@@ -21,12 +21,27 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       StarterKit.configure({
         paragraph: {
           HTMLAttributes: {
-            class: 'paragraph-block',
+            class: 'mb-2',
           },
         },
-        hardBreak: {
+        heading: {
           HTMLAttributes: {
-            class: 'line-break',
+            class: 'font-bold mb-2',
+          },
+        },
+        bulletList: {
+          HTMLAttributes: {
+            class: 'list-disc ml-4 mb-2',
+          },
+        },
+        orderedList: {
+          HTMLAttributes: {
+            class: 'list-decimal ml-4 mb-2',
+          },
+        },
+        blockquote: {
+          HTMLAttributes: {
+            class: 'border-l-4 border-gray-300 pl-4 italic mb-2',
           },
         },
       }),
@@ -38,7 +53,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[200px] p-4 border rounded-md',
+        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto focus:outline-none min-h-[200px] p-4 border rounded-md',
       },
       handlePaste: (view, event, slice) => {
         const clipboardData = event.clipboardData;
@@ -46,9 +61,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           const htmlData = clipboardData.getData('text/html');
           const textData = clipboardData.getData('text/plain');
           
-          // Si hay HTML, procesarlo de manera inteligente
           if (htmlData && htmlData.trim() !== '') {
-            // Limpiar HTML innecesario y mantener solo formateo básico
+            // Limpiar HTML manteniendo estructura básica
             let cleanHtml = htmlData
               .replace(/<meta[^>]*>/gi, '')
               .replace(/<style[^>]*>.*?<\/style>/gi, '')
@@ -57,37 +71,25 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               .replace(/style="[^"]*"/gi, '')
               .replace(/<span[^>]*>/gi, '')
               .replace(/<\/span>/gi, '')
-              .replace(/<div[^>]*>/gi, '<p>')
-              .replace(/<\/div>/gi, '</p>')
               .replace(/<font[^>]*>/gi, '')
               .replace(/<\/font>/gi, '');
             
-            // Insertar el HTML limpio
-            const { state } = view;
-            const { selection } = state;
-            const transaction = state.tr.replaceSelectionWith(
-              state.schema.text(cleanHtml)
-            );
-            view.dispatch(transaction);
+            // Usar el comando insertContent de TipTap para manejar el HTML
+            editor.commands.insertContent(cleanHtml);
             return true;
           } else if (textData) {
-            // Para texto plano, convertir saltos de línea dobles en párrafos
-            const processedText = textData
+            // Para texto plano, dividir en párrafos
+            const paragraphs = textData
               .split('\n\n')
-              .map(paragraph => paragraph.trim())
-              .filter(paragraph => paragraph.length > 0)
-              .map(paragraph => {
-                // Convertir saltos de línea simples en <br>
-                return paragraph.replace(/\n/g, '<br>');
-              })
-              .join('</p><p>');
+              .map(p => p.trim())
+              .filter(p => p.length > 0);
             
-            const htmlToInsert = processedText ? `<p>${processedText}</p>` : textData;
-            
-            const { state } = view;
-            const { selection } = state;
-            const transaction = state.tr.insertText(htmlToInsert, selection.from, selection.to);
-            view.dispatch(transaction);
+            if (paragraphs.length > 1) {
+              const content = paragraphs.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+              editor.commands.insertContent(content);
+            } else {
+              editor.commands.insertContent(textData.replace(/\n/g, '<br>'));
+            }
             return true;
           }
         }
@@ -100,116 +102,136 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     return null;
   }
 
-  const insertLineBreak = () => {
-    editor.chain().focus().setHardBreak().run();
-  };
-
-  const insertParagraphBreak = () => {
-    editor.chain().focus().splitBlock().run();
-  };
-
-  const insertManualHTML = (htmlTag: string) => {
-    const selection = editor.state.selection;
-    const transaction = editor.state.tr.insertText(htmlTag, selection.from, selection.to);
-    editor.view.dispatch(transaction);
-  };
-
   return (
     <div className="border rounded-lg overflow-hidden">
-      {/* Toolbar */}
-      <div className="border-b bg-muted/50 p-2 flex items-center space-x-1 flex-wrap">
-        <Button
-          variant={editor.isActive('bold') ? 'default' : 'ghost'}
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          disabled={!editor.can().chain().focus().toggleBold().run()}
-        >
-          <Bold className="h-4 w-4" />
-        </Button>
-        
-        <Button
-          variant={editor.isActive('italic') ? 'default' : 'ghost'}
-          size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          disabled={!editor.can().chain().focus().toggleItalic().run()}
-        >
-          <Italic className="h-4 w-4" />
-        </Button>
+      {/* Toolbar mejorada */}
+      <div className="border-b bg-muted/50 p-2 flex items-center space-x-1 flex-wrap gap-1">
+        <div className="flex items-center space-x-1">
+          <Button
+            variant={editor.isActive('bold') ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            disabled={!editor.can().chain().focus().toggleBold().run()}
+            title="Negrita"
+          >
+            <Bold className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            variant={editor.isActive('italic') ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            disabled={!editor.can().chain().focus().toggleItalic().run()}
+            title="Cursiva"
+          >
+            <Italic className="h-4 w-4" />
+          </Button>
+        </div>
 
         <div className="w-px h-6 bg-border mx-2" />
 
-        <Button
-          variant={editor.isActive('heading', { level: 1 }) ? 'default' : 'ghost'}
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        >
-          <Heading1 className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center space-x-1">
+          <Button
+            variant={editor.isActive('heading', { level: 1 }) ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            title="Título 1"
+          >
+            <Heading1 className="h-4 w-4" />
+          </Button>
 
-        <Button
-          variant={editor.isActive('heading', { level: 2 }) ? 'default' : 'ghost'}
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        >
-          <Heading2 className="h-4 w-4" />
-        </Button>
+          <Button
+            variant={editor.isActive('heading', { level: 2 }) ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            title="Título 2"
+          >
+            <Heading2 className="h-4 w-4" />
+          </Button>
 
-        <Button
-          variant={editor.isActive('heading', { level: 3 }) ? 'default' : 'ghost'}
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        >
-          <Heading3 className="h-4 w-4" />
-        </Button>
+          <Button
+            variant={editor.isActive('heading', { level: 3 }) ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            title="Título 3"
+          >
+            <Heading3 className="h-4 w-4" />
+          </Button>
 
-        <Button
-          variant={editor.isActive('paragraph') ? 'default' : 'ghost'}
-          size="sm"
-          onClick={() => editor.chain().focus().setParagraph().run()}
-        >
-          <Type className="h-4 w-4" />
-        </Button>
+          <Button
+            variant={editor.isActive('paragraph') ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => editor.chain().focus().setParagraph().run()}
+            title="Párrafo"
+          >
+            <Type className="h-4 w-4" />
+          </Button>
+        </div>
 
         <div className="w-px h-6 bg-border mx-2" />
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={insertLineBreak}
-          title="Insertar salto de línea"
-        >
-          <ArrowDown className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center space-x-1">
+          <Button
+            variant={editor.isActive('bulletList') ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            title="Lista con viñetas"
+          >
+            <List className="h-4 w-4" />
+          </Button>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={insertParagraphBreak}
-          title="Nuevo párrafo"
-          className="text-xs"
-        >
-          ¶
-        </Button>
+          <Button
+            variant={editor.isActive('orderedList') ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            title="Lista numerada"
+          >
+            <ListOrdered className="h-4 w-4" />
+          </Button>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => insertManualHTML('<br>')}
-          title="Insertar <br>"
-          className="text-xs"
-        >
-          BR
-        </Button>
+          <Button
+            variant={editor.isActive('blockquote') ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            title="Cita"
+          >
+            <Quote className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="w-px h-6 bg-border mx-2" />
+
+        <div className="flex items-center space-x-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().chain().focus().undo().run()}
+            title="Deshacer"
+          >
+            <Undo className="h-4 w-4" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().chain().focus().redo().run()}
+            title="Rehacer"
+          >
+            <Redo className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Editor */}
       <div className="bg-background">
-        <EditorContent editor={editor} placeholder={placeholder} />
+        <EditorContent editor={editor} />
       </div>
 
-      {/* Instrucciones mejoradas */}
+      {/* Ayuda mejorada */}
       <div className="bg-muted/30 p-2 text-xs text-muted-foreground border-t">
-        <strong>Tip:</strong> Pega texto normalmente - se convertirá automáticamente. Usa los botones para formateo adicional.
+        <strong>Tip:</strong> Pega texto desde cualquier fuente - se limpiará automáticamente. Usa Ctrl+Z/Ctrl+Y para deshacer/rehacer.
       </div>
     </div>
   );

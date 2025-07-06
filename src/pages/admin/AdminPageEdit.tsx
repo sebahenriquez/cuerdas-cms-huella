@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -273,7 +274,7 @@ const AdminPageEdit: React.FC = () => {
         <Card className="lg:col-span-3">
           <CardHeader>
             <CardTitle>Contenido</CardTitle>
-            <CardDescription>Edita el contenido en diferentes idiomas</CardDescription>
+            <CardDescription>Edita el contenido en diferentes idiomas con el editor de texto enriquecido</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue={languages[0]?.code} className="w-full">
@@ -302,11 +303,13 @@ const AdminPageEdit: React.FC = () => {
 
                     <div>
                       <Label htmlFor={`content-${language.id}`}>Contenido</Label>
-                      <RichTextEditor
-                        content={content?.content || ''}
-                        onChange={(value) => updatePageContent(language.id, 'content', value)}
-                        placeholder="Contenido de la página"
-                      />
+                      <div className="mt-2">
+                        <RichTextEditor
+                          content={content?.content || ''}
+                          onChange={(value) => updatePageContent(language.id, 'content', value)}
+                          placeholder="Contenido de la página - usa el editor de texto enriquecido para formatear tu contenido"
+                        />
+                      </div>
                     </div>
 
                     <div>
