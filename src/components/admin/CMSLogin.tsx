@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,8 +10,8 @@ import { useCMSAuth } from '@/contexts/CMSAuthContext';
 import { Loader2 } from 'lucide-react';
 
 const CMSLogin: React.FC = () => {
-  const [email, setEmail] = useState('adminS@lahuellaDelAsCuerdas.com');
-  const [password, setPassword] = useState('S3b+4321');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -95,16 +96,6 @@ const CMSLogin: React.FC = () => {
               )}
             </Button>
           </form>
-
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground mb-2">
-              <strong>Credenciales de prueba:</strong>
-            </p>
-            <p className="text-xs text-muted-foreground">
-              <strong>Usuario:</strong> adminS@lahuellaDelAsCuerdas.com<br />
-              <strong>Contraseña:</strong> S3b+4321
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>
