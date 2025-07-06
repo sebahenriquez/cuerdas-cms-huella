@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
@@ -70,11 +71,33 @@ const EscuchaLaHuella = () => {
     }
   };
 
+  // Get translated text based on current language
+  const getTrackListTitle = () => {
+    return currentLanguage?.code === 'en' ? 'Track List' : 'Lista de Tracks';
+  };
+
+  const getTrackListDescription = () => {
+    return currentLanguage?.code === 'en' 
+      ? 'All tracks from the album "La Huella de las Cuerdas"'
+      : 'Todos los tracks del álbum "La Huella de las Cuerdas"';
+  };
+
+  const getAlbumTitle = () => {
+    return currentLanguage?.code === 'en' ? 'Full Album' : 'Álbum completo';
+  };
+
+  const getTrackPosition = () => {
+    return currentLanguage?.code === 'en' ? 'Track' : 'Track';
+  };
+
+  const getOfText = () => {
+    return currentLanguage?.code === 'en' ? 'of' : 'de';
+  };
+
   return (
     <Layout showAudioPlayer={true}>
       {/* Hero Section */}
       <section 
-        
         className="hero-section hero-section-short"
         style={{
           backgroundImage: `url(${pageContent?.hero_image_url || 'https://images.unsplash.com/photo-1471478331149-c72f17e33c73'})`
@@ -114,7 +137,7 @@ const EscuchaLaHuella = () => {
                     {currentTrack?.track_contents?.[0]?.title || 'La Huella de las Cuerdas'}
                   </h3>
                   <p className="text-muted-foreground mb-6">
-                    Álbum completo
+                    {getAlbumTitle()}
                   </p>
                   
                   {/* Player Controls */}
@@ -152,7 +175,7 @@ const EscuchaLaHuella = () => {
                   
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground">
-                      Track {currentTrack?.order_position || 1} de {tracks.length}
+                      {getTrackPosition()} {currentTrack?.order_position || 1} {getOfText()} {tracks.length}
                     </p>
                   </div>
                 </div>
@@ -165,10 +188,10 @@ const EscuchaLaHuella = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Music2 className="h-5 w-5" />
-                <span>Lista de Tracks</span>
+                <span>{getTrackListTitle()}</span>
               </CardTitle>
               <CardDescription>
-                Todos los tracks del álbum "La Huella de las Cuerdas"
+                {getTrackListDescription()}
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -1,6 +1,6 @@
+
 import React from 'react';
 import Header from './Header';
-import Footer from './Footer';
 import AudioPlayer from '@/components/audio/AudioPlayer';
 
 interface LayoutProps {
@@ -15,7 +15,6 @@ const Layout: React.FC<LayoutProps> = ({ children, showAudioPlayer = false }) =>
       <main className="flex-1 pt-16">
         {children}
       </main>
-      <Footer />
       {showAudioPlayer && <AudioPlayer />}
     </div>
   );
