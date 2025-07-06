@@ -15,23 +15,37 @@ const TextsSection: React.FC<TextsSectionProps> = ({ currentTrackContent }) => {
   const processTextContent = (content: string) => {
     if (!content) return '';
     
-    // Si ya contiene HTML, preservarlo
-    if (content.includes('<p>') || content.includes('<br>') || content.includes('<div>')) {
-      // Limpiar y mejorar el HTML existente
+    // Si el contenido ya contiene etiquetas HTML, procesarlo directamente
+    if (content.includes('<') && content.includes('>')) {
+      // Limpiar el contenido HTML pero mantener las etiquetas válidas
       let processedContent = content
         .replace(/\r\n/g, '\n')
         .replace(/\r/g, '\n')
-        // Asegurar que los <br> tengan espaciado adecuado
+        // Asegurar que los <br> sean etiquetas válidas
         .replace(/<br\s*\/?>/gi, '<br>')
-        // Mejorar párrafos existentes
-        .replace(/<p>\s*<\/p>/gi, '') // Eliminar párrafos vacíos
+        // Limpiar párrafos vacíos
+        .replace(/<p>\s*<\/p>/gi, '')
+        // Normalizar párrafos
         .replace(/<p>/gi, '<p>')
-        .replace(/<\/p>/gi, '</p>');
+        .replace(/<\/p>/gi, '</p>')
+        // Si no hay párrafos pero hay <br>, wrap en un párrafo
+        .trim();
+      
+      // Si el contenido no está envuelto en párrafos, envolverlo
+      if (!processedContent.includes('<p>') && processedContent.length > 0) {
+        // Dividir por <br> y crear párrafos
+        const parts = processedContent.split('<br>');
+        processedContent = parts
+          .map(part => part.trim())
+          .filter(part => part.length > 0)
+          .map(part => `<p>${part}</p>`)
+          .join('');
+      }
       
       return processedContent;
     }
     
-    // Si es texto plano, procesarlo como antes pero con mejor soporte para HTML
+    // Si es texto plano, procesarlo como antes
     const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     
     // Dividir por uno o más saltos de línea para crear párrafos

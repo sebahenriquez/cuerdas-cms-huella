@@ -78,17 +78,31 @@ const TrackDetail = () => {
   const processTextContent = (content: string) => {
     if (!content) return '';
     
-    // Si ya contiene HTML, preservarlo y mejorarlo
-    if (content.includes('<p>') || content.includes('<br>') || content.includes('<div>')) {
-      return content
+    // Si el contenido contiene etiquetas HTML, procesarlo directamente
+    if (content.includes('<') && content.includes('>')) {
+      let processedContent = content
         .replace(/\r\n/g, '\n')
         .replace(/\r/g, '\n')
+        // Normalizar etiquetas <br>
         .replace(/<br\s*\/?>/gi, '<br>')
-        .replace(/<p>\s*<\/p>/gi, '') // Eliminar párrafos vacíos
+        // Limpiar párrafos vacíos
+        .replace(/<p>\s*<\/p>/gi, '')
         .trim();
+      
+      // Si no hay párrafos pero hay contenido, crear párrafos
+      if (!processedContent.includes('<p>') && processedContent.length > 0) {
+        const parts = processedContent.split('<br>');
+        processedContent = parts
+          .map(part => part.trim())
+          .filter(part => part.length > 0)
+          .map(part => `<p>${part}</p>`)
+          .join('');
+      }
+      
+      return processedContent;
     }
     
-    // Si es texto plano, procesarlo
+    // Procesamiento para texto plano
     const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     const paragraphs = normalizedContent
       .split(/\n\s*\n+/)
