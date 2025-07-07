@@ -158,9 +158,40 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
           console.log('CTA settings saved successfully');
         }
 
-        // Handle videos if provided
+        // Handle videos - complete sync
+        console.log('Processing videos...');
+        
+        // Get current videos in DB
+        const { data: currentVideos, error: fetchVideosError } = await supabase
+          .from('videos')
+          .select('*')
+          .eq('track_id', currentTrackId);
+
+        if (fetchVideosError) {
+          console.error('Error fetching current videos:', fetchVideosError);
+          throw new Error(`Error fetching videos: ${fetchVideosError.message}`);
+        }
+
+        const currentVideoIds = currentVideos?.map(v => v.id) || [];
+        const dataVideoIds = data.videos?.filter(v => v.id).map(v => v.id) || [];
+        
+        // Delete videos that are no longer in the data
+        const videosToDelete = currentVideoIds.filter(id => !dataVideoIds.includes(id));
+        if (videosToDelete.length > 0) {
+          const { error: deleteError } = await supabase
+            .from('videos')
+            .delete()
+            .in('id', videosToDelete);
+          
+          if (deleteError) {
+            console.error('Error deleting videos:', deleteError);
+            throw new Error(`Error deleting videos: ${deleteError.message}`);
+          }
+          console.log('Deleted videos:', videosToDelete);
+        }
+
+        // Process videos in data
         if (data.videos && data.videos.length > 0) {
-          console.log('Processing videos...');
           for (const video of data.videos) {
             if (video.id) {
               // Update existing video
@@ -169,8 +200,7 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
                 .update({
                   vimeo_url: video.vimeo_url,
                   thumbnail_url: video.thumbnail_url,
-                  order_position: video.order_position,
-                  track_id: currentTrackId
+                  order_position: video.order_position
                 })
                 .eq('id', video.id);
 
@@ -179,15 +209,16 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
                 throw new Error(`Error updating video: ${videoError.message}`);
               }
 
-              // Update video contents
+              // Handle video contents
               if (video.video_contents) {
                 for (const content of video.video_contents) {
                   if (content.id) {
+                    // Update existing content
                     const { error } = await supabase
                       .from('video_contents')
                       .update({
-                        title: content.title,
-                        description: content.description
+                        title: content.title || '',
+                        description: content.description || ''
                       })
                       .eq('id', content.id);
                     
@@ -196,12 +227,13 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
                       throw new Error(`Error updating video content: ${error.message}`);
                     }
                   } else {
+                    // Insert new content
                     const { error } = await supabase
                       .from('video_contents')
                       .insert({
                         video_id: video.id,
-                        title: content.title,
-                        description: content.description,
+                        title: content.title || '',
+                        description: content.description || '',
                         language_id: content.language_id
                       });
                     
@@ -212,7 +244,7 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
                   }
                 }
               }
-            } else {
+            } else if (video.vimeo_url) {
               // Create new video
               const { data: newVideo, error: videoError } = await supabase
                 .from('videos')
@@ -230,15 +262,15 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
                 throw new Error(`Error creating video: ${videoError.message}`);
               }
 
-              // Insert video contents
+              // Insert video contents for new video
               if (video.video_contents) {
                 for (const content of video.video_contents) {
                   const { error } = await supabase
                     .from('video_contents')
                     .insert({
                       video_id: newVideo.id,
-                      title: content.title,
-                      description: content.description,
+                      title: content.title || '',
+                      description: content.description || '',
                       language_id: content.language_id
                     });
                   
@@ -250,21 +282,52 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
               }
             }
           }
-          console.log('Videos processed successfully');
+        }
+        console.log('Videos processed successfully');
+
+        // Handle photos - complete sync
+        console.log('Processing photos...');
+        
+        // Get current photos in DB
+        const { data: currentPhotos, error: fetchPhotosError } = await supabase
+          .from('track_featured_images')
+          .select('*')
+          .eq('track_id', currentTrackId);
+
+        if (fetchPhotosError) {
+          console.error('Error fetching current photos:', fetchPhotosError);
+          throw new Error(`Error fetching photos: ${fetchPhotosError.message}`);
         }
 
-        // Handle photos if provided
+        const currentPhotoIds = currentPhotos?.map(p => p.id) || [];
+        const dataPhotoIds = data.photos?.filter(p => p.id).map(p => p.id) || [];
+        
+        // Delete photos that are no longer in the data
+        const photosToDelete = currentPhotoIds.filter(id => !dataPhotoIds.includes(id));
+        if (photosToDelete.length > 0) {
+          const { error: deleteError } = await supabase
+            .from('track_featured_images')
+            .delete()
+            .in('id', photosToDelete);
+          
+          if (deleteError) {
+            console.error('Error deleting photos:', deleteError);
+            throw new Error(`Error deleting photos: ${deleteError.message}`);
+          }
+          console.log('Deleted photos:', photosToDelete);
+        }
+
+        // Process photos in data
         if (data.photos && data.photos.length > 0) {
-          console.log('Processing photos...');
           for (const photo of data.photos) {
             if (photo.id) {
               // Update existing photo
               const { error: photoError } = await supabase
                 .from('track_featured_images')
                 .update({
-                  image_url: photo.image_url,
-                  caption_es: photo.caption_es,
-                  caption_en: photo.caption_en,
+                  image_url: photo.image_url || '',
+                  caption_es: photo.caption_es || '',
+                  caption_en: photo.caption_en || '',
                   order_position: photo.order_position,
                   media_file_id: photo.media_file_id
                 })
@@ -274,15 +337,15 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
                 console.error('Error updating photo:', photoError);
                 throw new Error(`Error updating photo: ${photoError.message}`);
               }
-            } else {
+            } else if (photo.image_url) {
               // Create new photo
               const { error: photoError } = await supabase
                 .from('track_featured_images')
                 .insert({
                   track_id: currentTrackId,
                   image_url: photo.image_url,
-                  caption_es: photo.caption_es,
-                  caption_en: photo.caption_en,
+                  caption_es: photo.caption_es || '',
+                  caption_en: photo.caption_en || '',
                   order_position: photo.order_position,
                   media_file_id: photo.media_file_id
                 });
@@ -293,8 +356,8 @@ export const useTrackSave = (trackId: number, onSuccess?: () => void) => {
               }
             }
           }
-          console.log('Photos processed successfully');
         }
+        console.log('Photos processed successfully');
 
         console.log('Track save operation completed successfully');
         return { success: true, trackId: currentTrackId };
