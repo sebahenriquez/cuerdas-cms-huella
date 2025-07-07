@@ -1,13 +1,11 @@
+
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Edit, Eye, Plus, Trash2, FileText } from 'lucide-react';
+import { Edit, Eye, Plus, Trash2, FileText, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { getLanguages } from '@/lib/supabase-helpers';
@@ -30,35 +28,69 @@ const AdminPages: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: pages = [], isLoading } = useQuery({
+  const { data: pages = [], isLoading: pagesLoading, error: pagesError, refetch: refetchPages } = useQuery({
     queryKey: ['admin-pages'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('pages')
-        .select(`
-          *,
-          page_contents(*)
-        `)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as Page[];
-    }
+      console.log('Fetching pages...');
+      try {
+        const { data, error } = await supabase
+          .from('pages')
+          .select(`
+            *,
+            page_contents(*)
+          `)
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error('Error fetching pages:', error);
+          throw error;
+        }
+        
+        console.log('Pages fetched successfully:', data);
+        return data as Page[];
+      } catch (error) {
+        console.error('Error in pages fetch query:', error);
+        throw error;
+      }
+    },
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 
-  const { data: languages = [] } = useQuery({
+  const { data: languages = [], isLoading: languagesLoading, error: languagesError } = useQuery({
     queryKey: ['languages'],
-    queryFn: getLanguages
+    queryFn: async () => {
+      console.log('Fetching languages...');
+      try {
+        const languages = await getLanguages();
+        console.log('Languages fetched successfully:', languages);
+        return languages;
+      } catch (error) {
+        console.error('Error fetching languages:', error);
+        throw error;
+      }
+    },
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
+
+  const isLoading = pagesLoading || languagesLoading;
+  const error = pagesError || languagesError;
 
   const deletePage = useMutation({
     mutationFn: async (pageId: number) => {
+      console.log('Deleting page:', pageId);
       const { error } = await supabase
         .from('pages')
         .delete()
         .eq('id', pageId);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting page:', error);
+        throw error;
+      }
+      
+      console.log('Page deleted successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-pages'] });
@@ -67,10 +99,11 @@ const AdminPages: React.FC = () => {
         description: 'La página ha sido eliminada correctamente.',
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Delete page mutation error:', error);
       toast({
         title: 'Error',
-        description: 'No se pudo eliminar la página.',
+        description: error.message || 'No se pudo eliminar la página.',
         variant: 'destructive',
       });
     }
@@ -87,10 +120,32 @@ const AdminPages: React.FC = () => {
     return content?.title || `Página ${page.id}`;
   };
 
+  const handleRefresh = () => {
+    refetchPages();
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2">Cargando páginas...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="text-red-600 text-center">
+          <h3 className="font-semibold">Error al cargar las páginas</h3>
+          <p className="text-sm mt-1">
+            {error instanceof Error ? error.message : 'Error desconocido'}
+          </p>
+        </div>
+        <Button onClick={handleRefresh} variant="outline">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Reintentar
+        </Button>
       </div>
     );
   }
@@ -106,12 +161,18 @@ const AdminPages: React.FC = () => {
             Administra todas las páginas del sitio web
           </p>
         </div>
-        <Button asChild>
-          <Link to="/admin/pages/new">
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva Página
-          </Link>
-        </Button>
+        <div className="flex space-x-2">
+          <Button onClick={handleRefresh} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Actualizar
+          </Button>
+          <Button asChild>
+            <Link to="/admin/pages/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Nueva Página
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6">
@@ -152,7 +213,7 @@ const AdminPages: React.FC = () => {
                     disabled={deletePage.isPending}
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
-                    Eliminar
+                    {deletePage.isPending ? 'Eliminando...' : 'Eliminar'}
                   </Button>
                 </div>
               </div>

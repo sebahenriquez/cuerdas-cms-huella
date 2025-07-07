@@ -149,11 +149,6 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
                           </p>
                         )}
                       </div>
-
-                      {/* Duration placeholder */}
-                      <div className="flex-shrink-0 text-sm text-gray-400 ml-4">
-                        --:--
-                      </div>
                     </div>
                   );
                 })}

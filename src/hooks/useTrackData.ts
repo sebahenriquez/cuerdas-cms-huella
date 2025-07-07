@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getLanguages } from '@/lib/supabase-helpers';
-import { useSupabaseQuery } from './useSupabaseQuery';
 
 interface Language {
   id: number;
@@ -90,7 +89,7 @@ export const useTrackData = (trackId: number) => {
     }
   });
 
-  const { data: languages = [] } = useSupabaseQuery({
+  const { data: languages = [], isLoading: languagesLoading, error: languagesError } = useQuery({
     queryKey: ['languages'],
     queryFn: async () => {
       console.log('Fetching languages...');
@@ -102,10 +101,12 @@ export const useTrackData = (trackId: number) => {
         console.error('Error fetching languages:', error);
         throw error;
       }
-    }
+    },
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 
-  const { data: existingTrack, isLoading, error } = useSupabaseQuery({
+  const { data: existingTrack, isLoading: trackLoading, error: trackError } = useQuery({
     queryKey: ['track', trackId],
     queryFn: async () => {
       if (trackId === 0) return null;
@@ -127,6 +128,11 @@ export const useTrackData = (trackId: number) => {
         
         if (error) {
           console.error('Supabase error fetching track:', error);
+          // Don't throw error if track doesn't exist, just return null
+          if (error.code === 'PGRST116') {
+            console.log('Track not found, will create new one');
+            return null;
+          }
           throw new Error(`Error fetching track: ${error.message}`);
         }
         
@@ -137,8 +143,19 @@ export const useTrackData = (trackId: number) => {
         throw error;
       }
     },
-    enabled: trackId > 0
+    enabled: trackId > 0,
+    retry: (failureCount, error: any) => {
+      // Don't retry if track doesn't exist (PGRST116)
+      if (error?.code === 'PGRST116') {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
+
+  const isLoading = languagesLoading || trackLoading;
+  const error = languagesError || trackError;
 
   // Log any query errors
   useEffect(() => {
@@ -184,71 +201,74 @@ export const useTrackData = (trackId: number) => {
   useEffect(() => {
     console.log('useEffect triggered with:', { existingTrack, languages });
     
-    if (existingTrack && languages.length > 0) {
-      console.log('Processing existing track data:', existingTrack);
-      
-      // Asegurar contenido para todos los idiomas
-      const completeTrackContents = ensureContentForAllLanguages(
-        existingTrack.track_contents || [], 
-        languages
-      );
-      
-      const transformedTrack = {
-        ...existingTrack,
-        track_contents: completeTrackContents,
-        videos: existingTrack.videos?.map(video => ({
-          ...video,
-          video_contents: video.video_contents || languages.map(lang => ({
-            title: '',
-            description: '',
-            language_id: lang.id
-          }))
-        })) || [],
-        photos: existingTrack.track_featured_images?.map((photo, index) => ({
-          ...photo,
-          image_url: photo.image_url || '',
-          order_position: photo.order_position || index + 1
-        })) || [],
-        cta_settings: existingTrack.track_cta_settings?.[0] ? {
-          show_texts: existingTrack.track_cta_settings[0].show_texts ?? true,
-          show_videos: existingTrack.track_cta_settings[0].show_videos ?? true,
-          show_photos: existingTrack.track_cta_settings[0].show_photos ?? true,
-          texts_label_es: existingTrack.track_cta_settings[0].texts_label_es || 'Textos',
-          texts_label_en: existingTrack.track_cta_settings[0].texts_label_en || 'Texts',
-          videos_label_es: existingTrack.track_cta_settings[0].videos_label_es || 'Videos',
-          videos_label_en: existingTrack.track_cta_settings[0].videos_label_en || 'Videos',
-          photos_label_es: existingTrack.track_cta_settings[0].photos_label_es || 'Fotos',
-          photos_label_en: existingTrack.track_cta_settings[0].photos_label_en || 'Photos'
-        } : {
-          show_texts: true,
-          show_videos: true,
-          show_photos: true,
-          texts_label_es: 'Textos',
-          texts_label_en: 'Texts',
-          videos_label_es: 'Videos',
-          videos_label_en: 'Videos',
-          photos_label_es: 'Fotos',
-          photos_label_en: 'Photos'
-        }
-      };
-      
-      console.log('Final transformed track data:', transformedTrack);
-      setTrackData(transformedTrack);
-    } else if (!existingTrack && languages.length > 0 && trackId > 0) {
-      console.log('Initializing new track with empty content for all languages');
-      const emptyContents = languages.map(lang => ({
-        title: '',
-        menu_title: '',
-        description: '',
-        long_text_content: '',
-        hero_image_url: '',
-        language_id: lang.id
-      }));
-      
-      setTrackData(prev => ({
-        ...prev,
-        track_contents: emptyContents
-      }));
+    if (languages.length > 0) {
+      if (existingTrack) {
+        console.log('Processing existing track data:', existingTrack);
+        
+        // Asegurar contenido para todos los idiomas
+        const completeTrackContents = ensureContentForAllLanguages(
+          existingTrack.track_contents || [], 
+          languages
+        );
+        
+        const transformedTrack = {
+          ...existingTrack,
+          track_contents: completeTrackContents,
+          videos: existingTrack.videos?.map(video => ({
+            ...video,
+            video_contents: video.video_contents || languages.map(lang => ({
+              title: '',
+              description: '',
+              language_id: lang.id
+            }))
+          })) || [],
+          photos: existingTrack.track_featured_images?.map((photo, index) => ({
+            ...photo,
+            image_url: photo.image_url || '',
+            order_position: photo.order_position || index + 1
+          })) || [],
+          cta_settings: existingTrack.track_cta_settings?.[0] ? {
+            show_texts: existingTrack.track_cta_settings[0].show_texts ?? true,
+            show_videos: existingTrack.track_cta_settings[0].show_videos ?? true,
+            show_photos: existingTrack.track_cta_settings[0].show_photos ?? true,
+            texts_label_es: existingTrack.track_cta_settings[0].texts_label_es || 'Textos',
+            texts_label_en: existingTrack.track_cta_settings[0].texts_label_en || 'Texts',
+            videos_label_es: existingTrack.track_cta_settings[0].videos_label_es || 'Videos',
+            videos_label_en: existingTrack.track_cta_settings[0].videos_label_en || 'Videos',
+            photos_label_es: existingTrack.track_cta_settings[0].photos_label_es || 'Fotos',
+            photos_label_en: existingTrack.track_cta_settings[0].photos_label_en || 'Photos'
+          } : {
+            show_texts: true,
+            show_videos: true,
+            show_photos: true,
+            texts_label_es: 'Textos',
+            texts_label_en: 'Texts',
+            videos_label_es: 'Videos',
+            videos_label_en: 'Videos',
+            photos_label_es: 'Fotos',
+            photos_label_en: 'Photos'
+          }
+        };
+        
+        console.log('Final transformed track data:', transformedTrack);
+        setTrackData(transformedTrack);
+      } else if (trackId > 0) {
+        console.log('Initializing new track with empty content for all languages');
+        const emptyContents = languages.map(lang => ({
+          title: '',
+          menu_title: '',
+          description: '',
+          long_text_content: '',
+          hero_image_url: '',
+          language_id: lang.id
+        }));
+        
+        setTrackData(prev => ({
+          ...prev,
+          id: trackId,
+          track_contents: emptyContents
+        }));
+      }
     }
   }, [existingTrack, languages, trackId]);
 

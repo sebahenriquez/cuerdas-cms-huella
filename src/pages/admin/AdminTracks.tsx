@@ -28,7 +28,7 @@ const AdminTracks: React.FC = () => {
   const queryClient = useQueryClient();
   const { currentTrack, isPlaying, playTrack, pauseTrack, setTracks } = useAudioPlayer();
 
-  const { data: tracksES = [], isLoading, error, refetch } = useQuery({
+  const { data: tracksES = [], isLoading: loadingES, error: errorES, refetch: refetchES } = useQuery({
     queryKey: ['admin-tracks-es'],
     queryFn: async () => {
       try {
@@ -45,7 +45,7 @@ const AdminTracks: React.FC = () => {
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 
-  const { data: tracksEN = [] } = useQuery({
+  const { data: tracksEN = [], isLoading: loadingEN, error: errorEN, refetch: refetchEN } = useQuery({
     queryKey: ['admin-tracks-en'],
     queryFn: async () => {
       try {
@@ -61,6 +61,9 @@ const AdminTracks: React.FC = () => {
     retry: 3,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
+
+  const isLoading = loadingES || loadingEN;
+  const error = errorES || errorEN;
 
   React.useEffect(() => {
     if (tracksES.length > 0) {
@@ -84,6 +87,11 @@ const AdminTracks: React.FC = () => {
     return tracksEN.some(track => track.id === trackId);
   };
 
+  const handleRefresh = () => {
+    refetchES();
+    refetchEN();
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -96,10 +104,13 @@ const AdminTracks: React.FC = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <div className="text-red-600">
-          Error al cargar los tracks: {error instanceof Error ? error.message : 'Error desconocido'}
+        <div className="text-red-600 text-center">
+          <h3 className="font-semibold">Error al cargar los tracks</h3>
+          <p className="text-sm mt-1">
+            {error instanceof Error ? error.message : 'Error desconocido'}
+          </p>
         </div>
-        <Button onClick={() => refetch()} variant="outline">
+        <Button onClick={handleRefresh} variant="outline">
           <RefreshCw className="h-4 w-4 mr-2" />
           Reintentar
         </Button>
@@ -117,7 +128,7 @@ const AdminTracks: React.FC = () => {
           </p>
         </div>
         <div className="flex space-x-2">
-          <Button onClick={() => refetch()} variant="outline" size="sm">
+          <Button onClick={handleRefresh} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
             Actualizar
           </Button>
@@ -220,7 +231,7 @@ const AdminTracks: React.FC = () => {
             <p className="text-muted-foreground mb-4">
               Los tracks se cargan automáticamente desde la base de datos.
             </p>
-            <Button onClick={() => refetch()}>
+            <Button onClick={handleRefresh}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Verificar conexión
             </Button>

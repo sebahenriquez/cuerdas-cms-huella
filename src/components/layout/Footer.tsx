@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -42,6 +43,11 @@ const Footer: React.FC = () => {
                   Acerca de Berta Rojas
                 </Link>
               </li>
+              <li>
+                <Link to="/prensa" className="text-muted-foreground hover:text-primary transition-colors">
+                  Prensa
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -52,11 +58,6 @@ const Footer: React.FC = () => {
               <li>
                 <Link to="/ficha-tecnica" className="hover:text-primary transition-colors">
                   Ficha Técnica
-                </Link>
-              </li>
-              <li>
-                <Link to="/prensa" className="hover:text-primary transition-colors">
-                  Prensa
                 </Link>
               </li>
             </ul>
