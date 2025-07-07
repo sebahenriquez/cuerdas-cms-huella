@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Edit, Eye, Plus, Trash2, FileText, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { getLanguages } from '@/lib/supabase-helpers';
+import { getLanguages } from '@/lib/language-helpers';
 
 interface Page {
   id: number;
@@ -32,46 +32,36 @@ const AdminPages: React.FC = () => {
     queryKey: ['admin-pages'],
     queryFn: async () => {
       console.log('Fetching pages...');
-      try {
-        const { data, error } = await supabase
-          .from('pages')
-          .select(`
-            *,
-            page_contents(*)
-          `)
-          .order('created_at', { ascending: false });
-        
-        if (error) {
-          console.error('Error fetching pages:', error);
-          throw error;
-        }
-        
-        console.log('Pages fetched successfully:', data);
-        return data as Page[];
-      } catch (error) {
-        console.error('Error in pages fetch query:', error);
+      const { data, error } = await supabase
+        .from('pages')
+        .select(`
+          *,
+          page_contents(*)
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching pages:', error);
         throw error;
       }
+      
+      console.log('Pages fetched successfully:', data);
+      return data as Page[];
     },
-    retry: 3,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
+    staleTime: 2 * 60 * 1000,
+    retry: 2,
   });
 
   const { data: languages = [], isLoading: languagesLoading, error: languagesError } = useQuery({
     queryKey: ['languages'],
     queryFn: async () => {
       console.log('Fetching languages...');
-      try {
-        const languages = await getLanguages();
-        console.log('Languages fetched successfully:', languages);
-        return languages;
-      } catch (error) {
-        console.error('Error fetching languages:', error);
-        throw error;
-      }
+      const languages = await getLanguages();
+      console.log('Languages fetched successfully:', languages);
+      return languages;
     },
-    retry: 3,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
+    staleTime: 5 * 60 * 1000,
+    retry: 2,
   });
 
   const isLoading = pagesLoading || languagesLoading;
@@ -124,6 +114,13 @@ const AdminPages: React.FC = () => {
     refetchPages();
   };
 
+  console.log('AdminPages render state:', { 
+    isLoading, 
+    error: error?.message, 
+    pagesCount: pages.length,
+    languagesCount: languages.length 
+  });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -134,6 +131,7 @@ const AdminPages: React.FC = () => {
   }
 
   if (error) {
+    console.error('AdminPages error:', error);
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
         <div className="text-red-600 text-center">

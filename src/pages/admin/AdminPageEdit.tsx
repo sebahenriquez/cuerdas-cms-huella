@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,8 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import { ArrowLeft, Save, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { getLanguages } from '@/lib/supabase-helpers';
-import { useSupabaseQuery } from '@/hooks/useSupabaseQuery';
+import { getLanguages } from '@/lib/language-helpers';
 
 interface PageContent {
   id?: number;
@@ -47,54 +46,56 @@ const AdminPageEdit: React.FC = () => {
     page_contents: []
   });
 
-  const { data: languages = [], isLoading: languagesLoading, error: languagesError } = useSupabaseQuery({
+  // Fetch languages
+  const { data: languages = [], isLoading: languagesLoading, error: languagesError } = useQuery({
     queryKey: ['languages'],
     queryFn: async () => {
       console.log('Fetching languages for page edit...');
-      try {
-        const languages = await getLanguages();
-        console.log('Languages fetched successfully:', languages);
-        return languages;
-      } catch (error) {
-        console.error('Error fetching languages:', error);
-        throw error;
-      }
-    }
+      const languages = await getLanguages();
+      console.log('Languages fetched successfully:', languages);
+      return languages;
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: 2
   });
 
-  const { data: existingPage, isLoading, error, refetch } = useSupabaseQuery({
+  // Fetch page data
+  const { data: existingPage, isLoading: pageLoading, error: pageError } = useQuery({
     queryKey: ['page', pageId],
     queryFn: async () => {
       if (pageId === 0) return null;
       
       console.log('Fetching page data for ID:', pageId);
       
-      try {
-        const { data, error } = await supabase
-          .from('pages')
-          .select(`
-            *,
-            page_contents(*)
-          `)
-          .eq('id', pageId)
-          .single();
-        
-        if (error) {
-          console.error('Supabase error fetching page:', error);
-          throw new Error(`Error fetching page: ${error.message}`);
-        }
-        
-        console.log('Page data fetched successfully:', data);
-        return data as PageData;
-      } catch (error) {
-        console.error('Error in page fetch query:', error);
-        throw error;
+      const { data, error } = await supabase
+        .from('pages')
+        .select(`
+          *,
+          page_contents(*)
+        `)
+        .eq('id', pageId)
+        .single();
+      
+      if (error) {
+        console.error('Supabase error fetching page:', error);
+        throw new Error(`Error fetching page: ${error.message}`);
       }
+      
+      console.log('Page data fetched successfully:', data);
+      return data as PageData;
     },
-    enabled: pageId > 0
+    enabled: pageId > 0,
+    staleTime: 2 * 60 * 1000,
+    retry: 1
   });
 
+  const isLoading = languagesLoading || (pageId > 0 && pageLoading);
+  const error = languagesError || pageError;
+
+  // Initialize page data when dependencies are ready
   useEffect(() => {
+    console.log('AdminPageEdit useEffect:', { existingPage, languages, pageId });
+    
     if (existingPage) {
       console.log('Setting existing page data:', existingPage);
       setPageData(existingPage);
@@ -118,84 +119,43 @@ const AdminPageEdit: React.FC = () => {
       console.log('Starting page save operation for pageId:', pageId);
       console.log('Save data:', data);
       
-      try {
-        if (pageId > 0) {
-          console.log('Updating existing page...');
-          
-          // Update page basic info
-          const { error: pageError } = await supabase
-            .from('pages')
-            .update({
-              slug: data.slug,
-              template_type: data.template_type,
-              status: data.status
-            })
-            .eq('id', pageId);
+      if (pageId > 0) {
+        console.log('Updating existing page...');
+        
+        // Update page basic info
+        const { error: pageError } = await supabase
+          .from('pages')
+          .update({
+            slug: data.slug,
+            template_type: data.template_type,
+            status: data.status
+          })
+          .eq('id', pageId);
 
-          if (pageError) {
-            console.error('Error updating page:', pageError);
-            throw new Error(`Error updating page: ${pageError.message}`);
-          }
+        if (pageError) {
+          console.error('Error updating page:', pageError);
+          throw new Error(`Error updating page: ${pageError.message}`);
+        }
 
-          console.log('Page basic info updated successfully');
-
-          // Update page contents
-          if (data.page_contents) {
-            console.log('Updating page contents...');
-            for (const content of data.page_contents) {
-              if (content.id) {
-                const { error } = await supabase
-                  .from('page_contents')
-                  .update(content)
-                  .eq('id', content.id);
-                if (error) {
-                  console.error('Error updating page content:', error);
-                  throw new Error(`Error updating content: ${error.message}`);
-                }
-              } else {
-                const { error } = await supabase
-                  .from('page_contents')
-                  .insert({
-                    ...content,
-                    page_id: pageId
-                  });
-                if (error) {
-                  console.error('Error inserting page content:', error);
-                  throw new Error(`Error inserting content: ${error.message}`);
-                }
+        // Update page contents
+        if (data.page_contents) {
+          console.log('Updating page contents...');
+          for (const content of data.page_contents) {
+            if (content.id) {
+              const { error } = await supabase
+                .from('page_contents')
+                .update(content)
+                .eq('id', content.id);
+              if (error) {
+                console.error('Error updating page content:', error);
+                throw new Error(`Error updating content: ${error.message}`);
               }
-            }
-            console.log('Page contents updated successfully');
-          }
-        } else {
-          console.log('Creating new page...');
-          
-          // Create new page
-          const { data: newPage, error: pageError } = await supabase
-            .from('pages')
-            .insert({
-              slug: data.slug,
-              template_type: data.template_type,
-              status: data.status
-            })
-            .select()
-            .single();
-
-          if (pageError) {
-            console.error('Error creating page:', pageError);
-            throw new Error(`Error creating page: ${pageError.message}`);
-          }
-
-          console.log('New page created successfully:', newPage);
-
-          // Insert page contents
-          if (data.page_contents) {
-            for (const content of data.page_contents) {
+            } else {
               const { error } = await supabase
                 .from('page_contents')
                 .insert({
                   ...content,
-                  page_id: newPage.id
+                  page_id: pageId
                 });
               if (error) {
                 console.error('Error inserting page content:', error);
@@ -204,17 +164,47 @@ const AdminPageEdit: React.FC = () => {
             }
           }
         }
+      } else {
+        console.log('Creating new page...');
+        
+        // Create new page
+        const { data: newPage, error: pageError } = await supabase
+          .from('pages')
+          .insert({
+            slug: data.slug,
+            template_type: data.template_type,
+            status: data.status
+          })
+          .select()
+          .single();
 
-        console.log('Page save operation completed successfully');
-      } catch (error) {
-        console.error('Page save operation failed:', error);
-        throw error;
+        if (pageError) {
+          console.error('Error creating page:', pageError);
+          throw new Error(`Error creating page: ${pageError.message}`);
+        }
+
+        // Insert page contents
+        if (data.page_contents) {
+          for (const content of data.page_contents) {
+            const { error } = await supabase
+              .from('page_contents')
+              .insert({
+                ...content,
+                page_id: newPage.id
+              });
+            if (error) {
+              console.error('Error inserting page content:', error);
+              throw new Error(`Error inserting content: ${error.message}`);
+            }
+          }
+        }
       }
+
+      console.log('Page save operation completed successfully');
     },
     onSuccess: () => {
       console.log('Page saved successfully, invalidating caches...');
       
-      // Invalidate all possible caches that could contain this page data
       queryClient.invalidateQueries({ queryKey: ['admin-pages'] });
       queryClient.invalidateQueries({ queryKey: ['page', pageId] });
       queryClient.invalidateQueries({ queryKey: ['page'] });
@@ -252,7 +242,14 @@ const AdminPageEdit: React.FC = () => {
     savePage.mutate(pageData);
   };
 
-  if (languagesLoading || isLoading) {
+  console.log('AdminPageEdit render state:', { 
+    isLoading, 
+    error: error?.message, 
+    languagesCount: languages.length,
+    pageDataContents: pageData.page_contents?.length 
+  });
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -261,16 +258,30 @@ const AdminPageEdit: React.FC = () => {
     );
   }
 
-  if (error || languagesError) {
+  if (error) {
+    console.error('AdminPageEdit error:', error);
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
         <div className="text-red-600">
-          Error al cargar: {error?.message || languagesError?.message || 'Error desconocido'}
+          Error al cargar: {error.message || 'Error desconocido'}
         </div>
-        <Button onClick={() => refetch()} variant="outline">
+        <Button onClick={() => window.location.reload()} variant="outline">
           <RefreshCw className="h-4 w-4 mr-2" />
-          Reintentar
+          Recargar página
         </Button>
+      </div>
+    );
+  }
+
+  if (languages.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p>No se encontraron idiomas configurados.</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Recargar página
+          </Button>
+        </div>
       </div>
     );
   }
@@ -355,77 +366,68 @@ const AdminPageEdit: React.FC = () => {
         <Card className="lg:col-span-3">
           <CardHeader>
             <CardTitle>Contenido</CardTitle>
-            <CardDescription>Edita el contenido en diferentes idiomas con el editor de texto enriquecido</CardDescription>
+            <CardDescription>Edita el contenido en diferentes idiomas</CardDescription>
           </CardHeader>
           <CardContent>
-            {languages.length > 0 ? (
-              <Tabs defaultValue={languages[0]?.code} className="w-full">
-                <TabsList className="grid grid-cols-2 w-full">
-                  {languages.map((language) => (
-                    <TabsTrigger key={language.id} value={language.code}>
-                      {language.name}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+            <Tabs defaultValue={languages[0]?.code} className="w-full">
+              <TabsList className="grid grid-cols-2 w-full">
+                {languages.map((language) => (
+                  <TabsTrigger key={language.id} value={language.code}>
+                    {language.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              
+              {languages.map((language) => {
+                const content = pageData.page_contents?.find(c => c.language_id === language.id);
                 
-                {languages.map((language) => {
-                  const content = pageData.page_contents?.find(c => c.language_id === language.id);
-                  
-                  return (
-                    <TabsContent key={language.id} value={language.code} className="space-y-4">
-                      <div>
-                        <Label htmlFor={`title-${language.id}`}>Título</Label>
-                        <Input
-                          id={`title-${language.id}`}
-                          value={content?.title || ''}
-                          onChange={(e) => updatePageContent(language.id, 'title', e.target.value)}
-                          placeholder="Título de la página"
+                return (
+                  <TabsContent key={language.id} value={language.code} className="space-y-4">
+                    <div>
+                      <Label htmlFor={`title-${language.id}`}>Título</Label>
+                      <Input
+                        id={`title-${language.id}`}
+                        value={content?.title || ''}
+                        onChange={(e) => updatePageContent(language.id, 'title', e.target.value)}
+                        placeholder="Título de la página"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor={`content-${language.id}`}>Contenido</Label>
+                      <div className="mt-2">
+                        <RichTextEditor
+                          content={content?.content || ''}
+                          onChange={(value) => updatePageContent(language.id, 'content', value)}
+                          placeholder="Contenido de la página"
                         />
                       </div>
+                    </div>
 
-                      <div>
-                        <Label htmlFor={`content-${language.id}`}>Contenido</Label>
-                        <div className="mt-2">
-                          <RichTextEditor
-                            content={content?.content || ''}
-                            onChange={(value) => updatePageContent(language.id, 'content', value)}
-                            placeholder="Contenido de la página - usa el editor de texto enriquecido para formatear tu contenido"
-                          />
-                        </div>
-                      </div>
+                    <div>
+                      <Label htmlFor={`meta-${language.id}`}>Meta Descripción</Label>
+                      <Textarea
+                        id={`meta-${language.id}`}
+                        value={content?.meta_description || ''}
+                        onChange={(e) => updatePageContent(language.id, 'meta_description', e.target.value)}
+                        placeholder="Descripción para SEO"
+                        rows={3}
+                      />
+                    </div>
 
-                      <div>
-                        <Label htmlFor={`meta-${language.id}`}>Meta Descripción</Label>
-                        <Textarea
-                          id={`meta-${language.id}`}
-                          value={content?.meta_description || ''}
-                          onChange={(e) => updatePageContent(language.id, 'meta_description', e.target.value)}
-                          placeholder="Descripción para SEO"
-                          rows={3}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor={`hero-${language.id}`}>Imagen Hero (URL)</Label>
-                        <Input
-                          id={`hero-${language.id}`}
-                          value={content?.hero_image_url || ''}
-                          onChange={(e) => updatePageContent(language.id, 'hero_image_url', e.target.value)}
-                          placeholder="https://ejemplo.com/imagen.jpg"
-                        />
-                      </div>
-                    </TabsContent>
-                  );
-                })}
-              </Tabs>
-            ) : (
-              <div className="text-center p-8">
-                <p>No se pudieron cargar los idiomas.</p>
-                <Button onClick={() => window.location.reload()} className="mt-4">
-                  Recargar página
-                </Button>
-              </div>
-            )}
+                    <div>
+                      <Label htmlFor={`hero-${language.id}`}>Imagen Hero (URL)</Label>
+                      <Input
+                        id={`hero-${language.id}`}
+                        value={content?.hero_image_url || ''}
+                        onChange={(e) => updatePageContent(language.id, 'hero_image_url', e.target.value)}
+                        placeholder="https://ejemplo.com/imagen.jpg"
+                      />
+                    </div>
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
           </CardContent>
         </Card>
       </div>
