@@ -1,52 +1,59 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { LanguageProvider } from '@/contexts/LanguageContext';
-import { CMSAuthProvider } from '@/contexts/CMSAuthContext';
-import { AudioPlayerProvider } from '@/contexts/AudioPlayerContext';
-import { Toaster } from '@/components/ui/toaster';
-import { Toaster as Sonner } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { CMSAuthProvider } from "@/contexts/CMSAuthContext";
 
-// Import pages
-import Layout from './components/layout/Layout';
-import Index from './pages/Index';
-import RecorreLaHuella from './pages/RecorreLaHuella';
-import EscuchaLaHuella from './pages/EscuchaLaHuella';
-import SobreElProyecto from './pages/SobreElProyecto';
-import Prensa from './pages/Prensa';
-import FichaTecnica from './pages/FichaTecnica';
-import Contacto from './pages/Contacto';
-import TrackDetail from './pages/TrackDetail';
-import NotFound from './pages/NotFound';
+import Layout from "./components/layout/Layout";
+import Index from "./pages/Index";
+import RecorreLaHuella from "./pages/RecorreLaHuella";
+import EscuchaLaHuella from "./pages/EscuchaLaHuella";
+import SobreElProyecto from "./pages/SobreElProyecto";
+import Prensa from "./pages/Prensa";
+import FichaTecnica from "./pages/FichaTecnica";
+import Contacto from "./pages/Contacto";
+import TrackDetail from "./pages/TrackDetail";
+import NotFound from "./pages/NotFound";
 
 // Admin routes
-import ProtectedRoute from './components/admin/ProtectedRoute';
-import CMSLogin from './components/admin/CMSLogin';
-import AdminLayout from './components/admin/AdminLayout';
-import AdminDashboard from './pages/admin/AdminDashboard';
+import ProtectedRoute from "./components/admin/ProtectedRoute";
+import CMSLogin from "./components/admin/CMSLogin";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 // New admin pages
-import NewAdminPages from './pages/admin/NewAdminPages';
-import NewAdminPageEdit from './pages/admin/NewAdminPageEdit';
-import NewAdminTracks from './pages/admin/NewAdminTracks';
-import NewAdminTrackEdit from './pages/admin/NewAdminTrackEdit';
+import NewAdminPages from "./pages/admin/NewAdminPages";
+import NewAdminPageEdit from "./pages/admin/NewAdminPageEdit";
+import NewAdminTracks from "./pages/admin/NewAdminTracks";
+import NewAdminTrackEdit from "./pages/admin/NewAdminTrackEdit";
 
 // Keep existing admin pages for other features
-import AdminAbout from './pages/admin/AdminAbout';
-import AdminAboutSectionEdit from './pages/admin/AdminAboutSectionEdit';
-import AdminPressKit from './pages/admin/AdminPressKit';
-import AdminVideos from './pages/admin/AdminVideos';
-import AdminVideoEdit from './pages/admin/AdminVideoEdit';
-import AdminMedia from './pages/admin/AdminMedia';
-import AdminUsers from './pages/admin/AdminUsers';
-import AdminLanguages from './pages/admin/AdminLanguages';
-import AdminLanguageEdit from './pages/admin/AdminLanguageEdit';
-import AdminCTAButtons from './pages/admin/AdminCTAButtons';
-import AdminTemplates from './pages/admin/AdminTemplates';
-import AdminSettings from './pages/admin/AdminSettings';
+import AdminAbout from "./pages/admin/AdminAbout";
+import AdminAboutSectionEdit from "./pages/admin/AdminAboutSectionEdit";
+import AdminPressKit from "./pages/admin/AdminPressKit";
+import AdminVideos from "./pages/admin/AdminVideos";
+import AdminVideoEdit from "./pages/admin/AdminVideoEdit";
+import AdminMedia from "./pages/admin/AdminMedia";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminLanguages from "./pages/admin/AdminLanguages";
+import AdminLanguageEdit from "./pages/admin/AdminLanguageEdit";
+import AdminCTAButtons from "./pages/admin/AdminCTAButtons";
+import AdminTemplates from "./pages/admin/AdminTemplates";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
+
+// Layout wrapper that provides children to Layout component
+const LayoutWrapper = () => {
+  return (
+    <Layout>
+      <Outlet />
+    </Layout>
+  );
+};
 
 function App() {
   return (
@@ -57,10 +64,10 @@ function App() {
             <TooltipProvider>
               <Toaster />
               <Sonner />
-              <Router>
+              <BrowserRouter>
                 <Routes>
                   {/* Public routes */}
-                  <Route path="/" element={<Layout />}>
+                  <Route path="/" element={<LayoutWrapper />}>
                     <Route index element={<Index />} />
                     <Route path="recorre-la-huella" element={<RecorreLaHuella />} />
                     <Route path="escucha-la-huella" element={<EscuchaLaHuella />} />
@@ -112,7 +119,7 @@ function App() {
                   {/* 404 route */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </Router>
+              </BrowserRouter>
             </TooltipProvider>
           </LanguageProvider>
         </AudioPlayerProvider>
