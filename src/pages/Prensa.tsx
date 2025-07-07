@@ -27,7 +27,13 @@ const Prensa: React.FC = () => {
 
   const handleDownload = () => {
     if (pressKitSettings?.download_url) {
-      window.open(pressKitSettings.download_url, '_blank');
+      // Create a temporary anchor element for download
+      const link = document.createElement('a');
+      link.href = pressKitSettings.download_url;
+      link.download = 'TheJourneyOfStringsRelease.zip'; // Suggest filename
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
