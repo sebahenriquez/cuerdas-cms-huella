@@ -28,10 +28,19 @@ const TrackSelector: React.FC<TrackSelectorProps> = ({
     return content?.menu_title || content?.title || `Track ${track.order_position}`;
   };
 
+  const getDisplayTitle = (track: Track) => {
+    // Si el track está seleccionado, mostrar el título completo
+    if (selectedTrack?.id === track.id) {
+      return getTrackTitle(track);
+    }
+    // Si no está seleccionado, mostrar solo el número
+    return track.order_position.toString();
+  };
+
   return (
-    <div className="fixed top-20 left-0 right-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
+    <div className="fixed top-16 left-0 right-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
       <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center space-x-2 overflow-x-auto">
+        <div className="flex items-center justify-center space-x-2 flex-wrap">
           {/* Botón de Intro */}
           {showIntroButton && (
             <Button
@@ -40,7 +49,7 @@ const TrackSelector: React.FC<TrackSelectorProps> = ({
               onClick={onIntroClick}
               className="flex-shrink-0"
             >
-              {currentLanguage?.code === 'es' ? 'Introducción' : 'Introduction'}
+              {currentLanguage?.code === 'es' ? 'Intro' : 'Intro'}
             </Button>
           )}
 
@@ -53,7 +62,7 @@ const TrackSelector: React.FC<TrackSelectorProps> = ({
               onClick={() => onTrackSelect(track)}
               className="flex-shrink-0 min-w-fit"
             >
-              {getTrackTitle(track)}
+              {getDisplayTitle(track)}
             </Button>
           ))}
         </div>

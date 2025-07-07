@@ -3,7 +3,6 @@ import React from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Track } from '@/types/track';
@@ -85,7 +84,7 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
       {/* Header */}
       <div className="flex-shrink-0 p-6 text-center">
         <h1 className="text-3xl font-bold mb-2">
@@ -98,10 +97,16 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
         )}
       </div>
 
-      {/* Track List - Full width with proper scroll */}
-      <div className="flex-1 px-6 overflow-hidden">
+      {/* Track List - Custom styled scroll */}
+      <div className="flex-1 px-6 relative">
         <div className="h-full max-w-4xl mx-auto">
-          <div className="h-full overflow-y-auto pr-2">
+          <div 
+            className="h-full overflow-y-auto scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500 pr-2"
+            style={{
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#4B5563 #1F2937'
+            }}
+          >
             <div className="py-4">
               {tracks.length === 0 ? (
                 <div className="text-center py-8">
@@ -261,6 +266,23 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .scrollbar-thin::-webkit-scrollbar {
+          width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background: #1f2937;
+          border-radius: 3px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: #4b5563;
+          border-radius: 3px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+          background: #6b7280;
+        }
+      `}</style>
     </div>
   );
 };
