@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -27,6 +28,13 @@ const Header: React.FC = () => {
     setIsLanguageSelectorOpen(false);
   };
 
+  const getSiteTitle = () => {
+    if (currentLanguage?.code === 'en') {
+      return 'The Journey of Strings';
+    }
+    return 'La Huella de las Cuerdas';
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border">
       <div className="container-wide">
@@ -34,7 +42,7 @@ const Header: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="text-xl font-bold text-primary">
-              La Huella de las Cuerdas
+              {getSiteTitle()}
             </div>
           </Link>
 
