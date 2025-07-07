@@ -128,6 +128,8 @@ export const useTrackData = (trackId: number) => {
       }
       
       console.log('Track data fetched successfully:', data);
+      console.log('Videos in track data:', data?.videos);
+      console.log('Photos in track data:', data?.track_featured_images);
       return data;
     },
     enabled: trackId > 0,
@@ -179,6 +181,8 @@ export const useTrackData = (trackId: number) => {
     if (languages.length > 0) {
       if (existingTrack) {
         console.log('Processing existing track data:', existingTrack);
+        console.log('Existing track videos:', existingTrack.videos);
+        console.log('Existing track photos:', existingTrack.track_featured_images);
         
         // Ensure content for all languages
         const completeTrackContents = ensureContentForAllLanguages(
@@ -186,22 +190,31 @@ export const useTrackData = (trackId: number) => {
           languages
         );
         
+        // Process videos with content for all languages
+        const processedVideos = existingTrack.videos?.map(video => ({
+          ...video,
+          video_contents: video.video_contents || languages.map(lang => ({
+            title: '',
+            description: '',
+            language_id: lang.id
+          }))
+        })) || [];
+        
+        // Process photos
+        const processedPhotos = existingTrack.track_featured_images?.map((photo, index) => ({
+          ...photo,
+          image_url: photo.image_url || '',
+          order_position: photo.order_position || index + 1
+        })) || [];
+        
+        console.log('Processed videos:', processedVideos);
+        console.log('Processed photos:', processedPhotos);
+        
         const transformedTrack = {
           ...existingTrack,
           track_contents: completeTrackContents,
-          videos: existingTrack.videos?.map(video => ({
-            ...video,
-            video_contents: video.video_contents || languages.map(lang => ({
-              title: '',
-              description: '',
-              language_id: lang.id
-            }))
-          })) || [],
-          photos: existingTrack.track_featured_images?.map((photo, index) => ({
-            ...photo,
-            image_url: photo.image_url || '',
-            order_position: photo.order_position || index + 1
-          })) || [],
+          videos: processedVideos,
+          photos: processedPhotos,
           cta_settings: existingTrack.track_cta_settings?.[0] ? {
             show_texts: existingTrack.track_cta_settings[0].show_texts ?? true,
             show_videos: existingTrack.track_cta_settings[0].show_videos ?? true,
@@ -226,6 +239,8 @@ export const useTrackData = (trackId: number) => {
         };
         
         console.log('Final transformed track data:', transformedTrack);
+        console.log('Final videos:', transformedTrack.videos);
+        console.log('Final photos:', transformedTrack.photos);
         setTrackData(transformedTrack);
       } else {
         console.log('Initializing track data for new or non-existent track');
@@ -241,7 +256,9 @@ export const useTrackData = (trackId: number) => {
         setTrackData(prev => ({
           ...prev,
           id: trackId || 0,
-          track_contents: emptyContents
+          track_contents: emptyContents,
+          videos: [],
+          photos: []
         }));
       }
     }

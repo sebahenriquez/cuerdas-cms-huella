@@ -34,7 +34,7 @@ const AdminVideoEdit: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const videoId = parseInt(id || '0');
+  const videoId = id === 'new' ? 0 : parseInt(id || '0');
 
   const [videoData, setVideoData] = useState<Partial<VideoData>>({
     vimeo_url: '',

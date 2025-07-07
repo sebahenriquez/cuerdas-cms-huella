@@ -106,6 +106,7 @@ function App() {
                     <Route path="about/:sectionKey/edit" element={<AdminAboutSectionEdit />} />
                     <Route path="press-kit" element={<AdminPressKit />} />
                     <Route path="videos" element={<AdminVideos />} />
+                    <Route path="videos/new" element={<AdminVideoEdit />} />
                     <Route path="videos/:id/edit" element={<AdminVideoEdit />} />
                     <Route path="media" element={<AdminMedia />} />
                     <Route path="users" element={<AdminUsers />} />
