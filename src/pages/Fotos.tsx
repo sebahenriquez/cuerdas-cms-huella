@@ -6,11 +6,23 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import LightboxModal from '@/components/recorre-la-huella/LightboxModal';
+import { getPageBySlug } from '@/lib/page-helpers';
 
 const Fotos: React.FC = () => {
   const { currentLanguage } = useLanguage();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
+  // Get page content from the pages system
+  const { data: pageData } = useQuery({
+    queryKey: ['fotos-page', currentLanguage?.id],
+    queryFn: async () => {
+      if (!currentLanguage) return null;
+      return getPageBySlug('fotos', currentLanguage.id);
+    },
+    enabled: !!currentLanguage,
+  });
+
+  // Get photos page settings for download URL
   const { data: pageSettings } = useQuery({
     queryKey: ['photos-page-settings', currentLanguage?.id],
     queryFn: async () => {
@@ -18,7 +30,7 @@ const Fotos: React.FC = () => {
         .from('photos_page_settings')
         .select('*')
         .eq('language_id', currentLanguage?.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -26,6 +38,7 @@ const Fotos: React.FC = () => {
     enabled: !!currentLanguage,
   });
 
+  // Get gallery photos
   const { data: photos = [] } = useQuery({
     queryKey: ['gallery-photos'],
     queryFn: async () => {
@@ -51,6 +64,11 @@ const Fotos: React.FC = () => {
     }
   };
 
+  const pageContent = pageData?.page_contents?.[0];
+  const pageTitle = pageContent?.title || 'Berta Rojas';
+  const buttonText = pageContent?.content || (currentLanguage?.code === 'es' ? 'Descargue aquí fotos de prensa en alta resolución' : 'Download high-resolution press photos here');
+  const creditText = pageSettings?.credit_text || 'Photos: Guillermo Fridman';
+
   return (
     <Layout>
       <div 
@@ -71,7 +89,7 @@ const Fotos: React.FC = () => {
             {/* Header */}
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-6xl font-bold text-white mb-8">
-                {pageSettings?.page_title || 'Berta Rojas'}
+                {pageTitle}
               </h1>
               
               {pageSettings?.download_url && (
@@ -81,12 +99,12 @@ const Fotos: React.FC = () => {
                   className="bg-white text-black hover:bg-gray-100 transition-colors text-lg px-8 py-4 mb-4"
                 >
                   <Download className="mr-2 h-5 w-5" />
-                  {pageSettings?.download_button_text || 'Download Photos'}
+                  {buttonText}
                 </Button>
               )}
               
               <p className="text-white/80 text-sm">
-                {pageSettings?.credit_text || 'Photos: Guillermo Fridman'}
+                {creditText}
               </p>
             </div>
 
