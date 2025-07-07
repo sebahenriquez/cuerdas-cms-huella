@@ -9,9 +9,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Plus, Trash2, Upload, GripVertical, Edit2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Plus, Trash2, Image, GripVertical, Edit2, ExternalLink } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+interface PhotoContent {
+  id?: number;
+  title: string;
+  description: string;
+  language_id: number;
+}
 
 interface TrackPhoto {
   id: number;
@@ -21,6 +27,7 @@ interface TrackPhoto {
   caption_en: string;
   order_position: number;
   media_file_id?: number;
+  photo_contents?: PhotoContent[];
 }
 
 interface Track {
@@ -74,44 +81,59 @@ const AdminTrackPhotos: React.FC = () => {
     enabled: selectedTrack > 0
   });
 
-  // Upload photo mutation
-  const uploadPhotoMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const fileName = `${Date.now()}-${file.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('media')
-        .getPublicUrl(fileName);
-
-      return publicUrl;
-    }
-  });
-
   // Save photo mutation
   const savePhotoMutation = useMutation({
     mutationFn: async (photoData: Partial<TrackPhoto> & { isNew?: boolean }) => {
-      const { isNew, ...data } = photoData;
+      const { isNew, photo_contents, ...mainData } = photoData;
       
       if (isNew) {
-        const { error } = await supabase
+        // Create new photo
+        const { data: newPhoto, error: photoError } = await supabase
           .from('track_featured_images')
           .insert({
-            ...data,
+            ...mainData,
             track_id: selectedTrack,
             order_position: photos.length + 1
-          });
-        if (error) throw error;
+          })
+          .select()
+          .single();
+
+        if (photoError) throw photoError;
+
+        // Update caption fields with content from photo_contents if provided
+        if (photo_contents) {
+          const spanishContent = photo_contents.find(c => c.language_id === 2);
+          const englishContent = photo_contents.find(c => c.language_id === 1);
+          
+          const { error: updateError } = await supabase
+            .from('track_featured_images')
+            .update({
+              caption_es: spanishContent?.description || '',
+              caption_en: englishContent?.description || ''
+            })
+            .eq('id', newPhoto.id);
+
+          if (updateError) throw updateError;
+        }
       } else {
-        const { error } = await supabase
+        // Update existing photo
+        const updateData = { ...mainData };
+        
+        // Update caption fields with content from photo_contents if provided
+        if (photo_contents) {
+          const spanishContent = photo_contents.find(c => c.language_id === 2);
+          const englishContent = photo_contents.find(c => c.language_id === 1);
+          
+          updateData.caption_es = spanishContent?.description || '';
+          updateData.caption_en = englishContent?.description || '';
+        }
+
+        const { error: photoError } = await supabase
           .from('track_featured_images')
-          .update(data)
-          .eq('id', data.id);
-        if (error) throw error;
+          .update(updateData)
+          .eq('id', mainData.id);
+
+        if (photoError) throw photoError;
       }
     },
     onSuccess: () => {
@@ -166,28 +188,34 @@ const AdminTrackPhotos: React.FC = () => {
     }
   });
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      try {
-        const imageUrl = await uploadPhotoMutation.mutateAsync(file);
-        setEditingPhoto({
-          id: 0,
-          track_id: selectedTrack,
-          image_url: imageUrl,
-          caption_es: '',
-          caption_en: '',
-          order_position: photos.length + 1
-        });
-        setIsDialogOpen(true);
-      } catch (error) {
-        toast({
-          title: 'Error al subir imagen',
-          description: 'No se pudo subir la imagen.',
-          variant: 'destructive'
-        });
-      }
-    }
+  const handleCreatePhoto = () => {
+    setEditingPhoto({
+      id: 0,
+      track_id: selectedTrack,
+      image_url: '',
+      caption_es: '',
+      caption_en: '',
+      order_position: photos.length + 1,
+      photo_contents: [
+        { title: '', description: '', language_id: 1 }, // English
+        { title: '', description: '', language_id: 2 }  // Spanish
+      ]
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleEditPhoto = (photo: TrackPhoto) => {
+    // Create photo_contents from existing captions
+    const photoContents = [
+      { title: '', description: photo.caption_en || '', language_id: 1 }, // English
+      { title: '', description: photo.caption_es || '', language_id: 2 }  // Spanish
+    ];
+
+    setEditingPhoto({
+      ...photo,
+      photo_contents: photoContents
+    });
+    setIsDialogOpen(true);
   };
 
   const handleSavePhoto = () => {
@@ -197,6 +225,21 @@ const AdminTrackPhotos: React.FC = () => {
         isNew: editingPhoto.id === 0
       });
     }
+  };
+
+  const updatePhotoContent = (languageId: number, field: 'title' | 'description', value: string) => {
+    if (!editingPhoto || !editingPhoto.photo_contents) return;
+    
+    const updatedContents = editingPhoto.photo_contents.map(content =>
+      content.language_id === languageId
+        ? { ...content, [field]: value }
+        : content
+    );
+    
+    setEditingPhoto({
+      ...editingPhoto,
+      photo_contents: updatedContents
+    });
   };
 
   const movePhoto = (dragIndex: number, hoverIndex: number) => {
@@ -211,6 +254,11 @@ const AdminTrackPhotos: React.FC = () => {
     }));
     
     updateOrderMutation.mutate(updates);
+  };
+
+  const getPhotoTitle = (photo: TrackPhoto) => {
+    // Since we don't have separate title storage for photos yet, use caption as title
+    return photo.caption_es || photo.caption_en || 'Sin título';
   };
 
   const getTrackTitle = (track: Track) => {
@@ -255,21 +303,10 @@ const AdminTrackPhotos: React.FC = () => {
                   {photos.length} fotos
                 </Badge>
               </CardTitle>
-              <div className="space-x-2">
-                <Button size="sm" asChild>
-                  <label htmlFor="photo-upload" className="cursor-pointer">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Subir Foto
-                  </label>
-                </Button>
-                <input
-                  id="photo-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileUpload}
-                />
-              </div>
+              <Button size="sm" onClick={handleCreatePhoto}>
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar Foto
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -292,22 +329,36 @@ const AdminTrackPhotos: React.FC = () => {
                       src={photo.image_url}
                       alt="Foto del track"
                       className="w-16 h-16 object-cover rounded"
+                      onError={(e) => {
+                        e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyMEg0NFY0NEgyMFYyMFoiIGZpbGw9IiNEMUQ1REIiLz4KPC9zdmc+';
+                      }}
                     />
                     <div className="flex-1 space-y-2">
-                      <div className="font-medium">Posición #{photo.order_position}</div>
+                      <div className="font-medium">
+                        Posición #{photo.order_position} - {getPhotoTitle(photo)}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        URL: {photo.image_url}
+                      </div>
                       <div className="text-sm text-muted-foreground">
                         <div><strong>ES:</strong> {photo.caption_es || 'Sin descripción'}</div>
                         <div><strong>EN:</strong> {photo.caption_en || 'Sin descripción'}</div>
                       </div>
                     </div>
                     <div className="space-x-2">
+                      {photo.image_url && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(photo.image_url, '_blank')}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {
-                          setEditingPhoto(photo);
-                          setIsDialogOpen(true);
-                        }}
+                        onClick={() => handleEditPhoto(photo)}
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
@@ -338,12 +389,29 @@ const AdminTrackPhotos: React.FC = () => {
           
           {editingPhoto && (
             <div className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="image-url">URL de la Imagen</Label>
+                  <Input
+                    id="image-url"
+                    value={editingPhoto.image_url}
+                    onChange={(e) =>
+                      setEditingPhoto({ ...editingPhoto, image_url: e.target.value })
+                    }
+                    placeholder="https://ejemplo.com/imagen.jpg"
+                  />
+                </div>
+              </div>
+
               {editingPhoto.image_url && (
                 <div className="flex justify-center">
                   <img
                     src={editingPhoto.image_url}
                     alt="Preview"
                     className="max-w-xs max-h-48 object-cover rounded-lg"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
                   />
                 </div>
               )}
@@ -356,13 +424,20 @@ const AdminTrackPhotos: React.FC = () => {
                 
                 <TabsContent value="es" className="space-y-4">
                   <div>
-                    <Label htmlFor="caption-es">Descripción en Español</Label>
+                    <Label htmlFor="title-es">Título en Español</Label>
+                    <Input
+                      id="title-es"
+                      value={editingPhoto.photo_contents?.find(c => c.language_id === 2)?.title || ''}
+                      onChange={(e) => updatePhotoContent(2, 'title', e.target.value)}
+                      placeholder="Título de la imagen en español"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="description-es">Descripción en Español</Label>
                     <Textarea
-                      id="caption-es"
-                      value={editingPhoto.caption_es}
-                      onChange={(e) =>
-                        setEditingPhoto({ ...editingPhoto, caption_es: e.target.value })
-                      }
+                      id="description-es"
+                      value={editingPhoto.photo_contents?.find(c => c.language_id === 2)?.description || ''}
+                      onChange={(e) => updatePhotoContent(2, 'description', e.target.value)}
                       placeholder="Descripción de la imagen en español"
                       rows={3}
                     />
@@ -371,13 +446,20 @@ const AdminTrackPhotos: React.FC = () => {
                 
                 <TabsContent value="en" className="space-y-4">
                   <div>
-                    <Label htmlFor="caption-en">Description in English</Label>
+                    <Label htmlFor="title-en">Title in English</Label>
+                    <Input
+                      id="title-en"
+                      value={editingPhoto.photo_contents?.find(c => c.language_id === 1)?.title || ''}
+                      onChange={(e) => updatePhotoContent(1, 'title', e.target.value)}
+                      placeholder="Image title in English"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="description-en">Description in English</Label>
                     <Textarea
-                      id="caption-en"
-                      value={editingPhoto.caption_en}
-                      onChange={(e) =>
-                        setEditingPhoto({ ...editingPhoto, caption_en: e.target.value })
-                      }
+                      id="description-en"
+                      value={editingPhoto.photo_contents?.find(c => c.language_id === 1)?.description || ''}
+                      onChange={(e) => updatePhotoContent(1, 'description', e.target.value)}
                       placeholder="Image description in English"
                       rows={3}
                     />
