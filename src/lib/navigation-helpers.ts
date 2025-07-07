@@ -26,11 +26,13 @@ export const getNavigation = async (languageId: number) => {
       const isSpanish = languageId === 1;
       const isEnglish = languageId === 2;
       
-      if (isSpanish && (item.url === '/contacto' || item.url === '/ficha-tecnica')) {
+      // Remove contacto for both languages
+      if (item.url === '/contacto') {
         return false;
       }
       
-      if (isEnglish && item.url === '/contacto') {
+      // Remove ficha-tecnica for Spanish only
+      if (isSpanish && item.url === '/ficha-tecnica') {
         return false;
       }
       

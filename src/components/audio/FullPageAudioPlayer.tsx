@@ -87,7 +87,7 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
       {/* Header */}
-      <div className="flex-shrink-0 p-6 border-b border-gray-700">
+      <div className="flex-shrink-0 p-6 text-center">
         <h1 className="text-3xl font-bold mb-2">
           {currentLanguage?.code === 'es' ? 'Escucha el Álbum' : 'Listen to the Album'}
         </h1>
@@ -98,68 +98,70 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
         )}
       </div>
 
-      {/* Track List */}
-      <div className="flex-1 min-h-0">
-        <ScrollArea className="h-full">
-          <div className="p-6">
-            {tracks.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-400">
-                  {currentLanguage?.code === 'es' ? 'No hay pistas disponibles' : 'No tracks available'}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                {tracks.map((track, index) => {
-                  const content = track.track_contents?.[0];
-                  const isCurrentTrack = currentTrack?.id === track.id;
-                  
-                  return (
-                    <div
-                      key={track.id}
-                      onClick={() => handleTrackSelect(track)}
-                      className={`group flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-white/10 ${
-                        isCurrentTrack ? 'bg-primary/20' : 'hover:bg-white/5'
-                      }`}
-                    >
-                      {/* Play/Pause button or track number */}
-                      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center mr-4">
-                        {isCurrentTrack && isPlaying ? (
-                          <Pause className="w-5 h-5 text-primary" />
-                        ) : isCurrentTrack ? (
-                          <Play className="w-5 h-5 text-primary" />
-                        ) : (
-                          <span className="text-gray-400 group-hover:hidden text-sm">
-                            {track.order_position}
-                          </span>
-                        )}
-                        {!isCurrentTrack && (
-                          <Play className="w-4 h-4 text-white hidden group-hover:block" />
-                        )}
-                      </div>
+      {/* Track List - Centered with internal scroll */}
+      <div className="flex-1 flex justify-center px-6 min-h-0">
+        <div className="w-full max-w-2xl">
+          <ScrollArea className="h-full">
+            <div className="py-4">
+              {tracks.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-400">
+                    {currentLanguage?.code === 'es' ? 'No hay pistas disponibles' : 'No tracks available'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {tracks.map((track, index) => {
+                    const content = track.track_contents?.[0];
+                    const isCurrentTrack = currentTrack?.id === track.id;
+                    
+                    return (
+                      <div
+                        key={track.id}
+                        onClick={() => handleTrackSelect(track)}
+                        className={`group flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-white/10 ${
+                          isCurrentTrack ? 'bg-primary/20' : 'hover:bg-white/5'
+                        }`}
+                      >
+                        {/* Play/Pause button or track number */}
+                        <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center mr-4">
+                          {isCurrentTrack && isPlaying ? (
+                            <Pause className="w-5 h-5 text-primary" />
+                          ) : isCurrentTrack ? (
+                            <Play className="w-5 h-5 text-primary" />
+                          ) : (
+                            <span className="text-gray-400 group-hover:hidden text-sm">
+                              {track.order_position}
+                            </span>
+                          )}
+                          {!isCurrentTrack && (
+                            <Play className="w-4 h-4 text-white hidden group-hover:block" />
+                          )}
+                        </div>
 
-                      {/* Track info */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className={`font-medium truncate ${isCurrentTrack ? 'text-primary' : 'text-white'}`}>
-                          {content?.title || `Track ${track.order_position}`}
-                        </h3>
-                        {content?.description && (
-                          <p className="text-sm text-gray-400 truncate mt-1">
-                            {content.description}
-                          </p>
-                        )}
+                        {/* Track info */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className={`font-medium truncate ${isCurrentTrack ? 'text-primary' : 'text-white'}`}>
+                            {content?.title || `Track ${track.order_position}`}
+                          </h3>
+                          {content?.description && (
+                            <p className="text-sm text-gray-400 truncate mt-1">
+                              {content.description}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </ScrollArea>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </div>
       </div>
 
-      {/* Player Controls */}
-      <div className="flex-shrink-0 bg-gray-900/80 backdrop-blur-sm border-t border-gray-700 p-4">
+      {/* Player Controls - Always visible at bottom */}
+      <div className="flex-shrink-0 bg-gray-900/90 backdrop-blur-sm border-t border-gray-700 p-4">
         {/* Progress Bar */}
         <div className="mb-4">
           <div className="flex items-center space-x-3">
