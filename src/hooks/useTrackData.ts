@@ -124,15 +124,10 @@ export const useTrackData = (trackId: number) => {
             track_cta_settings(*)
           `)
           .eq('id', trackId)
-          .single();
+          .maybeSingle();
         
         if (error) {
           console.error('Supabase error fetching track:', error);
-          // Don't throw error if track doesn't exist, just return null
-          if (error.code === 'PGRST116') {
-            console.log('Track not found, will create new one');
-            return null;
-          }
           throw new Error(`Error fetching track: ${error.message}`);
         }
         
@@ -154,7 +149,7 @@ export const useTrackData = (trackId: number) => {
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 
-  const isLoading = languagesLoading || trackLoading;
+  const isLoading = languagesLoading || (trackId > 0 && trackLoading);
   const error = languagesError || trackError;
 
   // Log any query errors
@@ -199,7 +194,7 @@ export const useTrackData = (trackId: number) => {
   };
 
   useEffect(() => {
-    console.log('useEffect triggered with:', { existingTrack, languages });
+    console.log('useEffect triggered with:', { existingTrack, languages, trackId });
     
     if (languages.length > 0) {
       if (existingTrack) {
@@ -252,8 +247,8 @@ export const useTrackData = (trackId: number) => {
         
         console.log('Final transformed track data:', transformedTrack);
         setTrackData(transformedTrack);
-      } else if (trackId > 0) {
-        console.log('Initializing new track with empty content for all languages');
+      } else {
+        console.log('Initializing track data for new or non-existent track');
         const emptyContents = languages.map(lang => ({
           title: '',
           menu_title: '',
@@ -265,7 +260,7 @@ export const useTrackData = (trackId: number) => {
         
         setTrackData(prev => ({
           ...prev,
-          id: trackId,
+          id: trackId || 0,
           track_contents: emptyContents
         }));
       }

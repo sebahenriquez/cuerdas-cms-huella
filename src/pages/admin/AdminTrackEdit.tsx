@@ -16,7 +16,9 @@ const AdminTrackEdit: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { currentTrack, isPlaying, playTrack, pauseTrack } = useAudioPlayer();
-  const trackId = parseInt(id || '0');
+  
+  // Manear tanto IDs existentes como "new" para nuevos tracks
+  const trackId = id === 'new' ? 0 : parseInt(id || '0');
 
   const {
     trackData,
@@ -79,6 +81,16 @@ const AdminTrackEdit: React.FC = () => {
           <RefreshCw className="h-4 w-4 mr-2" />
           Recargar página
         </Button>
+      </div>
+    );
+  }
+
+  // Asegurar que tenemos datos mínimos para renderizar
+  if (!trackData || !languages || languages.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2">Inicializando editor...</span>
       </div>
     );
   }

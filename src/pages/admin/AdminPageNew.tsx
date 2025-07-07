@@ -1,6 +1,7 @@
+
 import AdminPageEdit from './AdminPageEdit';
 
-// This component reuses AdminPageEdit for creating new pages
+// Este componente reutiliza AdminPageEdit para crear nuevas páginas
 const AdminPageNew = () => {
   return <AdminPageEdit />;
 };
