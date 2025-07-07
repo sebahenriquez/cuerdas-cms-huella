@@ -25,6 +25,7 @@ const AdminLayout: React.FC = () => {
     { icon: Music, label: 'Tracks', path: '/admin/tracks' },
     { icon: Video, label: 'Videos por Track', path: '/admin/track-videos' },
     { icon: Image, label: 'Fotos por Track', path: '/admin/track-photos' },
+    { icon: Image, label: 'Sección de Fotos', path: '/admin/gallery-photos' },
     { icon: Video, label: 'Videos', path: '/admin/videos' },
     { icon: FileText, label: 'Pages', path: '/admin/pages' },
     { icon: Info, label: 'About Page', path: '/admin/about' },

@@ -60,11 +60,22 @@ const Prensa: React.FC = () => {
           <Button
             onClick={handleDownload}
             size="lg"
-            className="bg-white text-black hover:bg-gray-100 transition-colors text-lg px-8 py-4"
+            className="bg-white text-black hover:bg-gray-100 transition-colors text-lg px-8 py-4 mb-12"
           >
             <Download className="mr-2 h-5 w-5" />
             {pressKitSettings?.button_label || (currentLanguage?.code === 'es' ? 'Kit de Prensa' : 'Press Kit')}
           </Button>
+
+          {/* Press Contact Card */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white max-w-md mx-auto">
+            <h3 className="text-lg font-bold mb-4 text-center">U.S. & UK PRESS CONTACT</h3>
+            <div className="space-y-2 text-center">
+              <p className="font-semibold">Diane Blackman, BRPR</p>
+              <p className="font-semibold">Co-Founder & President</p>
+              <p className="text-white/90">212.249.5125</p>
+              <p className="text-white/90">dblackman@brpublicrelations.com</p>
+            </div>
+          </div>
         </div>
       </div>
     </Layout>

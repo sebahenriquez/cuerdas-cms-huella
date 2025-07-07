@@ -383,6 +383,33 @@ export type Database = {
           },
         ]
       }
+      gallery_photos: {
+        Row: {
+          created_at: string
+          id: number
+          image_url: string
+          is_active: boolean
+          order_position: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          image_url: string
+          is_active?: boolean
+          order_position?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          image_url?: string
+          is_active?: boolean
+          order_position?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       image_galleries: {
         Row: {
           created_at: string | null
@@ -614,6 +641,47 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      photos_page_settings: {
+        Row: {
+          created_at: string
+          credit_text: string | null
+          download_button_text: string | null
+          download_url: string | null
+          id: number
+          language_id: number
+          page_title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          credit_text?: string | null
+          download_button_text?: string | null
+          download_url?: string | null
+          id?: number
+          language_id: number
+          page_title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          credit_text?: string | null
+          download_button_text?: string | null
+          download_url?: string | null
+          id?: number
+          language_id?: number
+          page_title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_page_settings_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: true
+            referencedRelation: "languages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       press_kit_settings: {
         Row: {

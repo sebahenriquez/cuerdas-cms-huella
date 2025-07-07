@@ -13,6 +13,7 @@ import RecorreLaHuella from "./pages/RecorreLaHuella";
 import EscuchaLaHuella from "./pages/EscuchaLaHuella";
 import SobreElProyecto from "./pages/SobreElProyecto";
 import Prensa from "./pages/Prensa";
+import Fotos from "./pages/Fotos";
 import FichaTecnica from "./pages/FichaTecnica";
 import Contacto from "./pages/Contacto";
 import TrackDetail from "./pages/TrackDetail";
@@ -38,6 +39,7 @@ import AdminVideos from "./pages/admin/AdminVideos";
 import AdminVideoEdit from "./pages/admin/AdminVideoEdit";
 import AdminTrackVideos from "./pages/admin/AdminTrackVideos";
 import AdminTrackPhotos from "./pages/admin/AdminTrackPhotos";
+import AdminGalleryPhotos from "./pages/admin/AdminGalleryPhotos";
 import AdminMedia from "./pages/admin/AdminMedia";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminLanguages from "./pages/admin/AdminLanguages";
@@ -75,6 +77,7 @@ function App() {
                     <Route path="escucha-la-huella" element={<EscuchaLaHuella />} />
                     <Route path="sobre-el-proyecto" element={<SobreElProyecto />} />
                     <Route path="prensa" element={<Prensa />} />
+                    <Route path="fotos" element={<Fotos />} />
                     <Route path="ficha-tecnica" element={<FichaTecnica />} />
                     <Route path="contacto" element={<Contacto />} />
                     <Route path="track/:id" element={<TrackDetail />} />
@@ -112,6 +115,7 @@ function App() {
                     <Route path="videos/:id/edit" element={<AdminVideoEdit />} />
                     <Route path="track-videos" element={<AdminTrackVideos />} />
                     <Route path="track-photos" element={<AdminTrackPhotos />} />
+                    <Route path="gallery-photos" element={<AdminGalleryPhotos />} />
                     <Route path="media" element={<AdminMedia />} />
                     <Route path="users" element={<AdminUsers />} />
                     <Route path="languages" element={<AdminLanguages />} />
