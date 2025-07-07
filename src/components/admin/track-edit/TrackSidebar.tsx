@@ -57,21 +57,17 @@ const TrackSidebar: React.FC<TrackSidebarProps> = ({
           onCTASettingsChange={onCTASettingsChange}
         />
 
-        {ctaSettings?.show_videos && (
-          <VideosSection
-            videos={videos}
-            languages={languages}
-            onVideosChange={onVideosChange}
-            onVideoContentChange={onVideoContentChange}
-          />
-        )}
+        <VideosSection
+          videos={videos}
+          languages={languages}
+          onVideosChange={onVideosChange}
+          onVideoContentChange={onVideoContentChange}
+        />
 
-        {ctaSettings?.show_photos && (
-          <PhotosSection
-            photos={photos}
-            onPhotosChange={onPhotosChange}
-          />
-        )}
+        <PhotosSection
+          photos={photos}
+          onPhotosChange={onPhotosChange}
+        />
       </CardContent>
     </Card>
   );

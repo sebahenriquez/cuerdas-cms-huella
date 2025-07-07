@@ -41,7 +41,7 @@ const VideosSection: React.FC<VideosSectionProps> = ({
   onVideoContentChange
 }) => {
   const addVideo = () => {
-    if (videos.length < 2) {
+    if (videos.length < 3) {
       const newVideos = [
         ...videos,
         {
@@ -71,18 +71,18 @@ const VideosSection: React.FC<VideosSectionProps> = ({
   };
 
   return (
-    <div className="border-t pt-4">
+    <div className="border-t pt-4 mt-4">
       <div className="flex items-center justify-between mb-3">
-        <Label className="flex items-center gap-2">
+        <Label className="flex items-center gap-2 font-semibold">
           <Video className="h-4 w-4" />
-          Videos (máx. 2)
+          Videos (máx. 3)
         </Label>
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={addVideo}
-          disabled={videos.length >= 2}
+          disabled={videos.length >= 3}
         >
           <Plus className="h-4 w-4" />
         </Button>
@@ -90,7 +90,7 @@ const VideosSection: React.FC<VideosSectionProps> = ({
       
       <div className="space-y-4">
         {videos.map((video, index) => (
-          <div key={index} className="border rounded p-3 space-y-3">
+          <div key={index} className="border rounded-lg p-4 space-y-3 bg-muted/30">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium">Video {index + 1}</span>
               <Button
@@ -102,18 +102,31 @@ const VideosSection: React.FC<VideosSectionProps> = ({
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <Input
-              placeholder="URL del Video (YouTube/Vimeo)"
-              value={video.vimeo_url}
-              onChange={(e) => updateVideo(index, 'vimeo_url', e.target.value)}
-            />
+            <div>
+              <Label className="text-sm">URL del Video</Label>
+              <Input
+                placeholder="https://youtu.be/... o https://vimeo.com/..."
+                value={video.vimeo_url}
+                onChange={(e) => updateVideo(index, 'vimeo_url', e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm">URL de Miniatura (opcional)</Label>
+              <Input
+                placeholder="https://ejemplo.com/imagen.jpg"
+                value={video.thumbnail_url || ''}
+                onChange={(e) => updateVideo(index, 'thumbnail_url', e.target.value)}
+                className="mt-1"
+              />
+            </div>
             
             <div className="space-y-3">
               <Label className="text-sm font-medium">Contenido del Video</Label>
               {languages.map((lang) => {
                 const content = video.video_contents?.find(c => c.language_id === lang.id);
                 return (
-                  <div key={lang.id} className="border rounded p-3 space-y-2">
+                  <div key={lang.id} className="border rounded p-3 space-y-2 bg-background">
                     <Label className="text-xs text-muted-foreground font-medium">{lang.name}</Label>
                     <div className="space-y-2">
                       <Input
