@@ -39,8 +39,13 @@ export const getNavigation = async (languageId: number) => {
       return true;
     });
 
-    console.log('Navigation fetched successfully:', filteredData);
-    return filteredData || [];
+    // Remove duplicates based on URL to prevent duplicate Prensa items
+    const uniqueData = filteredData?.filter((item, index, self) => 
+      index === self.findIndex(t => t.url === item.url)
+    );
+
+    console.log('Navigation fetched successfully:', uniqueData);
+    return uniqueData || [];
   } catch (error) {
     console.error('Error in getNavigation:', error);
     return [];

@@ -85,7 +85,7 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
       {/* Header */}
       <div className="flex-shrink-0 p-6 text-center">
         <h1 className="text-3xl font-bold mb-2">
@@ -98,10 +98,10 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
         )}
       </div>
 
-      {/* Track List - Centered with internal scroll */}
-      <div className="flex-1 flex justify-center px-6 min-h-0">
-        <div className="w-full max-w-2xl">
-          <ScrollArea className="h-full">
+      {/* Track List - Full width with proper scroll */}
+      <div className="flex-1 px-6 overflow-hidden">
+        <div className="h-full max-w-4xl mx-auto">
+          <div className="h-full overflow-y-auto pr-2">
             <div className="py-4">
               {tracks.length === 0 ? (
                 <div className="text-center py-8">
@@ -156,7 +156,7 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
                 </div>
               )}
             </div>
-          </ScrollArea>
+          </div>
         </div>
       </div>
 

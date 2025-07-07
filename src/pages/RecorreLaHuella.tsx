@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
@@ -67,7 +68,10 @@ const RecorreLaHuella = () => {
   const handleStartJourney = () => {
     setShowIntro(false);
     if (tracks.length > 0) {
-      setSelectedTrack(tracks[0]);
+      const firstTrack = tracks[0];
+      setSelectedTrack(firstTrack);
+      // Automatically start playing the first track
+      playTrack(firstTrack);
     }
   };
 
@@ -133,7 +137,7 @@ const RecorreLaHuella = () => {
   return (
     <Layout showAudioPlayer={false}>
       {/* Audio Player Section */}
-      <section className="relative z-20 bg-background border-b border-border shadow-lg">
+      <section className="relative z-20 bg-background border-b border-border shadow-lg pt-20">
         <div className="container mx-auto px-4 py-4">
           {selectedTrack ? <AudioPlayer /> : (
             <div className="text-center text-muted-foreground py-4">

@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Track } from '@/types/track';
 import { Button } from '@/components/ui/button';
-import { Home } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Track } from '@/types/track';
 
 interface TrackSelectorProps {
   tracks: Track[];
@@ -13,55 +13,52 @@ interface TrackSelectorProps {
   onIntroClick?: () => void;
 }
 
-const TrackSelector: React.FC<TrackSelectorProps> = ({ 
-  tracks, 
-  selectedTrack, 
+const TrackSelector: React.FC<TrackSelectorProps> = ({
+  tracks,
+  selectedTrack,
   onTrackSelect,
   showIntroButton = false,
   isIntroActive = false,
   onIntroClick
 }) => {
+  const { currentLanguage } = useLanguage();
+
+  const getTrackTitle = (track: Track) => {
+    const content = track.track_contents?.[0];
+    return content?.menu_title || content?.title || `Track ${track.order_position}`;
+  };
+
   return (
-    <nav className="track-nav">
-      <div className="container mx-auto px-4">
-        <div className="flex overflow-x-auto py-2 space-x-1 justify-center">
-          {/* Botón de Introducción */}
+    <div className="fixed top-20 left-0 right-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex items-center space-x-2 overflow-x-auto">
+          {/* Botón de Intro */}
           {showIntroButton && (
-            <button
+            <Button
+              variant={isIntroActive ? "default" : "outline"}
+              size="sm"
               onClick={onIntroClick}
-              className={`track-nav-item flex items-center space-x-1 ${
-                isIntroActive ? 'active' : ''
-              }`}
+              className="flex-shrink-0"
             >
-              <Home className="h-4 w-4" />
-              <span>Inicio</span>
-            </button>
+              {currentLanguage?.code === 'es' ? 'Introducción' : 'Introduction'}
+            </Button>
           )}
-          
+
           {/* Botones de Tracks */}
-          {tracks.map((track) => {
-            const trackContent = track.track_contents?.[0];
-            const isActive = selectedTrack?.id === track.id;
-            
-            return (
-              <button
-                key={track.id}
-                onClick={() => onTrackSelect(track)}
-                className={`track-nav-item ${isActive ? 'active' : ''}`}
-              >
-                {isActive ? (
-                  // Mostrar título completo solo si está activo
-                  trackContent?.menu_title || `Track ${track.order_position}`
-                ) : (
-                  // Mostrar solo el número si no está activo
-                  track.order_position.toString()
-                )}
-              </button>
-            );
-          })}
+          {tracks.map((track) => (
+            <Button
+              key={track.id}
+              variant={selectedTrack?.id === track.id ? "default" : "outline"}
+              size="sm"
+              onClick={() => onTrackSelect(track)}
+              className="flex-shrink-0 min-w-fit"
+            >
+              {getTrackTitle(track)}
+            </Button>
+          ))}
         </div>
       </div>
-    </nav>
+    </div>
   );
 };
 
