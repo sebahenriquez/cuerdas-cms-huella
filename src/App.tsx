@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -6,107 +5,117 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { CMSAuthProvider } from '@/contexts/CMSAuthContext';
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerContext';
 import { Toaster } from '@/components/ui/toaster';
+import { Toaster as Sonner } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 // Import pages
-import Index from '@/pages/Index';
-import RecorreLaHuella from '@/pages/RecorreLaHuella';
-import TrackDetail from '@/pages/TrackDetail';
-import EscuchaLaHuella from '@/pages/EscuchaLaHuella';
-import SobreElProyecto from '@/pages/SobreElProyecto';
-import FichaTecnica from '@/pages/FichaTecnica';
-import Prensa from '@/pages/Prensa';
-import Contacto from '@/pages/Contacto';
-import NotFound from '@/pages/NotFound';
+import Layout from './components/layout/Layout';
+import Index from './pages/Index';
+import RecorreLaHuella from './pages/RecorreLaHuella';
+import EscuchaLaHuella from './pages/EscuchaLaHuella';
+import SobreElProyecto from './pages/SobreElProyecto';
+import Prensa from './pages/Prensa';
+import FichaTecnica from './pages/FichaTecnica';
+import Contacto from './pages/Contacto';
+import TrackDetail from './pages/TrackDetail';
+import NotFound from './pages/NotFound';
 
-// Import admin pages
-import AdminLayout from '@/components/admin/AdminLayout';
-import ProtectedRoute from '@/components/admin/ProtectedRoute';
-import CMSLogin from '@/components/admin/CMSLogin';
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import AdminTracks from '@/pages/admin/AdminTracks';
-import AdminTrackEdit from '@/pages/admin/AdminTrackEdit';
-import AdminVideos from '@/pages/admin/AdminVideos';
-import AdminVideoEdit from '@/pages/admin/AdminVideoEdit';
-import AdminPages from '@/pages/admin/AdminPages';
-import AdminPageEdit from '@/pages/admin/AdminPageEdit';
-import AdminPageNew from '@/pages/admin/AdminPageNew';
-import AdminMedia from '@/pages/admin/AdminMedia';
-import AdminUsers from '@/pages/admin/AdminUsers';
-import AdminLanguages from '@/pages/admin/AdminLanguages';
-import AdminLanguageEdit from '@/pages/admin/AdminLanguageEdit';
-import AdminSettings from '@/pages/admin/AdminSettings';
-import AdminTemplates from '@/pages/admin/AdminTemplates';
-import AdminCTAButtons from '@/pages/admin/AdminCTAButtons';
-import AdminAbout from '@/pages/admin/AdminAbout';
-import AdminAboutSectionEdit from '@/pages/admin/AdminAboutSectionEdit';
-import AdminPressKit from '@/pages/admin/AdminPressKit';
+// Admin routes
+import ProtectedRoute from './components/admin/ProtectedRoute';
+import CMSLogin from './components/admin/CMSLogin';
+import AdminLayout from './components/admin/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 3,
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    },
-  },
-});
+// New admin pages
+import NewAdminPages from './pages/admin/NewAdminPages';
+import NewAdminPageEdit from './pages/admin/NewAdminPageEdit';
+import NewAdminTracks from './pages/admin/NewAdminTracks';
+import NewAdminTrackEdit from './pages/admin/NewAdminTrackEdit';
+
+// Keep existing admin pages for other features
+import AdminAbout from './pages/admin/AdminAbout';
+import AdminAboutSectionEdit from './pages/admin/AdminAboutSectionEdit';
+import AdminPressKit from './pages/admin/AdminPressKit';
+import AdminVideos from './pages/admin/AdminVideos';
+import AdminVideoEdit from './pages/admin/AdminVideoEdit';
+import AdminMedia from './pages/admin/AdminMedia';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminLanguages from './pages/admin/AdminLanguages';
+import AdminLanguageEdit from './pages/admin/AdminLanguageEdit';
+import AdminCTAButtons from './pages/admin/AdminCTAButtons';
+import AdminTemplates from './pages/admin/AdminTemplates';
+import AdminSettings from './pages/admin/AdminSettings';
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <CMSAuthProvider>
-        <LanguageProvider>
-          <AudioPlayerProvider>
-            <Router>
-              <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<Index />} />
-                <Route path="/recorre-la-huella" element={<RecorreLaHuella />} />
-                <Route path="/track/:id" element={<TrackDetail />} />
-                <Route path="/escucha-la-huella" element={<EscuchaLaHuella />} />
-                <Route path="/sobre-el-proyecto" element={<SobreElProyecto />} />
-                <Route path="/ficha-tecnica" element={<FichaTecnica />} />
-                <Route path="/prensa" element={<Prensa />} />
-                <Route path="/press" element={<Prensa />} />
-                <Route path="/contacto" element={<Contacto />} />
+        <AudioPlayerProvider>
+          <LanguageProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Router>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/" element={<Layout />}>
+                    <Route index element={<Index />} />
+                    <Route path="recorre-la-huella" element={<RecorreLaHuella />} />
+                    <Route path="escucha-la-huella" element={<EscuchaLaHuella />} />
+                    <Route path="sobre-el-proyecto" element={<SobreElProyecto />} />
+                    <Route path="prensa" element={<Prensa />} />
+                    <Route path="ficha-tecnica" element={<FichaTecnica />} />
+                    <Route path="contacto" element={<Contacto />} />
+                    <Route path="track/:id" element={<TrackDetail />} />
+                  </Route>
 
-                {/* Admin routes */}
-                <Route path="/admin/login" element={<CMSLogin />} />
-                <Route
-                  path="/admin/*"
-                  element={
-                    <ProtectedRoute>
-                      <AdminLayout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="tracks" element={<AdminTracks />} />
-                  <Route path="tracks/:id" element={<AdminTrackEdit />} />
-                  <Route path="videos" element={<AdminVideos />} />
-                  <Route path="videos/:id" element={<AdminVideoEdit />} />
-                  <Route path="pages" element={<AdminPages />} />
-                  <Route path="pages/:id" element={<AdminPageEdit />} />
-                  <Route path="pages/new" element={<AdminPageNew />} />
-                  <Route path="media" element={<AdminMedia />} />
-                  <Route path="users" element={<AdminUsers />} />
-                  <Route path="languages" element={<AdminLanguages />} />
-                  <Route path="languages/:id" element={<AdminLanguageEdit />} />
-                  <Route path="settings" element={<AdminSettings />} />
-                  <Route path="templates" element={<AdminTemplates />} />
-                  <Route path="cta-buttons" element={<AdminCTAButtons />} />
-                  <Route path="about" element={<AdminAbout />} />
-                  <Route path="about/sections/:id" element={<AdminAboutSectionEdit />} />
-                  <Route path="press-kit" element={<AdminPressKit />} />
-                </Route>
+                  {/* Admin login */}
+                  <Route path="/admin/login" element={<CMSLogin />} />
 
-                {/* 404 route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Router>
-            <Toaster />
-          </AudioPlayerProvider>
-        </LanguageProvider>
+                  {/* Protected admin routes */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute>
+                        <AdminLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<AdminDashboard />} />
+                    
+                    {/* New functional editors */}
+                    <Route path="pages" element={<NewAdminPages />} />
+                    <Route path="pages/new" element={<NewAdminPageEdit />} />
+                    <Route path="pages/:id/edit" element={<NewAdminPageEdit />} />
+                    
+                    <Route path="tracks" element={<NewAdminTracks />} />
+                    <Route path="tracks/new" element={<NewAdminTrackEdit />} />
+                    <Route path="tracks/:id/edit" element={<NewAdminTrackEdit />} />
+                    
+                    {/* Existing admin routes */}
+                    <Route path="about" element={<AdminAbout />} />
+                    <Route path="about/:sectionKey/edit" element={<AdminAboutSectionEdit />} />
+                    <Route path="press-kit" element={<AdminPressKit />} />
+                    <Route path="videos" element={<AdminVideos />} />
+                    <Route path="videos/:id/edit" element={<AdminVideoEdit />} />
+                    <Route path="media" element={<AdminMedia />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="languages" element={<AdminLanguages />} />
+                    <Route path="languages/:id/edit" element={<AdminLanguageEdit />} />
+                    <Route path="cta-buttons" element={<AdminCTAButtons />} />
+                    <Route path="templates" element={<AdminTemplates />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                  </Route>
+
+                  {/* 404 route */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Router>
+            </TooltipProvider>
+          </LanguageProvider>
+        </AudioPlayerProvider>
       </CMSAuthProvider>
     </QueryClientProvider>
   );
