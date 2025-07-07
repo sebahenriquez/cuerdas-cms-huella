@@ -8,18 +8,7 @@ import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { TracksHeader } from '@/components/admin/tracks/TracksHeader';
 import { TrackCard } from '@/components/admin/tracks/TrackCard';
 import { EmptyTracksState } from '@/components/admin/tracks/EmptyTracksState';
-
-interface Track {
-  id: number;
-  order_position: number;
-  audio_url: string;
-  status: string;
-  track_contents: Array<{
-    title: string;
-    menu_title: string;
-    language_id: number;
-  }>;
-}
+import { Track } from '@/types/track';
 
 const AdminTracks: React.FC = () => {
   const { currentTrack, isPlaying, playTrack, pauseTrack, setTracks } = useAudioPlayer();

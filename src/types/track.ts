@@ -31,6 +31,7 @@ export interface Track {
   id: number;
   order_position: number;
   audio_url: string;
+  status: string;
   track_contents?: TrackContent[];
   videos?: Video[];
   track_featured_images?: FeaturedImage[];

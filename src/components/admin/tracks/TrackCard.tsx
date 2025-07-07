@@ -5,18 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Play, Pause, Volume2, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-interface Track {
-  id: number;
-  order_position: number;
-  audio_url: string;
-  status: string;
-  track_contents: Array<{
-    title: string;
-    menu_title: string;
-    language_id: number;
-  }>;
-}
+import { Track } from '@/types/track';
 
 interface TrackCardProps {
   track: Track;
