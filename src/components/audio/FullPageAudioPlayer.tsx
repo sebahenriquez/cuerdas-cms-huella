@@ -97,70 +97,63 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
         )}
       </div>
 
-      {/* Track List - Custom styled scroll */}
-      <div className="flex-1 px-6 relative">
-        <div className="h-full max-w-4xl mx-auto">
-          <div 
-            className="h-full overflow-y-auto scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500 pr-2"
-            style={{
-              scrollbarWidth: 'thin',
-              scrollbarColor: '#4B5563 #1F2937'
-            }}
-          >
-            <div className="py-4">
-              {tracks.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-400">
-                    {currentLanguage?.code === 'es' ? 'No hay pistas disponibles' : 'No tracks available'}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {tracks.map((track, index) => {
-                    const content = track.track_contents?.[0];
-                    const isCurrentTrack = currentTrack?.id === track.id;
-                    
-                    return (
-                      <div
-                        key={track.id}
-                        onClick={() => handleTrackSelect(track)}
-                        className={`group flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-white/10 ${
-                          isCurrentTrack ? 'bg-primary/20' : 'hover:bg-white/5'
-                        }`}
-                      >
-                        {/* Play/Pause button or track number */}
-                        <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center mr-4">
-                          {isCurrentTrack && isPlaying ? (
-                            <Pause className="w-5 h-5 text-primary" />
-                          ) : isCurrentTrack ? (
-                            <Play className="w-5 h-5 text-primary" />
-                          ) : (
-                            <span className="text-gray-400 group-hover:hidden text-sm">
-                              {track.order_position}
-                            </span>
-                          )}
-                          {!isCurrentTrack && (
-                            <Play className="w-4 h-4 text-white hidden group-hover:block" />
-                          )}
-                        </div>
-
-                        {/* Track info */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className={`font-medium truncate ${isCurrentTrack ? 'text-primary' : 'text-white'}`}>
-                            {content?.title || `Track ${track.order_position}`}
-                          </h3>
-                          {content?.description && (
-                            <p className="text-sm text-gray-400 truncate mt-1">
-                              {content.description}
-                            </p>
-                          )}
-                        </div>
+      {/* Track List - Fixed height that adapts to screen */}
+      <div className="flex-1 px-6 relative flex flex-col min-h-0">
+        <div className="flex-1 max-w-4xl mx-auto w-full flex flex-col min-h-0">
+          <div className="flex-1 min-h-0">
+            {tracks.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-400">
+                  {currentLanguage?.code === 'es' ? 'No hay pistas disponibles' : 'No tracks available'}
+                </p>
+              </div>
+            ) : (
+              <div className="h-full flex flex-col">
+                {tracks.map((track, index) => {
+                  const content = track.track_contents?.[0];
+                  const isCurrentTrack = currentTrack?.id === track.id;
+                  
+                  return (
+                    <div
+                      key={track.id}
+                      onClick={() => handleTrackSelect(track)}
+                      className={`group flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-white/10 flex-shrink-0 ${
+                        isCurrentTrack ? 'bg-primary/20' : 'hover:bg-white/5'
+                      }`}
+                      style={{ minHeight: '60px' }}
+                    >
+                      {/* Play/Pause button or track number */}
+                      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center mr-4">
+                        {isCurrentTrack && isPlaying ? (
+                          <Pause className="w-5 h-5 text-primary" />
+                        ) : isCurrentTrack ? (
+                          <Play className="w-5 h-5 text-primary" />
+                        ) : (
+                          <span className="text-gray-400 group-hover:hidden text-sm">
+                            {track.order_position}
+                          </span>
+                        )}
+                        {!isCurrentTrack && (
+                          <Play className="w-4 h-4 text-white hidden group-hover:block" />
+                        )}
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+
+                      {/* Track info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`font-medium truncate ${isCurrentTrack ? 'text-primary' : 'text-white'}`}>
+                          {content?.title || `Track ${track.order_position}`}
+                        </h3>
+                        {content?.description && (
+                          <p className="text-sm text-gray-400 truncate mt-1">
+                            {content.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -266,23 +259,6 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .scrollbar-thin::-webkit-scrollbar {
-          width: 6px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-track {
-          background: #1f2937;
-          border-radius: 3px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-          background: #4b5563;
-          border-radius: 3px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-          background: #6b7280;
-        }
-      `}</style>
     </div>
   );
 };
