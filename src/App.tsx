@@ -36,6 +36,8 @@ import AdminAboutSectionEdit from "./pages/admin/AdminAboutSectionEdit";
 import AdminPressKit from "./pages/admin/AdminPressKit";
 import AdminVideos from "./pages/admin/AdminVideos";
 import AdminVideoEdit from "./pages/admin/AdminVideoEdit";
+import AdminTrackVideos from "./pages/admin/AdminTrackVideos";
+import AdminTrackPhotos from "./pages/admin/AdminTrackPhotos";
 import AdminMedia from "./pages/admin/AdminMedia";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminLanguages from "./pages/admin/AdminLanguages";
@@ -108,6 +110,8 @@ function App() {
                     <Route path="videos" element={<AdminVideos />} />
                     <Route path="videos/new" element={<AdminVideoEdit />} />
                     <Route path="videos/:id/edit" element={<AdminVideoEdit />} />
+                    <Route path="track-videos" element={<AdminTrackVideos />} />
+                    <Route path="track-photos" element={<AdminTrackPhotos />} />
                     <Route path="media" element={<AdminMedia />} />
                     <Route path="users" element={<AdminUsers />} />
                     <Route path="languages" element={<AdminLanguages />} />

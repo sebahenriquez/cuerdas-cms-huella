@@ -5,6 +5,7 @@ import {
   LayoutDashboard, 
   Music, 
   Video, 
+  Image,
   FileText, 
   Upload, 
   Users, 
@@ -22,6 +23,8 @@ const AdminLayout: React.FC = () => {
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
     { icon: Music, label: 'Tracks', path: '/admin/tracks' },
+    { icon: Video, label: 'Videos por Track', path: '/admin/track-videos' },
+    { icon: Image, label: 'Fotos por Track', path: '/admin/track-photos' },
     { icon: Video, label: 'Videos', path: '/admin/videos' },
     { icon: FileText, label: 'Pages', path: '/admin/pages' },
     { icon: Info, label: 'About Page', path: '/admin/about' },
