@@ -41,10 +41,10 @@ const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLan
   const handlePlayVideo = (videoId: string) => {
     // Pause the track audio
     pauseTrack();
-    // Update iframe src to start playing
+    // Update iframe src to start playing with better quality parameters
     const iframe = iframeRefs.current[videoId];
     if (iframe) {
-      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1`;
+      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&modestbranding=1&rel=0&iv_load_policy=3`;
     }
     // Mark this video as playing to hide the overlay
     setPlayingVideos(prev => new Set(prev).add(videoId));
@@ -66,20 +66,20 @@ const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLan
                 <div key={video.id} className="bg-card rounded-lg overflow-hidden shadow-lg">
                   <div className="aspect-video relative">
                     {videoId ? (
-                      <div className="relative">
+                      <div className="relative w-full h-full">
                         <iframe
                           ref={(el) => { iframeRefs.current[videoId] = el; }}
                           width="100%"
                           height="100%"
-                          src={`https://www.youtube.com/embed/${videoId}?controls=1`}
+                          src={`https://www.youtube.com/embed/${videoId}?controls=1&modestbranding=1&rel=0`}
                           title={videoContent?.title || `Video ${index + 1}`}
                           frameBorder="0"
                           allowFullScreen
-                          className="rounded-t-lg"
+                          className="absolute inset-0 w-full h-full rounded-t-lg"
                           allow="autoplay"
                         />
                         {!playingVideos.has(videoId) && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-t-lg">
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-t-lg z-10">
                             <Button
                               onClick={() => handlePlayVideo(videoId)}
                               size="lg"
@@ -117,15 +117,15 @@ const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLan
                       ref={(el) => { iframeRefs.current['demo1'] = el; }}
                       width="100%"
                       height="100%"
-                      src="https://www.youtube.com/embed/dQw4w9WgXcQ?controls=1"
+                      src="https://www.youtube.com/embed/dQw4w9WgXcQ?controls=1&modestbranding=1&rel=0"
                       title="Video demostrativo 1"
                       frameBorder="0"
                       allowFullScreen
-                      className="rounded-t-lg"
+                      className="absolute inset-0 w-full h-full rounded-t-lg"
                       allow="autoplay"
                     />
                     {!playingVideos.has('demo1') && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-t-lg">
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-t-lg z-10">
                         <Button
                           onClick={() => handlePlayVideo('demo1')}
                           size="lg"
@@ -152,15 +152,15 @@ const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLan
                       ref={(el) => { iframeRefs.current['demo2'] = el; }}
                       width="100%"
                       height="100%"
-                      src="https://www.youtube.com/embed/dQw4w9WgXcQ?controls=1"
+                      src="https://www.youtube.com/embed/dQw4w9WgXcQ?controls=1&modestbranding=1&rel=0"
                       title="Video demostrativo 2"
                       frameBorder="0"
                       allowFullScreen
-                      className="rounded-t-lg"
+                      className="absolute inset-0 w-full h-full rounded-t-lg"
                       allow="autoplay"
                     />
                     {!playingVideos.has('demo2') && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-t-lg">
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-t-lg z-10">
                         <Button
                           onClick={() => handlePlayVideo('demo2')}
                           size="lg"
