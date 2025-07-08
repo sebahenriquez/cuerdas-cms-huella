@@ -1,7 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import ReactPlayer from 'react-player/vimeo';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
+import { Play } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface Video {
   id: number;
@@ -24,11 +26,15 @@ const TrackVideos: React.FC<TrackVideosProps> = ({
   sectionTitle = 'Videos' 
 }) => {
   const { pauseTrack } = useAudioPlayer();
+  const [playingVideos, setPlayingVideos] = useState<Set<number>>(new Set());
 
   if (!videos || videos.length === 0) return null;
 
-  const handleVideoPlay = () => {
+  const handlePlayVideo = (videoId: number) => {
+    // Pause the track audio
     pauseTrack();
+    // Mark this video as playing
+    setPlayingVideos(prev => new Set(prev).add(videoId));
   };
 
   return (
@@ -44,15 +50,37 @@ const TrackVideos: React.FC<TrackVideosProps> = ({
             
             return (
               <div key={video.id} className="bg-background rounded-lg overflow-hidden shadow-lg">
-                <div className="aspect-video">
-                  <ReactPlayer
-                    url={video.vimeo_url}
-                    width="100%"
-                    height="100%"
-                    controls
-                    light={video.thumbnail_url}
-                    onPlay={handleVideoPlay}
-                  />
+                <div className="aspect-video relative">
+                  {playingVideos.has(video.id) ? (
+                    <ReactPlayer
+                      url={video.vimeo_url}
+                      width="100%"
+                      height="100%"
+                      controls
+                      playing={true}
+                      light={false}
+                    />
+                  ) : (
+                    <>
+                      <ReactPlayer
+                        url={video.vimeo_url}
+                        width="100%"
+                        height="100%"
+                        controls={false}
+                        light={video.thumbnail_url || true}
+                        playing={false}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Button
+                          onClick={() => handlePlayVideo(video.id)}
+                          size="lg"
+                          className="w-16 h-16 rounded-full bg-white/90 hover:bg-white text-black shadow-lg"
+                        >
+                          <Play className="h-6 w-6 ml-1" />
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </div>
                 
                 {videoContent && (

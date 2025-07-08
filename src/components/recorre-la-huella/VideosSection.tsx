@@ -1,6 +1,8 @@
 
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
+import { Play } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface VideoContent {
   title?: string;
@@ -26,6 +28,7 @@ interface VideosSectionProps {
 
 const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLanguage, sectionTitle }) => {
   const { pauseTrack } = useAudioPlayer();
+  const [playingVideos, setPlayingVideos] = useState<Set<string>>(new Set());
 
   // Extract YouTube video ID from various URL formats
   const getYouTubeId = (url: string) => {
@@ -34,26 +37,12 @@ const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLan
     return match ? match[1] : null;
   };
 
-  // Set up YouTube API event listener to pause audio when video starts
-  useEffect(() => {
-    const handleYouTubeMessage = (event: MessageEvent) => {
-      // Listen for YouTube iframe API messages
-      if (event.origin !== 'https://www.youtube.com') return;
-      
-      try {
-        const data = JSON.parse(event.data);
-        // When YouTube video starts playing (state 1), pause the track audio
-        if (data.event === 'video-progress' || (data.info && data.info.playerState === 1)) {
-          pauseTrack();
-        }
-      } catch (e) {
-        // Ignore parsing errors
-      }
-    };
-
-    window.addEventListener('message', handleYouTubeMessage);
-    return () => window.removeEventListener('message', handleYouTubeMessage);
-  }, [pauseTrack]);
+  const handlePlayVideo = (videoId: string) => {
+    // Pause the track audio
+    pauseTrack();
+    // Mark this video as playing
+    setPlayingVideos(prev => new Set(prev).add(videoId));
+  };
 
   return (
     <section id="videos" className="py-16 bg-muted/50">
@@ -69,17 +58,30 @@ const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLan
 
               return (
                 <div key={video.id} className="bg-card rounded-lg overflow-hidden shadow-lg">
-                  <div className="aspect-video">
+                  <div className="aspect-video relative">
                     {videoId ? (
-                      <iframe
-                        width="100%"
-                        height="100%"
-                        src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
-                        title={videoContent?.title || `Video ${index + 1}`}
-                        frameBorder="0"
-                        allowFullScreen
-                        className="rounded-t-lg"
-                      />
+                      <>
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          src={playingVideos.has(videoId) ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : `https://www.youtube.com/embed/${videoId}`}
+                          title={videoContent?.title || `Video ${index + 1}`}
+                          frameBorder="0"
+                          allowFullScreen
+                          className="rounded-t-lg"
+                        />
+                        {!playingVideos.has(videoId) && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-t-lg">
+                            <Button
+                              onClick={() => handlePlayVideo(videoId)}
+                              size="lg"
+                              className="w-16 h-16 rounded-full bg-white/90 hover:bg-white text-black shadow-lg"
+                            >
+                              <Play className="h-6 w-6 ml-1" />
+                            </Button>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="w-full h-full bg-muted flex items-center justify-center rounded-t-lg">
                         <p className="text-muted-foreground">Coming soon / Próximamente...</p>
@@ -102,16 +104,27 @@ const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLan
             {(!selectedTrack?.videos || selectedTrack.videos.length === 0) && (
               <>
                 <div className="bg-card rounded-lg overflow-hidden shadow-lg">
-                  <div className="aspect-video">
+                  <div className="aspect-video relative">
                     <iframe
                       width="100%"
                       height="100%"
-                      src="https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1"
+                      src={playingVideos.has('demo1') ? "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" : "https://www.youtube.com/embed/dQw4w9WgXcQ"}
                       title="Video demostrativo 1"
                       frameBorder="0"
                       allowFullScreen
                       className="rounded-t-lg"
                     />
+                    {!playingVideos.has('demo1') && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-t-lg">
+                        <Button
+                          onClick={() => handlePlayVideo('demo1')}
+                          size="lg"
+                          className="w-16 h-16 rounded-full bg-white/90 hover:bg-white text-black shadow-lg"
+                        >
+                          <Play className="h-6 w-6 ml-1" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -124,16 +137,27 @@ const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLan
                 </div>
                 
                 <div className="bg-card rounded-lg overflow-hidden shadow-lg">
-                  <div className="aspect-video">
+                  <div className="aspect-video relative">
                     <iframe
                       width="100%"
                       height="100%"
-                      src="https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1"
+                      src={playingVideos.has('demo2') ? "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" : "https://www.youtube.com/embed/dQw4w9WgXcQ"}
                       title="Video demostrativo 2"
                       frameBorder="0"
                       allowFullScreen
                       className="rounded-t-lg"
                     />
+                    {!playingVideos.has('demo2') && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-t-lg">
+                        <Button
+                          onClick={() => handlePlayVideo('demo2')}
+                          size="lg"
+                          className="w-16 h-16 rounded-full bg-white/90 hover:bg-white text-black shadow-lg"
+                        >
+                          <Play className="h-6 w-6 ml-1" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-foreground mb-2">
