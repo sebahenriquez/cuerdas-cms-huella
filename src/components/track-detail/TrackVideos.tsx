@@ -1,6 +1,7 @@
 
 import React from 'react';
 import ReactPlayer from 'react-player/vimeo';
+import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 
 interface Video {
   id: number;
@@ -22,7 +23,13 @@ const TrackVideos: React.FC<TrackVideosProps> = ({
   videos, 
   sectionTitle = 'Videos' 
 }) => {
+  const { pauseTrack } = useAudioPlayer();
+
   if (!videos || videos.length === 0) return null;
+
+  const handleVideoPlay = () => {
+    pauseTrack();
+  };
 
   return (
     <section className="py-16 bg-muted/50">
@@ -44,6 +51,7 @@ const TrackVideos: React.FC<TrackVideosProps> = ({
                     height="100%"
                     controls
                     light={video.thumbnail_url}
+                    onPlay={handleVideoPlay}
                   />
                 </div>
                 

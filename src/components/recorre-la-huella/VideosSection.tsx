@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 
 interface VideoContent {
   title?: string;
@@ -24,12 +25,35 @@ interface VideosSectionProps {
 }
 
 const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLanguage, sectionTitle }) => {
+  const { pauseTrack } = useAudioPlayer();
+
   // Extract YouTube video ID from various URL formats
   const getYouTubeId = (url: string) => {
     const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
     const match = url.match(regex);
     return match ? match[1] : null;
   };
+
+  // Set up YouTube API event listener to pause audio when video starts
+  useEffect(() => {
+    const handleYouTubeMessage = (event: MessageEvent) => {
+      // Listen for YouTube iframe API messages
+      if (event.origin !== 'https://www.youtube.com') return;
+      
+      try {
+        const data = JSON.parse(event.data);
+        // When YouTube video starts playing (state 1), pause the track audio
+        if (data.event === 'video-progress' || (data.info && data.info.playerState === 1)) {
+          pauseTrack();
+        }
+      } catch (e) {
+        // Ignore parsing errors
+      }
+    };
+
+    window.addEventListener('message', handleYouTubeMessage);
+    return () => window.removeEventListener('message', handleYouTubeMessage);
+  }, [pauseTrack]);
 
   return (
     <section id="videos" className="py-16 bg-muted/50">
@@ -50,7 +74,7 @@ const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLan
                       <iframe
                         width="100%"
                         height="100%"
-                        src={`https://www.youtube.com/embed/${videoId}`}
+                        src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
                         title={videoContent?.title || `Video ${index + 1}`}
                         frameBorder="0"
                         allowFullScreen
@@ -82,7 +106,7 @@ const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLan
                     <iframe
                       width="100%"
                       height="100%"
-                      src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                      src="https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1"
                       title="Video demostrativo 1"
                       frameBorder="0"
                       allowFullScreen
@@ -104,7 +128,7 @@ const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLan
                     <iframe
                       width="100%"
                       height="100%"
-                      src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                      src="https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1"
                       title="Video demostrativo 2"
                       frameBorder="0"
                       allowFullScreen
