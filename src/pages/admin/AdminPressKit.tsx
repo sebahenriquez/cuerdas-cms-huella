@@ -16,6 +16,8 @@ const pressKitSchema = z.object({
   download_url: z.string().url('Please enter a valid URL'),
   button_label: z.string().min(1, 'Button label is required'),
   description: z.string().min(1, 'Description is required'),
+  full_bios_url: z.string().url('Please enter a valid URL'),
+  full_bios_button_label: z.string().min(1, 'Full bios button label is required'),
 });
 
 type PressKitFormData = z.infer<typeof pressKitSchema>;
@@ -82,6 +84,8 @@ const AdminPressKit: React.FC = () => {
         download_url: setting?.download_url || '',
         button_label: setting?.button_label || '',
         description: setting?.description || '',
+        full_bios_url: setting?.full_bios_url || '',
+        full_bios_button_label: setting?.full_bios_button_label || '',
       },
     });
 
@@ -133,6 +137,34 @@ const AdminPressKit: React.FC = () => {
                     <FormLabel>Download URL</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="https://example.com/press-kit.zip" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="full_bios_button_label"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Bios Button Label</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Enter full bios button label" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="full_bios_url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Bios Download URL</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="https://example.com/full-bios.zip" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

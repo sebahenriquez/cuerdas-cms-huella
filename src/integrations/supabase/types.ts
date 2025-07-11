@@ -689,6 +689,8 @@ export type Database = {
           created_at: string | null
           description: string | null
           download_url: string | null
+          full_bios_button_label: string | null
+          full_bios_url: string | null
           id: number
           language_id: number | null
           updated_at: string | null
@@ -698,6 +700,8 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           download_url?: string | null
+          full_bios_button_label?: string | null
+          full_bios_url?: string | null
           id?: number
           language_id?: number | null
           updated_at?: string | null
@@ -707,6 +711,8 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           download_url?: string | null
+          full_bios_button_label?: string | null
+          full_bios_url?: string | null
           id?: number
           language_id?: number | null
           updated_at?: string | null

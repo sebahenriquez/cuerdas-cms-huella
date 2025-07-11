@@ -37,6 +37,18 @@ const Prensa: React.FC = () => {
     }
   };
 
+  const handleFullBiosDownload = () => {
+    if (pressKitSettings?.full_bios_url) {
+      // Create a temporary anchor element for download
+      const link = document.createElement('a');
+      link.href = pressKitSettings.full_bios_url;
+      link.download = 'TheJourneyOfStringsFullBios.zip'; // Suggest filename
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <Layout>
       <div 
@@ -57,14 +69,25 @@ const Prensa: React.FC = () => {
             {pressKitSettings?.description || (currentLanguage?.code === 'es' ? 'Descargue el kit de prensa' : 'Download the press kit')}
           </h1>
           
-          <Button
-            onClick={handleDownload}
-            size="lg"
-            className="bg-white text-black hover:bg-gray-100 transition-colors text-lg px-8 py-4 mb-12"
-          >
-            <Download className="mr-2 h-5 w-5" />
-            {pressKitSettings?.button_label || (currentLanguage?.code === 'es' ? 'Kit de Prensa' : 'Press Kit')}
-          </Button>
+          <div className="space-y-4 mb-12">
+            <Button
+              onClick={handleDownload}
+              size="lg"
+              className="bg-white text-black hover:bg-gray-100 transition-colors text-lg px-8 py-4 w-full max-w-md"
+            >
+              <Download className="mr-2 h-5 w-5" />
+              {pressKitSettings?.button_label || (currentLanguage?.code === 'es' ? 'Kit de Prensa' : 'Press Kit')}
+            </Button>
+            
+            <Button
+              onClick={handleFullBiosDownload}
+              size="lg"
+              className="bg-white text-black hover:bg-gray-100 transition-colors text-lg px-8 py-4 w-full max-w-md"
+            >
+              <Download className="mr-2 h-5 w-5" />
+              {pressKitSettings?.full_bios_button_label || (currentLanguage?.code === 'es' ? 'Descargue las bios completas' : 'Download the Full Bios of the Artists')}
+            </Button>
+          </div>
 
           {/* Press Contact Card */}
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white max-w-md mx-auto">

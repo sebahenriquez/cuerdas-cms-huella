@@ -105,7 +105,7 @@ const SobreElProyecto: React.FC = () => {
                       ) : (
                         <div>
                           <p className="text-lg leading-relaxed mb-4">
-                            Berta Rojas presents La Huella de las Cuerdas, a project tracing the cultural impact of the guitar in Latin America and illuminating the ties that bind it in so many ways to the wider family of stringed instruments in the Americas.
+                            Berta Rojas presents The Journey of Strings, a project tracing the cultural impact of the guitar in Latin America and illuminating the ties that bind it in so many ways to the wider family of stringed instruments in the Americas.
                           </p>
                           <p className="text-lg leading-relaxed mb-4">
                             A special edition unique high-quality multimedia package:

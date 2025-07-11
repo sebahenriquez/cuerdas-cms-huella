@@ -50,7 +50,7 @@ const IntroSection: React.FC<IntroSectionProps> = ({
                 <p className="text-lg text-white leading-relaxed mb-4">
                   {currentLanguage?.code === 'es' 
                     ? "Berta Rojas nos presenta La Huella de las Cuerdas, una obra integral que describe el impacto cultural de la guitarra en América Latina y redescubre los vínculos que, de distintas maneras, la unen a la gran familia de instrumentos de cuerda del continente."
-                    : "Berta Rojas presents La Huella de las Cuerdas, a project tracing the cultural impact of the guitar in Latin America and illuminating the ties that bind it in so many ways to the wider family of stringed instruments in the Americas."
+                    : "Berta Rojas presents The Journey of Strings, a project tracing the cultural impact of the guitar in Latin America and illuminating the ties that bind it in so many ways to the wider family of stringed instruments in the Americas."
                   }
                 </p>
                 <p className="text-lg text-white leading-relaxed">
