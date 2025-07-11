@@ -88,11 +88,12 @@ const AdminTrackVideos: React.FC = () => {
       const { isNew, video_contents, ...mainData } = videoData;
       
       if (isNew) {
-        // Create new video
+        // Create new video - exclude id from mainData
+        const { id, ...videoDataWithoutId } = mainData;
         const { data: newVideo, error: videoError } = await supabase
           .from('videos')
           .insert({
-            ...mainData,
+            ...videoDataWithoutId,
             track_id: selectedTrack,
             order_position: videos.length + 1
           })
