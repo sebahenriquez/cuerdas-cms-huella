@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import AudioPlayer from '@/components/audio/AudioPlayer';
 import TrackSelector from '@/components/recorre-la-huella/TrackSelector';
@@ -17,7 +18,9 @@ import { Track } from '@/types/track';
 
 const RecorreLaHuella = () => {
   const { currentLanguage } = useLanguage();
-  const { playTrack, setTracks } = useAudioPlayer();
+  const { playTrack, setTracks, pauseTrack, resumeTrack, nextTrack, previousTrack } = useAudioPlayer();
+  const { trackId } = useParams();
+  const navigate = useNavigate();
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [showIntro, setShowIntro] = useState(true);
@@ -49,6 +52,18 @@ const RecorreLaHuella = () => {
     }
   }, [tracks, setTracks]);
 
+  // Handle URL track parameter
+  useEffect(() => {
+    if (trackId && tracks.length > 0) {
+      const trackFromUrl = tracks.find(track => track.id.toString() === trackId);
+      if (trackFromUrl) {
+        setSelectedTrack(trackFromUrl);
+        setShowIntro(false);
+        playTrack(trackFromUrl);
+      }
+    }
+  }, [trackId, tracks, playTrack]);
+
   if (introLoading || tracksLoading) {
     return (
       <Layout>
@@ -63,6 +78,8 @@ const RecorreLaHuella = () => {
     setSelectedTrack(track);
     setShowIntro(false);
     playTrack(track);
+    // Navigate to the track's unique URL
+    navigate(`/recorre-la-huella/${track.id}`);
   };
 
   const handleStartJourney = () => {
@@ -72,6 +89,8 @@ const RecorreLaHuella = () => {
       setSelectedTrack(firstTrack);
       // Automatically start playing the first track
       playTrack(firstTrack);
+      // Navigate to the first track's URL
+      navigate(`/recorre-la-huella/${firstTrack.id}`);
     }
   };
 
@@ -104,13 +123,9 @@ const RecorreLaHuella = () => {
     return 'Comenzar el Recorrido'; // Fallback
   };
 
-  console.log('Current Track:', selectedTrack || tracks[0]);
-  console.log('Current CTA Settings:', currentCTASettings);
-  console.log('Current Language:', currentLanguage);
-  console.log('CTA Labels:', ctaLabels);
 
-  // Si estamos mostrando la introducción
-  if (showIntro) {
+  // Si estamos mostrando la introducción (solo si no hay trackId en la URL)
+  if (showIntro && !trackId) {
     return (
       <Layout showAudioPlayer={false}>
         {/* Track Menu - siempre visible */}
@@ -154,7 +169,7 @@ const RecorreLaHuella = () => {
         onTrackSelect={handleTrackSelect}
         showIntroButton={true}
         isIntroActive={false}
-        onIntroClick={() => setShowIntro(true)}
+        onIntroClick={() => navigate('/recorre-la-huella')}
       />
 
       {/* Hero Section - ahora con las etiquetas CTA traducidas */}
