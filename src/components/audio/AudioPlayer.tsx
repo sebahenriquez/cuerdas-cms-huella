@@ -32,16 +32,9 @@ const AudioPlayer: React.FC = () => {
   };
 
   const handlePlayPause = () => {
-    console.log('AudioPlayer: handlePlayPause called, isPlaying:', isPlaying);
-    console.log('AudioPlayer: currentTrack:', currentTrack);
-    console.log('AudioPlayer: pauseTrack function:', typeof pauseTrack);
-    console.log('AudioPlayer: resumeTrack function:', typeof resumeTrack);
-    
     if (isPlaying) {
-      console.log('AudioPlayer: Calling pauseTrack');
       pauseTrack();
     } else {
-      console.log('AudioPlayer: Calling resumeTrack');
       resumeTrack();
     }
   };
