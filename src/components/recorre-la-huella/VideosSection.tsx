@@ -39,6 +39,7 @@ const VideosSection: React.FC<VideosSectionProps> = ({ selectedTrack, currentLan
   };
 
   const handlePlayVideo = (videoId: string) => {
+    console.log('Video play button clicked, calling pauseTrack');
     // Pause the track audio
     pauseTrack();
     // Update iframe src to start playing with better quality parameters
