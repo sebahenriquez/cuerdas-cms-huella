@@ -32,8 +32,10 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    console.log('AudioPlayerContext: Creating new audio element');
     const audio = new Audio();
     audioRef.current = audio;
+    console.log('AudioPlayerContext: Audio element created:', audio);
 
     const updateTime = () => setCurrentTime(audio.currentTime);
     const updateDuration = () => setDuration(audio.duration);
@@ -44,38 +46,54 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     audio.addEventListener('ended', handleEnded);
 
     return () => {
+      console.log('AudioPlayerContext: Cleaning up audio element');
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('loadedmetadata', updateDuration);
       audio.removeEventListener('ended', handleEnded);
       audio.pause();
+      audio.src = '';
     };
   }, []);
 
   const playTrack = (track: Track) => {
-    if (!audioRef.current || !track.audio_url) return;
+    console.log('AudioPlayerContext: playTrack called with track:', track);
+    console.log('AudioPlayerContext: audioRef.current before play:', audioRef.current);
+    
+    if (!audioRef.current || !track.audio_url) {
+      console.log('AudioPlayerContext: Missing audioRef or audio_url');
+      return;
+    }
     
     if (currentTrack?.id !== track.id) {
+      console.log('AudioPlayerContext: Setting new track');
       setCurrentTrack(track);
       audioRef.current.src = track.audio_url;
     }
     
     audioRef.current.play().then(() => {
+      console.log('AudioPlayerContext: Play successful');
       setIsPlaying(true);
     }).catch((error) => {
-      console.error('Error playing audio:', error);
+      console.error('AudioPlayerContext: Error playing audio:', error);
     });
   };
 
   const pauseTrack = () => {
     console.log('AudioPlayerContext: pauseTrack called');
     console.log('AudioPlayerContext: audioRef.current:', audioRef.current);
-    if (audioRef.current) {
-      console.log('AudioPlayerContext: Pausing audio');
+    console.log('AudioPlayerContext: audioRef.current type:', typeof audioRef.current);
+    console.log('AudioPlayerContext: audioRef.current instanceof HTMLAudioElement:', audioRef.current instanceof HTMLAudioElement);
+    
+    if (audioRef.current && audioRef.current instanceof HTMLAudioElement) {
+      console.log('AudioPlayerContext: Valid audio element found, pausing');
       audioRef.current.pause();
       setIsPlaying(false);
-      console.log('AudioPlayerContext: Audio paused, isPlaying set to false');
+      console.log('AudioPlayerContext: Audio paused successfully');
     } else {
-      console.log('AudioPlayerContext: No audioRef.current available');
+      console.log('AudioPlayerContext: Invalid or missing audio element');
+      console.log('AudioPlayerContext: Recreating audio element');
+      const audio = new Audio();
+      audioRef.current = audio;
     }
   };
 
