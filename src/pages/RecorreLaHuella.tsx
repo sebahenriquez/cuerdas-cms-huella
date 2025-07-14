@@ -20,7 +20,7 @@ const RecorreLaHuella = () => {
   const { trackId } = useParams();
   const navigate = useNavigate();
   const { currentLanguage } = useLanguage();
-  const { playTrack, setTracks } = useAudioPlayer();
+  const { playTrack, setTracks, pauseTrack, resumeTrack, nextTrack, previousTrack } = useAudioPlayer();
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [showIntro, setShowIntro] = useState(!trackId);
@@ -45,26 +45,28 @@ const RecorreLaHuella = () => {
     enabled: !!currentLanguage,
   });
 
-  // Set tracks in audio player context when loaded and handle URL track
+  // Set tracks in audio player context when loaded
   useEffect(() => {
     if (tracks.length > 0) {
       setTracks(tracks);
-      
-      // If there's a trackId in URL, find and select that track
-      if (trackId) {
-        const trackNumber = parseInt(trackId);
-        const track = tracks.find(t => t.order_position === trackNumber);
-        if (track) {
-          setSelectedTrack(track);
-          setShowIntro(false);
-          playTrack(track);
-        } else {
-          // If track not found, redirect to intro
-          navigate('/recorre-la-huella', { replace: true });
-        }
+    }
+  }, [tracks, setTracks]);
+  
+  // Handle URL track selection separately
+  useEffect(() => {
+    if (trackId && tracks.length > 0) {
+      const trackNumber = parseInt(trackId);
+      const track = tracks.find(t => t.order_position === trackNumber);
+      if (track) {
+        setSelectedTrack(track);
+        setShowIntro(false);
+        playTrack(track);
+      } else {
+        // If track not found, redirect to intro
+        navigate('/recorre-la-huella', { replace: true });
       }
     }
-  }, [tracks, setTracks, trackId, playTrack, navigate]);
+  }, [trackId, tracks, playTrack, navigate]);
 
   if (introLoading || tracksLoading) {
     return (
