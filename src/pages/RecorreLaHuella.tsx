@@ -18,7 +18,8 @@ import { Track } from '@/types/track';
 
 const RecorreLaHuella = () => {
   const { currentLanguage } = useLanguage();
-  const { playTrack, setTracks, pauseTrack, resumeTrack, nextTrack, previousTrack } = useAudioPlayer();
+  const audioPlayerContext = useAudioPlayer();
+  const { playTrack, setTracks, pauseTrack, resumeTrack, nextTrack, previousTrack, currentTrack, isPlaying } = audioPlayerContext;
   const [searchParams, setSearchParams] = useSearchParams();
   const trackParam = searchParams.get('track');
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
@@ -75,6 +76,8 @@ const RecorreLaHuella = () => {
   }
 
   const handleTrackSelect = (track: Track) => {
+    console.log('RecorreLaHuella: handleTrackSelect called with track:', track);
+    console.log('RecorreLaHuella: audioPlayerContext:', audioPlayerContext);
     setSelectedTrack(track);
     setShowIntro(false);
     playTrack(track);

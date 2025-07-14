@@ -67,9 +67,15 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   const pauseTrack = () => {
+    console.log('AudioPlayerContext: pauseTrack called');
+    console.log('AudioPlayerContext: audioRef.current:', audioRef.current);
     if (audioRef.current) {
+      console.log('AudioPlayerContext: Pausing audio');
       audioRef.current.pause();
       setIsPlaying(false);
+      console.log('AudioPlayerContext: Audio paused, isPlaying set to false');
+    } else {
+      console.log('AudioPlayerContext: No audioRef.current available');
     }
   };
 
