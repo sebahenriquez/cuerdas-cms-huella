@@ -133,7 +133,7 @@ const RecorreLaHuella = () => {
   // Si estamos mostrando la introducción
   if (showIntro) {
     return (
-      <Layout showAudioPlayer={false}>
+    <Layout showAudioPlayer={false}>
         {/* Track Menu - siempre visible */}
         <TrackSelector 
           tracks={tracks}

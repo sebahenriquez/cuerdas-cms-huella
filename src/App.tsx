@@ -70,11 +70,13 @@ function App() {
               <Sonner />
               <BrowserRouter>
                 <Routes>
-                  {/* Public routes */}
+                  {/* RecorreLaHuella routes - rendered directly without LayoutWrapper */}
+                  <Route path="recorre-la-huella" element={<RecorreLaHuella />} />
+                  <Route path="recorre-la-huella/:trackId" element={<RecorreLaHuella />} />
+                  
+                  {/* Other public routes with LayoutWrapper */}
                   <Route path="/" element={<LayoutWrapper />}>
                     <Route index element={<Index />} />
-                    <Route path="recorre-la-huella" element={<RecorreLaHuella />} />
-                    <Route path="recorre-la-huella/:trackId" element={<RecorreLaHuella />} />
                     <Route path="escucha-la-huella" element={<EscuchaLaHuella />} />
                     <Route path="sobre-el-proyecto" element={<SobreElProyecto />} />
                     <Route path="prensa" element={<Prensa />} />
