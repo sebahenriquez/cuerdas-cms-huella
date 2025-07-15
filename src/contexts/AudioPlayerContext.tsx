@@ -52,14 +52,22 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, []);
 
   const playTrack = (track: Track) => {
-    if (!audioRef.current || !track.audio_url) return;
+    console.log('playTrack called with track:', track.id);
+    console.log('audioRef.current at playTrack:', audioRef.current);
+    
+    if (!audioRef.current || !track.audio_url) {
+      console.log('ERROR: audioRef or audio_url missing', { audioRef: !!audioRef.current, audioUrl: track.audio_url });
+      return;
+    }
     
     if (currentTrack?.id !== track.id) {
+      console.log('Setting new track source:', track.audio_url);
       setCurrentTrack(track);
       audioRef.current.src = track.audio_url;
     }
     
     audioRef.current.play().then(() => {
+      console.log('Audio playing successfully');
       setIsPlaying(true);
     }).catch((error) => {
       console.error('Error playing audio:', error);
@@ -67,9 +75,17 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   const pauseTrack = () => {
+    console.log('pauseTrack called');
+    console.log('audioRef.current:', audioRef.current);
+    console.log('isPlaying state:', isPlaying);
+    
     if (audioRef.current) {
+      console.log('Audio element found, calling pause()');
       audioRef.current.pause();
       setIsPlaying(false);
+      console.log('Audio paused, isPlaying set to false');
+    } else {
+      console.log('ERROR: audioRef.current is null or undefined');
     }
   };
 
