@@ -43,9 +43,15 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
   };
 
   const handlePlayPause = () => {
+    console.log('FullPageAudioPlayer - handlePlayPause clicked');
+    console.log('FullPageAudioPlayer - isPlaying state:', isPlaying);
+    console.log('FullPageAudioPlayer - currentTrack:', currentTrack);
+    
     if (isPlaying) {
+      console.log('FullPageAudioPlayer - Calling pauseTrack');
       pauseTrack();
     } else {
+      console.log('FullPageAudioPlayer - Calling resumeTrack');
       resumeTrack();
     }
   };
