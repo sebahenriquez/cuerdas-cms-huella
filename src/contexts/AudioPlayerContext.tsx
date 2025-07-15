@@ -54,9 +54,16 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const playTrack = (track: Track) => {
     console.log('playTrack called with track:', track.id);
     console.log('audioRef.current at playTrack:', audioRef.current);
+    console.log('currentTrack?.id:', currentTrack?.id, 'isPlaying:', isPlaying);
     
     if (!audioRef.current || !track.audio_url) {
       console.log('ERROR: audioRef or audio_url missing', { audioRef: !!audioRef.current, audioUrl: track.audio_url });
+      return;
+    }
+    
+    // Evitar reproducir el mismo track si ya está reproduciéndose
+    if (currentTrack?.id === track.id && isPlaying) {
+      console.log('Track already playing, skipping playTrack');
       return;
     }
     
