@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import AudioPlayer from '@/components/audio/AudioPlayer';
 import TrackSelector from '@/components/recorre-la-huella/TrackSelector';
@@ -21,6 +22,8 @@ const RecorreLaHuella = () => {
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [showIntro, setShowIntro] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Query para la página de introducción
   const { data: introData, isLoading: introLoading } = useQuery({
@@ -49,6 +52,27 @@ const RecorreLaHuella = () => {
     }
   }, [tracks, setTracks]);
 
+  // Handle URL parameters for track selection
+  useEffect(() => {
+    const trackParam = searchParams.get('track');
+    if (trackParam && tracks.length > 0) {
+      const trackId = parseInt(trackParam);
+      const track = tracks.find(t => t.id === trackId);
+      if (track) {
+        setSelectedTrack(track);
+        setShowIntro(false);
+        playTrack(track);
+      }
+    }
+  }, [searchParams, tracks, playTrack]);
+
+  // Update URL when track changes
+  const updateTrackInURL = (track: Track) => {
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('track', track.id.toString());
+    setSearchParams(newSearchParams, { replace: true });
+  };
+
   if (introLoading || tracksLoading) {
     return (
       <Layout>
@@ -63,6 +87,7 @@ const RecorreLaHuella = () => {
     setSelectedTrack(track);
     setShowIntro(false);
     playTrack(track);
+    updateTrackInURL(track);
   };
 
   const handleStartJourney = () => {
@@ -72,7 +97,16 @@ const RecorreLaHuella = () => {
       setSelectedTrack(firstTrack);
       // Automatically start playing the first track
       playTrack(firstTrack);
+      updateTrackInURL(firstTrack);
     }
+  };
+
+  const handleIntroClick = () => {
+    setShowIntro(true);
+    // Remove track parameter from URL when showing intro
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.delete('track');
+    setSearchParams(newSearchParams, { replace: true });
   };
 
   const getCurrentTrackContent = () => {
@@ -104,10 +138,6 @@ const RecorreLaHuella = () => {
     return 'Comenzar el Recorrido'; // Fallback
   };
 
-  console.log('Current Track:', selectedTrack || tracks[0]);
-  console.log('Current CTA Settings:', currentCTASettings);
-  console.log('Current Language:', currentLanguage);
-  console.log('CTA Labels:', ctaLabels);
 
   // Si estamos mostrando la introducción
   if (showIntro) {
@@ -120,7 +150,7 @@ const RecorreLaHuella = () => {
           onTrackSelect={handleTrackSelect}
           showIntroButton={true}
           isIntroActive={true}
-          onIntroClick={() => setShowIntro(true)}
+          onIntroClick={handleIntroClick}
         />
 
         {/* Intro Section */}
@@ -154,7 +184,7 @@ const RecorreLaHuella = () => {
         onTrackSelect={handleTrackSelect}
         showIntroButton={true}
         isIntroActive={false}
-        onIntroClick={() => setShowIntro(true)}
+        onIntroClick={handleIntroClick}
       />
 
       {/* Hero Section - ahora con las etiquetas CTA traducidas */}
