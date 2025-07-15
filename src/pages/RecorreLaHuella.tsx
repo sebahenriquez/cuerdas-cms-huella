@@ -64,7 +64,7 @@ const RecorreLaHuella = () => {
         playTrack(track);
       }
     }
-  }, [searchParams, tracks, playTrack]);
+  }, [searchParams, tracks]); // Removed playTrack from dependencies to prevent infinite loop
 
   // Update URL when track changes
   const updateTrackInURL = (track: Track) => {
