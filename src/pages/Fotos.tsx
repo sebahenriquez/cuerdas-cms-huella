@@ -113,7 +113,7 @@ const Fotos: React.FC = () => {
               {photos.map((photo) => (
                 <div
                   key={photo.id}
-                  className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden cursor-pointer transition-transform hover:scale-105"
+                  className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden cursor-pointer transition-transform hover:scale-105 relative"
                   onClick={() => setSelectedImage(photo.image_url)}
                 >
                   <img
@@ -124,6 +124,9 @@ const Fotos: React.FC = () => {
                       e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1NiIgdmlld0JveD0iMCAwIDQwMCAyNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjU2IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xODAgMTI4SDE4MFYxMjhIMjIwVjEyOEgyMjBWMTI4SDE4MFoiIGZpbGw9IiNEMUQ1REIiLz4KPC9zdmc+';
                     }}
                   />
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-sm font-medium px-3 py-2">
+                    PH: Guillermo Fridman
+                  </div>
                 </div>
               ))}
             </div>
