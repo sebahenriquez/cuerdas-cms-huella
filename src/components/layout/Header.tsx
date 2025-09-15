@@ -35,6 +35,20 @@ const Header: React.FC = () => {
     return 'La Huella de las Cuerdas';
   };
 
+  const isExternalUrl = (url: string) => {
+    return url.startsWith('http://') || url.startsWith('https://');
+  };
+
+  const getAriaLabel = (item: any) => {
+    if (isExternalUrl(item.url)) {
+      if (currentLanguage?.code === 'es') {
+        return 'Abrir el libro en Issuu, se abre en una nueva pestaña';
+      }
+      return 'Open the book on Issuu, opens in a new tab';
+    }
+    return undefined;
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border">
       <div className="container-wide">
@@ -48,19 +62,39 @@ const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
-            {navigationItems.map((item: any) => (
-              <Link
-                key={item.id}
-                to={item.url}
-                className={`font-medium transition-colors hover:text-primary ${
-                  isActiveRoute(item.url)
-                    ? 'text-primary border-b-2 border-primary'
-                    : 'text-foreground'
-                }`}
-              >
-                {item.navigation_contents[0]?.title}
-              </Link>
-            ))}
+            {navigationItems.map((item: any) => {
+              const isExternal = isExternalUrl(item.url);
+              const ariaLabel = getAriaLabel(item);
+              
+              if (isExternal) {
+                return (
+                  <a
+                    key={item.id}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={ariaLabel}
+                    className="font-medium transition-colors hover:text-primary text-foreground"
+                  >
+                    {item.navigation_contents[0]?.title}
+                  </a>
+                );
+              }
+              
+              return (
+                <Link
+                  key={item.id}
+                  to={item.url}
+                  className={`font-medium transition-colors hover:text-primary ${
+                    isActiveRoute(item.url)
+                      ? 'text-primary border-b-2 border-primary'
+                      : 'text-foreground'
+                  }`}
+                >
+                  {item.navigation_contents[0]?.title}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Language Selector & Mobile Menu */}
@@ -114,18 +148,39 @@ const Header: React.FC = () => {
         {isMobileMenuOpen && (
           <div className="lg:hidden bg-card border-t border-border">
             <nav className="py-4 space-y-2">
-              {navigationItems.map((item: any) => (
-                <Link
-                  key={item.id}
-                  to={item.url}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-4 py-2 font-medium transition-colors hover:text-primary hover:bg-muted rounded-lg ${
-                    isActiveRoute(item.url) ? 'text-primary bg-muted' : 'text-foreground'
-                  }`}
-                >
-                  {item.navigation_contents[0]?.title}
-                </Link>
-              ))}
+              {navigationItems.map((item: any) => {
+                const isExternal = isExternalUrl(item.url);
+                const ariaLabel = getAriaLabel(item);
+                
+                if (isExternal) {
+                  return (
+                    <a
+                      key={item.id}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={ariaLabel}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block px-4 py-2 font-medium transition-colors hover:text-primary hover:bg-muted rounded-lg text-foreground"
+                    >
+                      {item.navigation_contents[0]?.title}
+                    </a>
+                  );
+                }
+                
+                return (
+                  <Link
+                    key={item.id}
+                    to={item.url}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`block px-4 py-2 font-medium transition-colors hover:text-primary hover:bg-muted rounded-lg ${
+                      isActiveRoute(item.url) ? 'text-primary bg-muted' : 'text-foreground'
+                    }`}
+                  >
+                    {item.navigation_contents[0]?.title}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
         )}
