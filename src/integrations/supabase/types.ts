@@ -791,9 +791,11 @@ export type Database = {
       }
       track_contents: {
         Row: {
+          composers: string | null
           content_blocks: Json | null
           created_at: string | null
           description: string | null
+          featured_artists: string | null
           hero_image_url: string | null
           id: number
           language_id: number | null
@@ -805,9 +807,11 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          composers?: string | null
           content_blocks?: Json | null
           created_at?: string | null
           description?: string | null
+          featured_artists?: string | null
           hero_image_url?: string | null
           id?: number
           language_id?: number | null
@@ -819,9 +823,11 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          composers?: string | null
           content_blocks?: Json | null
           created_at?: string | null
           description?: string | null
+          featured_artists?: string | null
           hero_image_url?: string | null
           id?: number
           language_id?: number | null

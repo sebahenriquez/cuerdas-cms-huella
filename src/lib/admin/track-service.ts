@@ -16,6 +16,8 @@ export interface TrackContent {
   description: string;
   long_text_content: string;
   hero_image_url: string;
+  featured_artists?: string;
+  composers?: string;
   language_id: number;
 }
 
@@ -101,7 +103,9 @@ export const trackService = {
               menu_title: content.menu_title,
               description: content.description,
               long_text_content: content.long_text_content,
-              hero_image_url: content.hero_image_url
+              hero_image_url: content.hero_image_url,
+              featured_artists: content.featured_artists,
+              composers: content.composers
             })
             .eq('id', content.id);
           

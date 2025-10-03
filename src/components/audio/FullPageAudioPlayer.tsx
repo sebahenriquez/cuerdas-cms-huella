@@ -3,6 +3,7 @@ import React from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Track } from '@/types/track';
@@ -103,9 +104,9 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
         )}
       </div>
 
-      {/* Track List - Compact grid layout */}
-      <div className="flex-1 px-4 flex flex-col min-h-0">
-        <div className="flex-1 max-w-6xl mx-auto w-full flex flex-col">
+      {/* Track List - Vertical table layout */}
+      <div className="flex-1 px-4 flex flex-col min-h-0 overflow-hidden">
+        <div className="flex-1 max-w-7xl mx-auto w-full flex flex-col overflow-hidden">
           {tracks.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-400">
@@ -113,49 +114,66 @@ const FullPageAudioPlayer: React.FC<FullPageAudioPlayerProps> = ({ tracks }) => 
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 mb-4">
-              {tracks.map((track, index) => {
-                const content = track.track_contents?.[0];
-                const isCurrentTrack = currentTrack?.id === track.id;
-                
-                return (
-                  <div
-                    key={track.id}
-                    onClick={() => handleTrackSelect(track)}
-                    className={`group flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-white/10 ${
-                      isCurrentTrack ? 'bg-primary/20 border border-primary/30' : 'hover:bg-white/5 border border-transparent'
-                    }`}
-                  >
-                    {/* Play/Pause button or track number */}
-                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center mr-3">
-                      {isCurrentTrack && isPlaying ? (
-                        <Pause className="w-4 h-4 text-primary" />
-                      ) : isCurrentTrack ? (
-                        <Play className="w-4 h-4 text-primary" />
-                      ) : (
-                        <span className="text-gray-400 group-hover:hidden text-sm font-medium">
-                          {track.order_position}
-                        </span>
-                      )}
-                      {!isCurrentTrack && (
-                        <Play className="w-3 h-3 text-white hidden group-hover:block" />
-                      )}
-                    </div>
-
-                    {/* Track info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className={`font-medium text-sm truncate ${isCurrentTrack ? 'text-primary' : 'text-white'}`}>
-                        {content?.title || `Track ${track.order_position}`}
-                      </h3>
-                      {content?.description && (
-                        <p className="text-xs text-gray-400 truncate mt-1">
-                          {content.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="overflow-auto flex-1 rounded-lg border border-white/10">
+              <Table>
+                <TableHeader className="sticky top-0 bg-gray-900/95 backdrop-blur-sm z-10">
+                  <TableRow className="border-white/10 hover:bg-transparent">
+                    <TableHead className="text-gray-300 font-semibold w-20">
+                      {currentLanguage?.code === 'es' ? 'N°' : '#'}
+                    </TableHead>
+                    <TableHead className="text-gray-300 font-semibold">
+                      {currentLanguage?.code === 'es' ? 'Título' : 'Title'}
+                    </TableHead>
+                    <TableHead className="text-gray-300 font-semibold">
+                      Feat.
+                    </TableHead>
+                    <TableHead className="text-gray-300 font-semibold">
+                      {currentLanguage?.code === 'es' ? 'Compositores' : 'Composers'}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tracks.map((track) => {
+                    const content = track.track_contents?.[0];
+                    const isCurrentTrack = currentTrack?.id === track.id;
+                    
+                    return (
+                      <TableRow
+                        key={track.id}
+                        onClick={() => handleTrackSelect(track)}
+                        className={`cursor-pointer transition-colors border-white/10 ${
+                          isCurrentTrack 
+                            ? 'bg-primary/20 hover:bg-primary/30' 
+                            : 'hover:bg-white/5'
+                        }`}
+                      >
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            {isCurrentTrack && isPlaying ? (
+                              <Pause className="w-4 h-4 text-primary" />
+                            ) : isCurrentTrack ? (
+                              <Play className="w-4 h-4 text-primary" />
+                            ) : (
+                              <span className="text-gray-400">
+                                {track.order_position}
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className={`font-medium ${isCurrentTrack ? 'text-primary' : 'text-white'}`}>
+                          {content?.title || `Track ${track.order_position}`}
+                        </TableCell>
+                        <TableCell className="text-gray-300">
+                          {content?.featured_artists || '-'}
+                        </TableCell>
+                        <TableCell className="text-gray-300">
+                          {content?.composers || '-'}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
           )}
         </div>

@@ -5,6 +5,8 @@ export interface TrackContent {
   description?: string;
   long_text_content?: string;
   hero_image_url?: string;
+  featured_artists?: string;
+  composers?: string;
   language_id: number;
 }
 
