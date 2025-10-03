@@ -20,6 +20,8 @@ const EscuchaLaHuella: React.FC = () => {
             title,
             description,
             hero_image_url,
+            featured_artists,
+            composers,
             language_id
           )
         `)
